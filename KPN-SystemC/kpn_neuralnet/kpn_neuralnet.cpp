@@ -21,6 +21,7 @@ class	image_reader : public kahn_process
 
   // Queue data type should be changed to image
 	sc_fifo_out<float> out;
+  layer l;
 
 	image_reader(sc_module_name name, strs _images)
 	:	kahn_process(name),
