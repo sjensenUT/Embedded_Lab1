@@ -9,7 +9,6 @@
 #include <systemc.h>
 #include "../kahn_process.h"
 #include "../../darknet/include/darknet.h"
-
 using	std::cout;
 using	std::endl;
 typedef std::vector<std::string> strs;
@@ -218,7 +217,13 @@ class	kpn_neuralnet : public sc_module
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
 		strs images = {"dog.jpg", "horse.jpg"};
-
+		std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
+		std::string weightFile = "../../darknet/yolov2-tiny.weights";
+		char *cfgFileC = new char[cfgFile.length() + 1];
+		strcpy(cfgFileC, cfgFile.c_str());
+		char *weightFileC = new char[weightFile.length() + 1];
+		strcpy(weightFileC, weightFile.c_str());
+		network *net = load_network(cfgFileC, weightFileC, 0);
 		reader_to_conv0 = new sc_fifo<float>(1);
 		conv0_to_max1   = new sc_fifo<float>(1);
 		max1_to_conv2   = new sc_fifo<float>(1);
