@@ -7,11 +7,22 @@
 #include <string>
 #include <iostream>
 #include <systemc.h>
+#include <stdio.h>
 #include "../kahn_process.h"
-#include "../../darknet/include/darknet.h"
+#include "darknet.h"
+#include "../../darknet/src/convolutional_layer.h"
+#include "../../darknet/src/parser.h"
+#include "../../darknet/src/activations.h"
+
 using	std::cout;
 using	std::endl;
 typedef std::vector<std::string> strs;
+
+// These constants are fixed parameters of the YOLO-V2 Tiny network.
+const int HEIGHT   = 416;
+const int WIDTH    = 416;
+const int CHANNELS = 3;
+const int BATCH    = 1;
 
 class	image_reader : public kahn_process
 {
@@ -80,6 +91,8 @@ class	image_writer : public kahn_process
 			outFN = "predicted_";
 			outFN += images[i];
 
+      // TODO - create the output file.
+
 			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		}
 	}
@@ -94,15 +107,17 @@ class	conv_layer : public kahn_process
 	const	int layerIndex;
 	const	int filterSize;	
 	const	int pad;
-	const	std::string activation;
+	const	ACTIVATION activation;
 	const	bool batchNormalize;
-  // Queue data type should be changed to image
-	sc_fifo_in<float> in;
+	
+  sc_fifo_in<float> in;
 	sc_fifo_out<float> out;
 
-  // Store a layer object: layer l;
+  convolutional_layer l;
 
-	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride, int _numFilters, int _pad, std::string _activation, bool _batchNormalize)
+	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride,
+             int _numFilters, int _pad, ACTIVATION _activation, bool _batchNormalize,
+             const char* _weightsFileName)
 	:	kahn_process(name),
 		stride(_stride),
 		numFilters(_numFilters),
@@ -114,11 +129,27 @@ class	conv_layer : public kahn_process
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
-    // Call make_convolutional_layer() to create the layer object, store it inside this
-    // object. Figure out what values to pass to make_convolutional_layer() that are 
-    // not parameters to this constructor.
+    int groups  = 1;
+    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
+    int padding = 0;
+    if (this->pad != 0) {
+      padding = this->filterSize / 2;
+    }
 
-	}
+    // Call make_convolutional_layer() to create the layer object
+    l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
+          this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+          0, 0, 0);  
+ 
+    // Load the weights into the layer
+    FILE* weightsFile = fopen(_weightsFileName, "r");
+    if(weightsFile) {
+      load_convolutional_weights(l, weightsFile);   
+    } else {
+      cout << "Could not find weights file " << _weightsFileName << endl;
+    }
+  }
 
 	void	process() override
 	{
@@ -266,7 +297,7 @@ class	kpn_neuralnet : public sc_module
 		reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-		conv0 = new conv_layer("conv0",0,3,1,16, 1, "leaky", true);
+		conv0 = new conv_layer("conv0",0,3,1,16, 1, LEAKY, true, "conv0.weights");
 		conv0->in(*reader_to_conv0);
 		conv0->out(*conv0_to_max1);
 
@@ -274,7 +305,7 @@ class	kpn_neuralnet : public sc_module
 		max1->in(*conv0_to_max1);
 		max1->out(*max1_to_conv2);
 
-		conv2 = new conv_layer("conv2",2,3,1,32, 1,"leaky", true);
+		conv2 = new conv_layer("conv2",2,3,1,32, 1, LEAKY, true, "conv2.weights");
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
 		
@@ -282,7 +313,7 @@ class	kpn_neuralnet : public sc_module
                 max3->in(*conv2_to_max3);
                 max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4,3,1,64,1,"leaky",true);
+		conv4 = new conv_layer("conv4",4,3,1,64,1, LEAKY, true, "conv4.weights");
                 conv4->in(*max3_to_conv4);
                 conv4->out(*conv4_to_max5);
 		
@@ -290,7 +321,7 @@ class	kpn_neuralnet : public sc_module
                 max5->in(*conv4_to_max5);
                 max5->out(*max5_to_conv6);
 		
-		conv6 = new conv_layer("conv6",6,3,1,128,1,"leaky",true);
+		conv6 = new conv_layer("conv6",6,3,1,128,1, LEAKY, true, "conv6.weights");
                 conv6->in(*max5_to_conv6);
                 conv6->out(*conv6_to_max7);
 	
@@ -298,7 +329,7 @@ class	kpn_neuralnet : public sc_module
                 max7->in(*conv6_to_max7);
                 max7->out(*max7_to_conv8);
 		
-		conv8 = new conv_layer("conv8",8,3,1,256,1,"leaky",true);
+		conv8 = new conv_layer("conv8",8,3,1,256,1, LEAKY ,true, "conv8.weights");
                 conv8->in(*max7_to_conv8);
                 conv8->out(*conv8_to_max9);
 		
@@ -306,7 +337,7 @@ class	kpn_neuralnet : public sc_module
                 max9->in(*conv8_to_max9);
                 max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10",10,3,1,512,1,"leaky",true);
+		conv10 = new conv_layer("conv10",10,3,1,512,1, LEAKY, true, "conv10.weights");
                 conv10->in(*max9_to_conv10);
                 conv10->out(*conv10_to_max11);
 		
@@ -314,15 +345,15 @@ class	kpn_neuralnet : public sc_module
                 max11->in(*conv10_to_max11);
                 max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12,3,1,1024,1,"leaky",true);
+		conv12 = new conv_layer("conv12",12,3,1,1024,1,LEAKY,true, "conv12.weights");
                 conv12->in(*max11_to_conv12);
                 conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13,3,1,512,1,"leaky",true);
+		conv13 = new conv_layer("conv13",13,3,1,512,1,LEAKY,true,"conv13.weights");
                 conv13->in(*conv12_to_conv13);
                 conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14,1,1,425,1,"linear",false);
+		conv14 = new conv_layer("conv14",14,1,1,425,1, LINEAR, false, "conv14.weights");
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		//TODO: Implement region layer

@@ -10,4 +10,6 @@ PROJECT := kpn_neuralnet
 SRCS    := $(wildcard *.cpp)
 OBJS    := $(SRCS:.cpp=.o) ../../darknet/obj/*.o
 
+INCDIR  := -I../../darknet/include/
+
 include ../Makefile.rules
