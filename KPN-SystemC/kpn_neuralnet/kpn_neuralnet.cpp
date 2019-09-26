@@ -7,11 +7,23 @@
 #include <string>
 #include <iostream>
 #include <systemc.h>
+#include <stdio.h>
 #include "../kahn_process.h"
-#include "../../darknet/include/darknet.h"
+#include "darknet.h"
+#include "../../darknet/src/convolutional_layer.h"
+#include "../../darknet/src/parser.h"
+#include "../../darknet/src/activations.h"
+
 using	std::cout;
 using	std::endl;
+using std::size_t;
 typedef std::vector<std::string> strs;
+
+// These constants are fixed parameters of the YOLO-V2 Tiny network.
+const int HEIGHT   = 416;
+const int WIDTH    = 416;
+const int CHANNELS = 3;
+const int BATCH    = 1;
 
 class	image_reader : public kahn_process
 {
@@ -20,7 +32,7 @@ class	image_reader : public kahn_process
 	strs	images;
 
   // Queue data type should be changed to image
-	sc_fifo_out<float> out;
+	sc_fifo_out<float*> out;
   layer l;
 
 	image_reader(sc_module_name name, strs _images)
@@ -32,7 +44,7 @@ class	image_reader : public kahn_process
 
 	void	process() override
 	{
-		float	val = 1.234;
+		float* val;
 
 		for(size_t i=0; i<images.size(); i++)
 		{
@@ -57,7 +69,7 @@ class	image_writer : public kahn_process
 	strs	images;
 
   // Queue data type should be changed to image
-	sc_fifo_in<float> in;
+	sc_fifo_in<float*> in;
 
 	image_writer(sc_module_name name, strs _images)
 	:	kahn_process(name),
@@ -68,7 +80,7 @@ class	image_writer : public kahn_process
 
 	void	process() override
 	{
-		float	    val;
+		float*  val;
 		std::string outFN;
 
 		for(size_t i=0; i<images.size(); i++)
@@ -79,6 +91,8 @@ class	image_writer : public kahn_process
 			// dump to file
 			outFN = "predicted_";
 			outFN += images[i];
+
+      // TODO - create the output file.
 
 			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		}
@@ -94,15 +108,17 @@ class	conv_layer : public kahn_process
 	const	int layerIndex;
 	const	int filterSize;	
 	const	int pad;
-	const	std::string activation;
+	const	ACTIVATION activation;
 	const	bool batchNormalize;
-  // Queue data type should be changed to image
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	
+  sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
-  // Store a layer object: layer l;
+  convolutional_layer l;
 
-	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride, int _numFilters, int _pad, std::string _activation, bool _batchNormalize)
+	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride,
+             int _numFilters, int _pad, ACTIVATION _activation, bool _batchNormalize,
+             const char* _weightsFileName)
 	:	kahn_process(name),
 		stride(_stride),
 		numFilters(_numFilters),
@@ -114,24 +130,53 @@ class	conv_layer : public kahn_process
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
-    // Call make_convolutional_layer() to create the layer object, store it inside this
-    // object. Figure out what values to pass to make_convolutional_layer() that are 
-    // not parameters to this constructor.
+    int groups  = 1;
+    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
+    int padding = 0;
+    if (this->pad != 0) {
+      padding = this->filterSize / 2;
+    }
 
-	}
+    // Call make_convolutional_layer() to create the layer object
+    l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
+          this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+          0, 0, 0);  
+ 
+    // Load the weights into the layer
+    FILE* weightsFile = fopen(_weightsFileName, "r");
+    if(weightsFile) {
+      load_convolutional_weights(l, weightsFile);   
+    } else {
+      cout << "Could not find weights file " << _weightsFileName << endl;
+    }
+  }
 
 	void	process() override
 	{
-		float val;
+		float* input;
 
-		in->read(val);
+    // Read the output from the previos layer
+		in->read(input);
+
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-    // Modified forward_convolutional_layer() code goes here
-    // Or we define it as a private method and call it from here.
-    // Then write layer.output to out queue
+    // Create a dummy network object. forward_convolutional_layer only uses the "input"
+    // and "workspace" elements of the network struct. "input" is simply the output of
+    // the previous layer, while "workspace" points to an array of floats that we will
+    // create just before calling. The size can be determined by layer.get_workspace_size().
+    network dummyNetwork;
+    dummyNetwork.input = input;
+    size_t workspace_size = get_convolutional_workspace_size(l);
+    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    forward_convolutional_layer(l, dummyNetwork);
 
-		out->write(10*val);
+    // Send off the layer's output to the next layer!
+		out->write(l.output);
+
+    // Now we're done with the workspace - deallocate it or else memory leaks.
+    free(dummyNetwork.workspace);
+
 	}
 };
 
@@ -143,8 +188,8 @@ class	max_layer : public kahn_process
 	const	int layerIndex;
 	const	int filterSize;	
 
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
   // Layer object goes here
 
@@ -162,14 +207,14 @@ class	max_layer : public kahn_process
 
 	void	process() override
 	{
-		float val;
+		float* val;
 
 		in->read(val);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
     
     // Call forward_maxpool_layer() here, read from layer.output and write to out
   
-		out->write(val+1.5);
+		out->write(val);
 	}
 };
 
@@ -196,7 +241,6 @@ class	region_layer : public kahn_process
 	
 	sc_fifo_in<float> in;
 	sc_fifo_out<float> out;
-	
 
 	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, int _jitter, bool _rescore, 
 		int _objScale, bool _noObjectScale, int _classScale, int _coordScale, bool _absolute, float _thresh, bool _random) 
@@ -222,11 +266,11 @@ class	region_layer : public kahn_process
 
 	void	process() override
 	{
-		float val;
+		float* val;
 
 		in->read(val);
 		cout << "forwarding detection layer @ iter " << iter << endl;
-		out->write(val+0.1);
+		out->write(val);
 	}
 };
 
@@ -238,7 +282,7 @@ class	kpn_neuralnet : public sc_module
 
   // Declare all queues between our layers here
   // I think the data type for all of them will be image
-	sc_fifo<float>	*reader_to_conv0, 
+	sc_fifo<float*>	*reader_to_conv0, 
 			*conv0_to_max1, 
 			*max1_to_conv2,
 			*conv2_to_max3,
@@ -276,30 +320,30 @@ class	kpn_neuralnet : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 = new sc_fifo<float>(1);
-		conv0_to_max1   = new sc_fifo<float>(1);
-		max1_to_conv2   = new sc_fifo<float>(1);
-		conv2_to_max3   = new sc_fifo<float>(1);
-                max3_to_conv4   = new sc_fifo<float>(1);
-		conv4_to_max5   = new sc_fifo<float>(1);
-                max5_to_conv6   = new sc_fifo<float>(1);
-		conv6_to_max7   = new sc_fifo<float>(1);
-                max7_to_conv8   = new sc_fifo<float>(1);
-		conv8_to_max9   = new sc_fifo<float>(1);
-                max9_to_conv10   = new sc_fifo<float>(1);
-		conv10_to_max11   = new sc_fifo<float>(1);
-                max11_to_conv12   = new sc_fifo<float>(1);
-		conv12_to_conv13   = new sc_fifo<float>(1);
-                conv13_to_conv14   = new sc_fifo<float>(1);
-		conv14_to_region   = new sc_fifo<float>(1);
-		region_to_writer = new sc_fifo<float>(1);
+		reader_to_conv0 = new sc_fifo<float*>(1);
+		conv0_to_max1   = new sc_fifo<float*>(1);
+		max1_to_conv2   = new sc_fifo<float*>(1);
+		conv2_to_max3   = new sc_fifo<float*>(1);
+                max3_to_conv4   = new sc_fifo<float*>(1);
+		conv4_to_max5   = new sc_fifo<float*>(1);
+                max5_to_conv6   = new sc_fifo<float*>(1);
+		conv6_to_max7   = new sc_fifo<float*>(1);
+                max7_to_conv8   = new sc_fifo<float*>(1);
+		conv8_to_max9   = new sc_fifo<float*>(1);
+                max9_to_conv10   = new sc_fifo<float*>(1);
+		conv10_to_max11   = new sc_fifo<float*>(1);
+                max11_to_conv12   = new sc_fifo<float*>(1);
+		conv12_to_conv13   = new sc_fifo<float*>(1);
+                conv13_to_conv14   = new sc_fifo<float*>(1);
+		conv14_to_region   = new sc_fifo<float*>(1);
+		region_to_writer = new sc_fifo<float*>(1);
 
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.
 		reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-		conv0 = new conv_layer("conv0",0,3,1,16, 1, "leaky", true);
+		conv0 = new conv_layer("conv0",0,3,1,16, 1, LEAKY, true, "conv0.weights");
 		conv0->in(*reader_to_conv0);
 		conv0->out(*conv0_to_max1);
 
@@ -307,7 +351,7 @@ class	kpn_neuralnet : public sc_module
 		max1->in(*conv0_to_max1);
 		max1->out(*max1_to_conv2);
 
-		conv2 = new conv_layer("conv2",2,3,1,32, 1,"leaky", true);
+		conv2 = new conv_layer("conv2",2,3,1,32, 1, LEAKY, true, "conv2.weights");
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
 		
@@ -315,7 +359,7 @@ class	kpn_neuralnet : public sc_module
                 max3->in(*conv2_to_max3);
                 max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4,3,1,64,1,"leaky",true);
+		conv4 = new conv_layer("conv4",4,3,1,64,1, LEAKY, true, "conv4.weights");
                 conv4->in(*max3_to_conv4);
                 conv4->out(*conv4_to_max5);
 		
@@ -323,7 +367,7 @@ class	kpn_neuralnet : public sc_module
                 max5->in(*conv4_to_max5);
                 max5->out(*max5_to_conv6);
 		
-		conv6 = new conv_layer("conv6",6,3,1,128,1,"leaky",true);
+		conv6 = new conv_layer("conv6",6,3,1,128,1, LEAKY, true, "conv6.weights");
                 conv6->in(*max5_to_conv6);
                 conv6->out(*conv6_to_max7);
 	
@@ -331,7 +375,7 @@ class	kpn_neuralnet : public sc_module
                 max7->in(*conv6_to_max7);
                 max7->out(*max7_to_conv8);
 		
-		conv8 = new conv_layer("conv8",8,3,1,256,1,"leaky",true);
+		conv8 = new conv_layer("conv8",8,3,1,256,1, LEAKY ,true, "conv8.weights");
                 conv8->in(*max7_to_conv8);
                 conv8->out(*conv8_to_max9);
 		
@@ -339,7 +383,7 @@ class	kpn_neuralnet : public sc_module
                 max9->in(*conv8_to_max9);
                 max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10",10,3,1,512,1,"leaky",true);
+		conv10 = new conv_layer("conv10",10,3,1,512,1, LEAKY, true, "conv10.weights");
                 conv10->in(*max9_to_conv10);
                 conv10->out(*conv10_to_max11);
 		
@@ -347,15 +391,15 @@ class	kpn_neuralnet : public sc_module
                 max11->in(*conv10_to_max11);
                 max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12,3,1,1024,1,"leaky",true);
+		conv12 = new conv_layer("conv12",12,3,1,1024,1,LEAKY,true, "conv12.weights");
                 conv12->in(*max11_to_conv12);
                 conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13,3,1,512,1,"leaky",true);
+		conv13 = new conv_layer("conv13",13,3,1,512,1,LEAKY,true,"conv13.weights");
                 conv13->in(*conv12_to_conv13);
                 conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14,1,1,425,1,"linear",false);
+		conv14 = new conv_layer("conv14",14,1,1,425,1, LINEAR, false, "conv14.weights");
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		
