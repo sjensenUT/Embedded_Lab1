@@ -12,8 +12,10 @@
 #include "darknet.h"
 #include "../../darknet/src/convolutional_layer.h"
 #include "../../darknet/src/maxpool_layer.h"
+#include "../../darknet/src/region_layer.h"
 #include "../../darknet/src/parser.h"
 #include "../../darknet/src/activations.h"
+#include "../../darknet/src/image.h"
 
 using	std::cout;
 using	std::endl;
@@ -25,6 +27,12 @@ const int HEIGHT   = 416;
 const int WIDTH    = 416;
 const int CHANNELS = 3;
 const int BATCH    = 1;
+
+// Constant float array to hold the anchors for the region layer
+// whatever that means
+const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
+                           5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
+
 
 class	image_reader : public kahn_process
 {
@@ -45,18 +53,20 @@ class	image_reader : public kahn_process
 
 	void	process() override
 	{
-		float* val;
-
 		for(size_t i=0; i<images.size(); i++)
 		{
 			cout << "reading image " << images[i] << " @ iter " << iter++ << endl;
 
 			// read images[i] from file
-			// Call load_image_color() and letterbox_image() here for each image,
-			// then write it to output queue
-			// for(val in images[i])
-			// 	out->write(val);
-			out->write(val);
+			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
+      image sized = resize_image(orig, WIDTH, HEIGHT);
+      // Done with orig, just need sized.
+      free_image(orig);
+
+			// sized.data is now the float* that points to the float array that will
+			// be the output/input of each layer. The image writer will call free on 
+			// this float* to deallocate the data.
+			out->write(sized.data);
 		}
 	}
 }; 
@@ -245,11 +255,13 @@ class	region_layer : public kahn_process
 	const float thresh;
 	const bool random;
 	
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
-	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, int _jitter, bool _rescore, 
-		int _objScale, bool _noObjectScale, int _classScale, int _coordScale, bool _absolute, float _thresh, bool _random) 
+	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
+               int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
+               int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
+               bool _absolute, float _thresh, bool _random) 
 	:	kahn_process(name),
 		anchors(_anchors),
 		biasMatch(_biasMatch),
@@ -309,11 +321,11 @@ class	kpn_neuralnet : public sc_module
 			//*detection_to_writer;
 
   // Declare all layers here
-	max_layer	*max1, *max3, *max5, *max7, *max9, *max11;
-	conv_layer	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
+	max_layer   	*max1, *max3, *max5, *max7, *max9, *max11;
+	conv_layer  	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
+  region_layer  *region;
 	image_reader	*reader0;
 	image_writer	*writer0;
-	//detection_layer	*det0;
 
   // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
@@ -409,13 +421,10 @@ class	kpn_neuralnet : public sc_module
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		
-		region = new region_layer("region", {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828}, 
-					true, 80, 4, 5, true, 0.2, false, 5, true, 1, 1, true, 0.6, true);
-		region->in(conv14_to_region);
-		region->out(region_to_writer);
-		//det0 = new detection_layer("detection");
-		//det0->in(*conv2_to_detection);
-		//det0->out(*detection_to_writer);
+		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
+                               true, 1, 1, true, 0.6, true);
+		region->in(*conv14_to_region);
+		region->out(*region_to_writer);
 
 		writer0 = new image_writer("image_writer",images);
 		writer0->in(*region_to_writer);
