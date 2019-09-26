@@ -111,10 +111,10 @@ class	conv_layer : public kahn_process
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
 	
-  sc_fifo_in<float*> in;
+  	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  convolutional_layer l;
+  	convolutional_layer l;
 
 	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride,
              int _numFilters, int _pad, ACTIVATION _activation, bool _batchNormalize,
@@ -129,53 +129,52 @@ class	conv_layer : public kahn_process
 		batchNormalize(_batchNormalize)
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
+		int groups  = 1;
+    		// Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+    		// filter size rounding down (see parse_convolutional() in darknet's parser.c)
+    		int padding = 0;
+    		if (this->pad != 0) {
+      			padding = this->filterSize / 2;
+    		}
 
-    int groups  = 1;
-    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
-    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
-    int padding = 0;
-    if (this->pad != 0) {
-      padding = this->filterSize / 2;
-    }
-
-    // Call make_convolutional_layer() to create the layer object
-    l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
-          this->filterSize, this->stride, padding, activation, (int) batchNormalize,
-          0, 0, 0);  
+    		// Call make_convolutional_layer() to create the layer object
+    			l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
+          			this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+          			0, 0, 0);  
  
-    // Load the weights into the layer
-    FILE* weightsFile = fopen(_weightsFileName, "r");
-    if(weightsFile) {
-      load_convolutional_weights(l, weightsFile);   
-    } else {
-      cout << "Could not find weights file " << _weightsFileName << endl;
-    }
-  }
+ 		// Load the weights into the layer
+    		FILE* weightsFile = fopen(_weightsFileName, "r");
+    		if(weightsFile) {
+      			load_convolutional_weights(l, weightsFile);   
+    		} else {
+      			cout << "Could not find weights file " << _weightsFileName << endl;
+    		}
+  	}
 
 	void	process() override
 	{
 		float* input;
 
-    // Read the output from the previos layer
+    		// Read the output from the previos layer
 		in->read(input);
 
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-    // Create a dummy network object. forward_convolutional_layer only uses the "input"
-    // and "workspace" elements of the network struct. "input" is simply the output of
-    // the previous layer, while "workspace" points to an array of floats that we will
-    // create just before calling. The size can be determined by layer.get_workspace_size().
-    network dummyNetwork;
-    dummyNetwork.input = input;
-    size_t workspace_size = get_convolutional_workspace_size(l);
-    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
-    forward_convolutional_layer(l, dummyNetwork);
+    		// Create a dummy network object. forward_convolutional_layer only uses the "input"
+    		// and "workspace" elements of the network struct. "input" is simply the output of
+    		// the previous layer, while "workspace" points to an array of floats that we will
+    		// create just before calling. The size can be determined by layer.get_workspace_size().
+    		network dummyNetwork;
+    		dummyNetwork.input = input;
+    		size_t workspace_size = get_convolutional_workspace_size(l);
+    		dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    		forward_convolutional_layer(l, dummyNetwork);
 
-    // Send off the layer's output to the next layer!
+    		// Send off the layer's output to the next layer!
 		out->write(l.output);
 
-    // Now we're done with the workspace - deallocate it or else memory leaks.
-    free(dummyNetwork.workspace);
+    		// Now we're done with the workspace - deallocate it or else memory leaks.
+   		 free(dummyNetwork.workspace);
 
 	}
 };
@@ -239,10 +238,10 @@ class	region_layer : public kahn_process
 	const float thresh;
 	const bool random;
 	
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
-	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, int _jitter, bool _rescore, 
+	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
 		int _objScale, bool _noObjectScale, int _classScale, int _coordScale, bool _absolute, float _thresh, bool _random) 
 	:	kahn_process(name),
 		anchors(_anchors),
@@ -305,6 +304,7 @@ class	kpn_neuralnet : public sc_module
   // Declare all layers here
 	max_layer	*max1, *max3, *max5, *max7, *max9, *max11;
 	conv_layer	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
+	region_layer	*region;
 	image_reader	*reader0;
 	image_writer	*writer0;
 	//detection_layer	*det0;
@@ -403,10 +403,11 @@ class	kpn_neuralnet : public sc_module
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		
-		region = new region_layer("region", {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828}, 
-					true, 80, 4, 5, true, 0.2, false, 5, true, 1, 1, true, 0.6, true);
-		region->in(conv14_to_region);
-		region->out(region_to_writer);
+		float anchors[] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828};	
+		region = new region_layer("region", anchors, 
+					true, 80, 4, 5, true, (float) 0.2, false, 5, true, 1, 1, true, (float) 0.6, true);
+		region->in(*conv14_to_region);
+		region->out(*region_to_writer);
 		//det0 = new detection_layer("detection");
 		//det0->in(*conv2_to_detection);
 		//det0->out(*detection_to_writer);
