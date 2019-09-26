@@ -8,7 +8,7 @@ CXXFLAGS += -std=c++11
 
 PROJECT := kpn_neuralnet
 SRCS    := $(wildcard *.cpp)
-OBJS    := $(SRCS:.cpp=.o) ../../darknet/obj/*.o
+OBJS    := $(SRCS:.cpp=.o) $(filter-out ../../darknet/obj/darknet.o, $(wildcard ../../darknet/obj/*.o))
 
 INCDIR  := -I../../darknet/include/
 
