@@ -33,6 +33,16 @@ const int BATCH    = 1;
 const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
+void	load(int lIdx, const char* attr, float* ptr, int size)
+{
+	char	fn[100];
+	FILE*	fh;
+
+	sprintf(fn, "out/l%i/%s.bin", lIdx, attr);
+	fh = fopen(fn, "w");
+	fread(ptr, sizeof(float), size, fh);
+	fclose(fh);
+}
 
 class	image_reader : public kahn_process
 {
@@ -149,17 +159,33 @@ class	conv_layer : public kahn_process
     		}
 
     		// Call make_convolutional_layer() to create the layer object
-    			l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
-          			this->filterSize, this->stride, padding, activation, (int) batchNormalize,
-          			0, 0, 0);  
+    		l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
+          		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+          		0, 0, 0);  
  
  		// Load the weights into the layer
-    		FILE* weightsFile = fopen(_weightsFileName, "r");
-    		if(weightsFile) {
-      			load_convolutional_weights(l, weightsFile);   
-    		} else {
-      			cout << "Could not find weights file " << _weightsFileName << endl;
-    		}
+    		//FILE* weightsFile = fopen(_weightsFileName, "r");
+    		//if(weightsFile) {
+      		//	load_convolutional_weights(l, weightsFile);   
+    		//} else {
+      		//	cout << "Could not find weights file " << _weightsFileName << endl;
+    		//}
+		//new code for loading weights, copied from kamyar
+		int num = l.c/l.groups*l.n*l.size*l.size;
+
+		load(layerIndex, "biases", l.biases, l.n);
+
+		if(l.batch_normalize)
+		{
+			load(layerIndex, "scales", l.scales, l.n);
+			load(layerIndex, "mean",   l.rolling_mean, l.n);
+			load(layerIndex, "variance", l.rolling_variance, l.n);
+		}
+
+		load(layerIndex, "weights", l.weights, num);
+
+		printf("loaded parameters of layer %i\n", layerIndex);
+
   	}
 
 	void	process() override
