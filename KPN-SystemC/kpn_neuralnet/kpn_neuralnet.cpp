@@ -1,4 +1,4 @@
-/* 
+/* :
  *  Embedded System Design & Modeling - Lab 1
  *  (NAMES GO HERE)
  */
@@ -257,15 +257,10 @@ class	region_layer : public kahn_process
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-<<<<<<< HEAD
-	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
-		int _objScale, bool _noObjectScale, int _classScale, int _coordScale, bool _absolute, float _thresh, bool _random) 
-=======
 	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
                int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
                int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
                bool _absolute, float _thresh, bool _random) 
->>>>>>> 21b0513407a8cde6ee36a1d96b87a99511f699e5
 	:	kahn_process(name),
 		anchors(_anchors),
 		biasMatch(_biasMatch),
@@ -325,15 +320,9 @@ class	kpn_neuralnet : public sc_module
 			//*detection_to_writer;
 
   // Declare all layers here
-<<<<<<< HEAD
 	max_layer	*max1, *max3, *max5, *max7, *max9, *max11;
 	conv_layer	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
 	region_layer	*region;
-=======
-	max_layer   	*max1, *max3, *max5, *max7, *max9, *max11;
-	conv_layer  	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
-  region_layer  *region;
->>>>>>> 21b0513407a8cde6ee36a1d96b87a99511f699e5
 	image_reader	*reader0;
 	image_writer	*writer0;
 
@@ -430,22 +419,11 @@ class	kpn_neuralnet : public sc_module
 		conv14 = new conv_layer("conv14",14,1,1,425,1, LINEAR, false, "conv14.weights");
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
-		
-<<<<<<< HEAD
-		float anchors[] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828};	
-		region = new region_layer("region", anchors, 
-					true, 80, 4, 5, true, (float) 0.2, false, 5, true, 1, 1, true, (float) 0.6, true);
-		region->in(*conv14_to_region);
-		region->out(*region_to_writer);
-		//det0 = new detection_layer("detection");
-		//det0->in(*conv2_to_detection);
-		//det0->out(*detection_to_writer);
-=======
+
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
                                true, 1, 1, true, 0.6, true);
 		region->in(*conv14_to_region);
 		region->out(*region_to_writer);
->>>>>>> 21b0513407a8cde6ee36a1d96b87a99511f699e5
 
 		writer0 = new image_writer("image_writer",images);
 		writer0->in(*region_to_writer);
