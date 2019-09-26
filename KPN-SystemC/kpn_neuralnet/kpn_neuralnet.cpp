@@ -174,17 +174,50 @@ class	max_layer : public kahn_process
 };
 
 // Necessary? Not sure yolov2-tiny has a "detection" layer, whatever that is.
-class	detection_layer : public kahn_process
+class	region_layer : public kahn_process
 {
 	public:
-
+	
+	const float* anchors;
+	const bool biasMatch;
+	const int classes;
+	const int coords;
+	const int num;
+	const bool softMax;
+	const float jitter;
+	const bool rescore;
+	const int objScale;
+	const bool noObjectScale;
+	const int classScale;
+	const int coordScale;
+	const bool absolute;
+	const float thresh;
+	const bool random;
+	
 	sc_fifo_in<float> in;
 	sc_fifo_out<float> out;
+	
 
-	detection_layer(sc_module_name name) 
-	:	kahn_process(name)
+	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes, int _coords, int _num, bool _softMax, int _jitter, bool _rescore, 
+		int _objScale, bool _noObjectScale, int _classScale, int _coordScale, bool _absolute, float _thresh, bool _random) 
+	:	kahn_process(name),
+		anchors(_anchors),
+		biasMatch(_biasMatch),
+		classes(_classes),
+		coords(_coords),
+		num(_num),
+		softMax(_softMax),
+		jitter(_jitter),
+		rescore(_rescore),
+		objScale(_objScale),
+		noObjectScale(_noObjectScale),
+		classScale(_classScale),
+		coordScale(_coordScale),
+		absolute(_absolute),
+		thresh(_thresh),
+		random(_random)
 	{
-		cout << "instantiated detection layer " << endl;
+		cout << "instantiated region layer " << endl;
 	}
 
 	void	process() override
@@ -325,7 +358,11 @@ class	kpn_neuralnet : public sc_module
 		conv14 = new conv_layer("conv14",14,1,1,425,1,"linear",false);
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
-		//TODO: Implement region layer
+		
+		region = new region_layer("region", {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828}, 
+					true, 80, 4, 5, true, 0.2, false, 5, true, 1, 1, true, 0.6, true);
+		region->in(conv14_to_region);
+		region->out(region_to_writer);
 		//det0 = new detection_layer("detection");
 		//det0->in(*conv2_to_detection);
 		//det0->out(*detection_to_writer);
