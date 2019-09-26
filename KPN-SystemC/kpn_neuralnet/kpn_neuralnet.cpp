@@ -170,6 +170,7 @@ class	conv_layer : public kahn_process
     		//} else {
       		//	cout << "Could not find weights file " << _weightsFileName << endl;
     		//}
+
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
 
@@ -227,7 +228,7 @@ class	max_layer : public kahn_process
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  layer l;
+  	layer l;
 
 	max_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride) 
 	:	kahn_process(name),
@@ -237,8 +238,8 @@ class	max_layer : public kahn_process
 	{
 		cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
 
-    // Create the underlying darknet layer
-    l = make_maxpool_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->filterSize, 
+    	// Create the underlying darknet layer
+    	l = make_maxpool_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->filterSize, 
                            this->stride, filterSize-1);
     
 	}
@@ -250,11 +251,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
     
-    // Call forward_maxpool_layer() here, read from layer.output and write to out
-    // Create a dummy network object. The function only uses network.input
-    network dummyNetwork;
-    dummyNetwork.input = data;
-    forward_maxpool_layer(l, dummyNetwork);
+   	 	// Call forward_maxpool_layer() here, read from layer.output and write to out
+   	 	// Create a dummy network object. The function only uses network.input
+   	 	network dummyNetwork;
+  		dummyNetwork.input = data;
+   	 	forward_maxpool_layer(l, dummyNetwork);
 		out->write(data);
 	}
 };
@@ -282,6 +283,8 @@ class	region_layer : public kahn_process
 	
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
+	
+	layer l;	
 
 	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
                int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
@@ -304,16 +307,22 @@ class	region_layer : public kahn_process
 		thresh(_thresh),
 		random(_random)
 	{
-		cout << "instantiated region layer " << endl;
+		l = make_region_layer(BATCH, WIDTH, HEIGHT, this->num, this->classes, this->coords);
+
 	}
 
 	void	process() override
 	{
-		float* val;
+		float* data;
 
-		in->read(val);
+		in->read(data);
+		
 		cout << "forwarding detection layer @ iter " << iter << endl;
-		out->write(val);
+		network dummyNetwork;
+	   	dummyNetwork.input = data;
+		forward_region_layer(l, dummyNetwork);
+                //should this be l.delta?
+		out->write(l.output);
 	}
 };
 
