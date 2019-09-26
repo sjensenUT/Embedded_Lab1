@@ -16,6 +16,7 @@
 
 using	std::cout;
 using	std::endl;
+using std::size_t;
 typedef std::vector<std::string> strs;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
@@ -31,7 +32,7 @@ class	image_reader : public kahn_process
 	strs	images;
 
   // Queue data type should be changed to image
-	sc_fifo_out<float> out;
+	sc_fifo_out<float*> out;
   layer l;
 
 	image_reader(sc_module_name name, strs _images)
@@ -43,7 +44,7 @@ class	image_reader : public kahn_process
 
 	void	process() override
 	{
-		float	val = 1.234;
+		float* val;
 
 		for(size_t i=0; i<images.size(); i++)
 		{
@@ -68,7 +69,7 @@ class	image_writer : public kahn_process
 	strs	images;
 
   // Queue data type should be changed to image
-	sc_fifo_in<float> in;
+	sc_fifo_in<float*> in;
 
 	image_writer(sc_module_name name, strs _images)
 	:	kahn_process(name),
@@ -79,7 +80,7 @@ class	image_writer : public kahn_process
 
 	void	process() override
 	{
-		float	    val;
+		float*  val;
 		std::string outFN;
 
 		for(size_t i=0; i<images.size(); i++)
@@ -110,8 +111,8 @@ class	conv_layer : public kahn_process
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
 	
-  sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+  sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
   convolutional_layer l;
 
@@ -153,16 +154,29 @@ class	conv_layer : public kahn_process
 
 	void	process() override
 	{
-		float val;
+		float* input;
 
-		in->read(val);
+    // Read the output from the previos layer
+		in->read(input);
+
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-    // Modified forward_convolutional_layer() code goes here
-    // Or we define it as a private method and call it from here.
-    // Then write layer.output to out queue
+    // Create a dummy network object. forward_convolutional_layer only uses the "input"
+    // and "workspace" elements of the network struct. "input" is simply the output of
+    // the previous layer, while "workspace" points to an array of floats that we will
+    // create just before calling. The size can be determined by layer.get_workspace_size().
+    network dummyNetwork;
+    dummyNetwork.input = input;
+    size_t workspace_size = get_convolutional_workspace_size(l);
+    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    forward_convolutional_layer(l, dummyNetwork);
 
-		out->write(10*val);
+    // Send off the layer's output to the next layer!
+		out->write(l.output);
+
+    // Now we're done with the workspace - deallocate it or else memory leaks.
+    free(dummyNetwork.workspace);
+
 	}
 };
 
@@ -174,8 +188,8 @@ class	max_layer : public kahn_process
 	const	int layerIndex;
 	const	int filterSize;	
 
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
   // Layer object goes here
 
@@ -193,14 +207,14 @@ class	max_layer : public kahn_process
 
 	void	process() override
 	{
-		float val;
+		float* val;
 
 		in->read(val);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
     
     // Call forward_maxpool_layer() here, read from layer.output and write to out
   
-		out->write(val+1.5);
+		out->write(val);
 	}
 };
 
@@ -209,8 +223,8 @@ class	detection_layer : public kahn_process
 {
 	public:
 
-	sc_fifo_in<float> in;
-	sc_fifo_out<float> out;
+	sc_fifo_in<float*> in;
+	sc_fifo_out<float*> out;
 
 	detection_layer(sc_module_name name) 
 	:	kahn_process(name)
@@ -220,11 +234,11 @@ class	detection_layer : public kahn_process
 
 	void	process() override
 	{
-		float val;
+		float* val;
 
 		in->read(val);
 		cout << "forwarding detection layer @ iter " << iter << endl;
-		out->write(val+0.1);
+		out->write(val);
 	}
 };
 
@@ -236,7 +250,7 @@ class	kpn_neuralnet : public sc_module
 
   // Declare all queues between our layers here
   // I think the data type for all of them will be image
-	sc_fifo<float>	*reader_to_conv0, 
+	sc_fifo<float*>	*reader_to_conv0, 
 			*conv0_to_max1, 
 			*max1_to_conv2,
 			*conv2_to_max3,
@@ -274,23 +288,23 @@ class	kpn_neuralnet : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 = new sc_fifo<float>(1);
-		conv0_to_max1   = new sc_fifo<float>(1);
-		max1_to_conv2   = new sc_fifo<float>(1);
-		conv2_to_max3   = new sc_fifo<float>(1);
-                max3_to_conv4   = new sc_fifo<float>(1);
-		conv4_to_max5   = new sc_fifo<float>(1);
-                max5_to_conv6   = new sc_fifo<float>(1);
-		conv6_to_max7   = new sc_fifo<float>(1);
-                max7_to_conv8   = new sc_fifo<float>(1);
-		conv8_to_max9   = new sc_fifo<float>(1);
-                max9_to_conv10   = new sc_fifo<float>(1);
-		conv10_to_max11   = new sc_fifo<float>(1);
-                max11_to_conv12   = new sc_fifo<float>(1);
-		conv12_to_conv13   = new sc_fifo<float>(1);
-                conv13_to_conv14   = new sc_fifo<float>(1);
-		conv14_to_region   = new sc_fifo<float>(1);
-		region_to_writer = new sc_fifo<float>(1);
+		reader_to_conv0 = new sc_fifo<float*>(1);
+		conv0_to_max1   = new sc_fifo<float*>(1);
+		max1_to_conv2   = new sc_fifo<float*>(1);
+		conv2_to_max3   = new sc_fifo<float*>(1);
+                max3_to_conv4   = new sc_fifo<float*>(1);
+		conv4_to_max5   = new sc_fifo<float*>(1);
+                max5_to_conv6   = new sc_fifo<float*>(1);
+		conv6_to_max7   = new sc_fifo<float*>(1);
+                max7_to_conv8   = new sc_fifo<float*>(1);
+		conv8_to_max9   = new sc_fifo<float*>(1);
+                max9_to_conv10   = new sc_fifo<float*>(1);
+		conv10_to_max11   = new sc_fifo<float*>(1);
+                max11_to_conv12   = new sc_fifo<float*>(1);
+		conv12_to_conv13   = new sc_fifo<float*>(1);
+                conv13_to_conv14   = new sc_fifo<float*>(1);
+		conv14_to_region   = new sc_fifo<float*>(1);
+		region_to_writer = new sc_fifo<float*>(1);
 
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.

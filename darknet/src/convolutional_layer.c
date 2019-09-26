@@ -118,6 +118,10 @@ static size_t get_workspace_size(layer l){
     return (size_t)l.out_h*l.out_w*l.size*l.size*l.c/l.groups*sizeof(float);
 }
 
+size_t get_convolutional_workspace_size(layer l) {
+  return get_workspace_size(l);
+}
+
 #ifdef GPU
 #ifdef CUDNN
 void cudnn_convolutional_setup(layer *l)
