@@ -11,6 +11,7 @@
 #include "../kahn_process.h"
 #include "darknet.h"
 #include "../../darknet/src/convolutional_layer.h"
+#include "../../darknet/src/maxpool_layer.h"
 #include "../../darknet/src/parser.h"
 #include "../../darknet/src/activations.h"
 
@@ -191,7 +192,7 @@ class	max_layer : public kahn_process
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  // Layer object goes here
+  layer l;
 
 	max_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride) 
 	:	kahn_process(name),
@@ -201,20 +202,25 @@ class	max_layer : public kahn_process
 	{
 		cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
 
-    // Call make_maxpool_layer() here
+    // Create the underlying darknet layer
+    l = make_maxpool_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->filterSize, 
+                           this->stride, filterSize-1);
     
 	}
 
 	void	process() override
 	{
-		float* val;
+		float* data;
 
-		in->read(val);
+		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
     
     // Call forward_maxpool_layer() here, read from layer.output and write to out
-  
-		out->write(val);
+    // Create a dummy network object. The function only uses network.input
+    network dummyNetwork;
+    dummyNetwork.input = data;
+    forward_maxpool_layer(l, dummyNetwork);
+		out->write(data);
 	}
 };
 
