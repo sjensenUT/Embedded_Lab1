@@ -1,4 +1,4 @@
-/* :
+/* 
  *  Embedded System Design & Modeling - Lab 1
  *  (NAMES GO HERE)
  */
@@ -9,6 +9,7 @@
 #include <systemc.h>
 #include <stdio.h>
 #include "../kahn_process.h"
+
 #include "darknet.h"
 #include "../../darknet/src/convolutional_layer.h"
 #include "../../darknet/src/maxpool_layer.h"
@@ -52,7 +53,9 @@ class	image_reader : public kahn_process
 
   // Queue data type should be changed to image
 	sc_fifo_out<float*> out;
-  layer l;
+	sc_fifo_out<float*> im_out; 
+	sc_fifo_out<int> imd_out; 
+  	layer l;
 
 	image_reader(sc_module_name name, strs _images)
 	:	kahn_process(name),
@@ -71,12 +74,17 @@ class	image_reader : public kahn_process
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
       image sized = resize_image(orig, WIDTH, HEIGHT);
       // Done with orig, just need sized.
-      free_image(orig);
+      // free_image(orig);
 
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
 			// this float* to deallocate the data.
 			out->write(sized.data);
+			im_out->write(orig.data);
+			imd_out->write(orig.w);
+			imd_out->write(orig.h); //give both width in height in queue of length 2
+
+			free_image(sized); 
 		}
 	}
 }; 
@@ -91,6 +99,9 @@ class	image_writer : public kahn_process
 
   // Queue data type should be changed to image
 	sc_fifo_in<float*> in;
+	sc_fifo_in<int> l_in; // for l.classes for draw_detections. classes is an int. 
+	sc_fifo_in<float*> im_in; 
+	sc_fifo_in<int> imd_in; // for width and height of image
 
 	image_writer(sc_module_name name, strs _images)
 	:	kahn_process(name),
@@ -102,19 +113,41 @@ class	image_writer : public kahn_process
 	void	process() override
 	{
 		float*  val;
+		image im;
+		int classes; 
+
+		image ** alphabet = load_alphabet(); 
 		std::string outFN;
 
 		for(size_t i=0; i<images.size(); i++)
 		{
 			// read values from "in"
 			in->read(val);
+			l_in->read(classes); 
 
+			network dummyNetwork;
+        	        dummyNetwork.input = val;
+			
+						
+			float thresh = 0.6;
+			float hier_thresh = 0.6;
+			im_in->read(im.data);
+			imd_in->read(im.w);
+			imd_in->read(im.h); 
+			int nboxes = 0; 
+			detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
+ 			char ** names = NULL; 
+			draw_detections(im, dets, nboxes, thresh, names, alphabet, classes);
+			free_detections(dets, nboxes); 
+
+			save_image(im, "test_predictions");
+			free(val); 
 			// dump to file
 			outFN = "predicted_";
 			outFN += images[i];
-
-      // TODO - create the output file.
-
+			
+		        // TODO - create the output file.
+			free_image(im); 
 			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		}
 	}
@@ -283,6 +316,7 @@ class	region_layer : public kahn_process
 	
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
+	sc_fifo_out<int>  l_out; // this is to pass the l.classes parameter for draw_detections
 	
 	layer l;	
 
@@ -323,6 +357,7 @@ class	region_layer : public kahn_process
 		forward_region_layer(l, dummyNetwork);
                 //should this be l.delta?
 		out->write(l.output);
+		l_out->write(l.classes); 
 	}
 };
 
@@ -351,6 +386,10 @@ class	kpn_neuralnet : public sc_module
 			*conv13_to_conv14,
 			*conv14_to_region,
 			*region_to_writer;
+
+	sc_fifo<float*>  *reader_to_writer; 
+	sc_fifo<int>    *layer_region_to_writer; 
+	sc_fifo<int>    *int_reader_to_writer; 
 			//*conv2_to_detection,
 			//*detection_to_writer;
 
@@ -364,7 +403,7 @@ class	kpn_neuralnet : public sc_module
   // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-		strs images = {"dog.jpg", "horse.jpg"};
+		strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
@@ -372,28 +411,34 @@ class	kpn_neuralnet : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 = new sc_fifo<float*>(1);
-		conv0_to_max1   = new sc_fifo<float*>(1);
-		max1_to_conv2   = new sc_fifo<float*>(1);
-		conv2_to_max3   = new sc_fifo<float*>(1);
-                max3_to_conv4   = new sc_fifo<float*>(1);
-		conv4_to_max5   = new sc_fifo<float*>(1);
-                max5_to_conv6   = new sc_fifo<float*>(1);
-		conv6_to_max7   = new sc_fifo<float*>(1);
-                max7_to_conv8   = new sc_fifo<float*>(1);
-		conv8_to_max9   = new sc_fifo<float*>(1);
-                max9_to_conv10   = new sc_fifo<float*>(1);
-		conv10_to_max11   = new sc_fifo<float*>(1);
-                max11_to_conv12   = new sc_fifo<float*>(1);
-		conv12_to_conv13   = new sc_fifo<float*>(1);
-                conv13_to_conv14   = new sc_fifo<float*>(1);
-		conv14_to_region   = new sc_fifo<float*>(1);
-		region_to_writer = new sc_fifo<float*>(1);
+		reader_to_conv0 	= new sc_fifo<float*>(1);
+		conv0_to_max1   	= new sc_fifo<float*>(1);
+		max1_to_conv2   	= new sc_fifo<float*>(1);
+		conv2_to_max3   	= new sc_fifo<float*>(1);
+                max3_to_conv4   	= new sc_fifo<float*>(1);
+		conv4_to_max5   	= new sc_fifo<float*>(1);
+                max5_to_conv6   	= new sc_fifo<float*>(1);
+		conv6_to_max7   	= new sc_fifo<float*>(1);
+                max7_to_conv8   	= new sc_fifo<float*>(1);
+		conv8_to_max9   	= new sc_fifo<float*>(1);
+                max9_to_conv10   	= new sc_fifo<float*>(1);
+		conv10_to_max11   	= new sc_fifo<float*>(1);
+                max11_to_conv12   	= new sc_fifo<float*>(1);
+		conv12_to_conv13   	= new sc_fifo<float*>(1);
+                conv13_to_conv14   	= new sc_fifo<float*>(1);
+		conv14_to_region   	= new sc_fifo<float*>(1);
+		region_to_writer 	= new sc_fifo<float*>(1);
+
+		reader_to_writer 	= new sc_fifo<float*>(1); 
+		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
+		layer_region_to_writer 	= new sc_fifo<int>(1);
 
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.
 		reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
+		reader0->im_out(*reader_to_writer);
+		reader0->imd_out(*int_reader_to_writer); 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
 		conv0 = new conv_layer("conv0",0,3,1,16, 1, LEAKY, true, "conv0.weights");
 		conv0->in(*reader_to_conv0);
@@ -406,6 +451,7 @@ class	kpn_neuralnet : public sc_module
 		conv2 = new conv_layer("conv2",2,3,1,32, 1, LEAKY, true, "conv2.weights");
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
+
 		
 		max3 = new max_layer("max3",3,2,2);
                 max3->in(*conv2_to_max3);
@@ -459,14 +505,18 @@ class	kpn_neuralnet : public sc_module
                                true, 1, 1, true, 0.6, true);
 		region->in(*conv14_to_region);
 		region->out(*region_to_writer);
+		region->l_out(*layer_region_to_writer);
 
 		writer0 = new image_writer("image_writer",images);
 		writer0->in(*region_to_writer);
+		writer0->l_in(*layer_region_to_writer); 
+		writer0->im_in(*reader_to_writer);
+		writer0->imd_in(*int_reader_to_writer);  
 	}
 };
 
 // This will probably remain as-is.
-int	sc_main(int, char *[]) 
+int	sc_main(int argc, char * argv[]) 
 {
 	kpn_neuralnet knn0("kpn_neuralnet");
 	sc_start();
