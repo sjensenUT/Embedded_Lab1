@@ -39,7 +39,7 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 	FILE*	fh;
 
 	sprintf(fn, "out/l%i/%s.bin", lIdx, attr);
-	fh = fopen(fn, "w");
+	fh = fopen(fn, "r");
 	fread(ptr, sizeof(float), size, fh);
 	fclose(fh);
 }
