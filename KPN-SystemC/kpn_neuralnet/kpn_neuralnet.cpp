@@ -115,9 +115,25 @@ class	image_writer : public kahn_process
 		float*  val;
 		image im;
 		int classes; 
+		cout <<  "inside the image writer function" <<endl; 
 
-		image ** alphabet = load_alphabet(); 
-		std::string outFN;
+		//FIXME: this function can't seem to find the data/labels that it needs. Tried putting the alphabet in different places
+		image ** alphabets = load_alphabet(); 
+		// new comment
+		/* this is the load_alphabet code
+    		int i, j;
+		const int nsize = 8;
+		image **alphabets = (image**)malloc(nsize);
+    		for(j = 0; j < nsize; ++j){
+        	alphabets[j] = (image*)malloc(128);
+        	for(i = 32; i < 127; ++i){
+            			char buff[256];
+	            		sprintf(buff, "data/labels/%d_%d.png", i, j);
+        	    		alphabets[j][i] = load_image_color(buff, 0, 0);
+        		}	
+    		}
+		*/			
+		//std::string outFN;
 
 		for(size_t i=0; i<images.size(); i++)
 		{
@@ -135,21 +151,30 @@ class	image_writer : public kahn_process
 			imd_in->read(im.w);
 			imd_in->read(im.h); 
 			int nboxes = 0; 
+			
+			// this is returning an invalid read error: 
 			detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
- 			char ** names = NULL; 
-			draw_detections(im, dets, nboxes, thresh, names, alphabet, classes);
+ 			cout << "attempting to detect" << endl;
+			char ** names = NULL; 
+	
+			draw_detections(im, dets, nboxes, thresh, names, alphabets, classes);
 			free_detections(dets, nboxes); 
+				
+			cout << "attempting to write" << endl; 
 
-			save_image(im, "test_predictions");
+			//save_image(im, "test_predictions.png");
 			free(val); 
 			// dump to file
-			outFN = "predicted_";
-			outFN += images[i];
-			
+			//outFN = "predicted_output_";
+			//outFN += i;
+			char outFN[50];
+			sprintf(outFN,"my_test_predicted_output %d",i); 
+			save_image(im,outFN);
 		        // TODO - create the output file.
 			free_image(im); 
 			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		}
+		free(alphabets); 
 	}
 };
 
@@ -261,8 +286,7 @@ class	max_layer : public kahn_process
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  	layer l;
-
+  	layer l; 
 	max_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride) 
 	:	kahn_process(name),
 		stride(_stride),
