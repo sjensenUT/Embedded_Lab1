@@ -341,6 +341,7 @@ class	region_layer : public kahn_process
 		thresh(_thresh),
 		random(_random)
 	{
+		cout << "instantiating region layer" << endl;
 		l = make_region_layer(BATCH, WIDTH, HEIGHT, this->num, this->classes, this->coords);
 
 	}
@@ -350,12 +351,12 @@ class	region_layer : public kahn_process
 		float* data;
 
 		in->read(data);
-		
+			
 		cout << "forwarding detection layer @ iter " << iter << endl;
 		network dummyNetwork;
 	   	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
-                //should this be l.delta?
+		//should this be l.delta?
 		out->write(l.output);
 		l_out->write(l.classes); 
 	}
