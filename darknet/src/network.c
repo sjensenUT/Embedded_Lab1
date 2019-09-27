@@ -187,9 +187,10 @@ network *make_network(int n)
 
 void forward_network(network *netp)
 {
+    printf("in network.c:forward_network\n");
 #ifdef GPU
     if(netp->gpu_index >= 0){
-        forward_network_gpu(netp);   
+        forward_network_gpu(netp);
         return;
     }
 #endif
@@ -198,11 +199,26 @@ void forward_network(network *netp)
     for(i = 0; i < net.n; ++i){
         net.index = i;
         layer l = net.layers[i];
+	//printf("# inputs to layer %d, is %d\n", i, net.inputs);
+	//printf("inputs to layer %d, are", i);
+	int j;
+	if(i == 0){
+		for(j = 0; j < 10; j++){
+			printf(" %f", net.input[j]);
+		}
+	}
+	//printf("\n");
         if(l.delta){
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
         }
         l.forward(l, net);
         net.input = l.output;
+	printf("# outputs of layer %d, is %d\n", i, l.outputs);
+	printf("outputs of layer %d, are", i);
+        for(j = 0; j < 10; j++){
+                printf(" %f", l.output[j]);
+        }
+	printf("\n");
         if(l.truth) {
             net.truth = l.output;
         }
