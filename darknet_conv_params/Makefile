@@ -27,7 +27,7 @@ load:
 		-lm -lpthread -o load
 
 extract:
-	gcc -c extract.c -I $(DARKNET)/include/ -I $(DARKNET)/src/ -std=c99
+	gcc -g -c extract.c -I $(DARKNET)/include/ -I $(DARKNET)/src/ -std=c99
 	gcc	extract.o\
 		$(DARKNET)/obj/*_layer.o\
 		$(DARKNET)/obj/box.o\
