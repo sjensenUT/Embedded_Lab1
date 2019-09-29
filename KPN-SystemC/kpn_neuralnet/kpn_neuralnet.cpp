@@ -8,6 +8,7 @@
 #include <iostream>
 #include <systemc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "../kahn_process.h"
 
 #include "darknet.h"
@@ -55,6 +56,7 @@ class	image_reader : public kahn_process
 	sc_fifo_out<float*> out;
 	sc_fifo_out<float*> im_out; 
 	sc_fifo_out<int> imd_out; 
+	sc_fifo_out<char*> im_name_out; 
   	layer l;
 
 	image_reader(sc_module_name name, strs _images)
@@ -72,7 +74,7 @@ class	image_reader : public kahn_process
 
 			// read images[i] from file
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
-      image sized = resize_image(orig, WIDTH, HEIGHT);
+			image sized = resize_image(orig, WIDTH, HEIGHT);
       // Done with orig, just need sized.
       // free_image(orig);
 
@@ -83,19 +85,23 @@ class	image_reader : public kahn_process
 			im_out->write(orig.data);
 			imd_out->write(orig.w);
 			imd_out->write(orig.h); //give both width in height in queue of length 2
-
+			char name[10];
+			sprintf(name,"image %d",i); 
+			im_name_out->write(name);
 			free_image(sized); 
 		}
 	}
 }; 
 
+/*
 class	image_writer : public kahn_process
 {
 	public:
 
 	int	iter;
-
+	
 	strs	images;
+	images ** alphabets; 
 
   // Queue data type should be changed to image
 	sc_fifo_in<float*> in;
@@ -107,6 +113,8 @@ class	image_writer : public kahn_process
 	:	kahn_process(name),
 		images(_images)
 	{
+		
+		alphabets = load_alphabet(); 
 		cout << "instantiated image_writer" << endl;
 	}
 
@@ -118,9 +126,8 @@ class	image_writer : public kahn_process
 		cout <<  "inside the image writer function" <<endl; 
 
 		//FIXME: this function can't seem to find the data/labels that it needs. Tried putting the alphabet in different places
-		image ** alphabets = load_alphabet(); 
 		// new comment
-		/* this is the load_alphabet code
+		 this is the load_alphabet code
     		int i, j;
 		const int nsize = 8;
 		image **alphabets = (image**)malloc(nsize);
@@ -132,11 +139,11 @@ class	image_writer : public kahn_process
         	    		alphabets[j][i] = load_image_color(buff, 0, 0);
         		}	
     		}
-		*/			
+					
 		//std::string outFN;
-
-		for(size_t i=0; i<images.size(); i++)
-		{
+		// shouldn't need for loop anymore because dependent
+		//for(size_t i=0; i<images.size(); i++)
+		//{
 			// read values from "in"
 			in->read(val);
 			l_in->read(classes); 
@@ -145,8 +152,8 @@ class	image_writer : public kahn_process
         	        dummyNetwork.input = val;
 			
 						
-			float thresh = 0.6;
-			float hier_thresh = 0.6;
+			float thresh = 0.45;
+			float hier_thresh = 0.5;
 			im_in->read(im.data);
 			imd_in->read(im.w);
 			imd_in->read(im.h); 
@@ -157,7 +164,19 @@ class	image_writer : public kahn_process
  			cout << "attempting to detect" << endl;
 			char ** names = NULL; 
 	
-			draw_detections(im, dets, nboxes, thresh, names, alphabets, classes);
+			//draw_detections(im, dets, nboxes, thresh, names, alphabets, classes);
+			
+    			//layer l = net->layers[t->n - 1];
+   			int i;
+			int nboxes = num_detections(net, thresh);
+		    	if(num) *num = nboxes;
+    			detection *dets = calloc(nboxes, sizeof(detection));
+    			for(i = 0; i < nboxes; ++i){
+        		dets[i].prob = calloc(l.classes, sizeof(float));
+        		if(l.coords > 4){
+		            dets[i].mask = calloc(l.coords-4, sizeof(float));
+        }
+    }
 			free_detections(dets, nboxes); 
 				
 			cout << "attempting to write" << endl; 
@@ -173,11 +192,11 @@ class	image_writer : public kahn_process
 		        // TODO - create the output file.
 			free_image(im); 
 			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
-		}
+		//}
 		free(alphabets); 
 	}
 };
-
+*/
 class	conv_layer : public kahn_process
 {
 	public:
@@ -262,15 +281,21 @@ class	conv_layer : public kahn_process
     		// create just before calling. The size can be determined by layer.get_workspace_size().
     		network dummyNetwork;
     		dummyNetwork.input = input;
+		cout << "getting workspace size" << endl; 
     		size_t workspace_size = get_convolutional_workspace_size(l);
+		cout << "allocating workspace memory" << endl; 
     		dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+		cout << "forward convoluting" << endl;
     		forward_convolutional_layer(l, dummyNetwork);
 
+	   	cout << "freeing" << endl;
+		free(dummyNetwork.workspace);
     		// Send off the layer's output to the next layer!
 		out->write(l.output);
 
     		// Now we're done with the workspace - deallocate it or else memory leaks.
-   		 free(dummyNetwork.workspace);
+		free(dummyNetwork.input);
+		free(input); 
 
 	}
 };
@@ -313,7 +338,10 @@ class	max_layer : public kahn_process
    	 	network dummyNetwork;
   		dummyNetwork.input = data;
    	 	forward_maxpool_layer(l, dummyNetwork);
+		free(dummyNetwork.input); 
 		out->write(data);
+	
+		free(data); 
 	}
 };
 
@@ -339,9 +367,14 @@ class	region_layer : public kahn_process
 	const bool random;
 	
 	sc_fifo_in<float*> in;
-	sc_fifo_out<float*> out;
-	sc_fifo_out<int>  l_out; // this is to pass the l.classes parameter for draw_detections
+//	sc_fifo_out<float*> out;
+//	sc_fifo_out<int>  l_out; // this is to pass the l.classes parameter for draw_detections
 	
+	sc_fifo_in<float*> im_in; 
+	sc_fifo_in<int> imd_in; // for width and height of image
+	sc_fifo_in<char*> im_name_in; 
+
+	image ** alphabets; 
 	layer l;	
 
 	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
@@ -367,23 +400,109 @@ class	region_layer : public kahn_process
 	{
 		cout << "instantiating region layer" << endl;
 		l = make_region_layer(BATCH, WIDTH, HEIGHT, this->num, this->classes, this->coords);
-
+		alphabets = load_alphabet(); 
 	}
 
 	void	process() override
 	{
 		float* data;
+		char* image_name = NULL; 
+		image im; 
 
+	
 		in->read(data);
-			
+		im_name_in->read(image_name);
+		im_in->read(im.data);
+		imd_in->read(im.w);
+		imd_in->read(im.h); 
+	
 		cout << "forwarding detection layer @ iter " << iter << endl;
 		network dummyNetwork;
 	   	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
 		//should this be l.delta?
-		out->write(l.output);
-		l_out->write(l.classes); 
+		//out->write(l.output);
+		//l_out->write(l.classes); 
+			
+			
+						
+			float thresh = 0.45;
+			float hier_thresh = 0.5;
+			float hier = hier_thresh; 
+			int nboxes = 0; 
+			
+			// this is returning an invalid read error: 
+			// FIXME: Find the guts of get_network_boxes and draw_detections
+			//	detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
+ 			cout << "attempting to detect" << endl;
+			char ** names = NULL; 
+	
+			int w = im.w;
+			int h = im.h; 	
+    			//layer l = net->layers[t->n - 1];
+    			//get_network_boxes -> make network boxes
+   			int i;
+			int * map = nullptr; 
+			int relative = 0; 
+
+			// get network boxes -> make network boxes -> num detections
+				
+
+			cout << "the type of l is: " << l.type << endl; 
+			// FIXME: should be able to minimize this to just the l.type == REGION options
+    			//if(l.type == YOLO){
+			//	nboxes += yolo_num_detections(l, thresh);
+			//}
+			if(l.type == DETECTION || l.type == REGION){
+				nboxes += l.w*l.h*l.n;
+			}
+			//if(num) *num = nboxes;
+    			detection *dets = (detection *) calloc(nboxes, sizeof(detection));
+    			for(i = 0; i < nboxes; ++i){
+        		dets[i].prob = (float *) calloc(l.classes, sizeof(float));
+        			if(l.coords > 4){
+		            		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
+        			}
+    			}
+				
+			// finished make network boxes. should have dets
+		        //if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
+		        //    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
+		        //    dets += count;
+		  	//}
+		        if(l.type == REGION){
+		            get_region_detections(l, w, h, WIDTH, HEIGHT, thresh, map, hier, relative, dets);
+		            dets += l.w*l.h*l.n;
+		        }	
+		        if(l.type == DETECTION){
+		            get_detection_detections(l, w, h, thresh, dets);
+		            dets += l.w*l.h*l.n;
+		        }
+			// draw detections
+		 		
+			draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
+
+			
+			free_detections(dets, nboxes); 
+				
+			cout << "attempting to write" << endl; 
+			
+			 
+			// dump to file
+			//outFN = "predicted_output_";
+			//outFN += i;
+			char outFN[100];
+			sprintf(outFN,"%s_testOut",image_name); 
+			save_image(im,outFN);
+		        // TODO - create the output file.
+			delete[] data;
+			delete[] image_name; 
+			free_image(im); 
+			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
+		//free(alphabets);  Now part of the constructor and I don't free it here? 
+		//}
 	}
+
 };
 
 // Might need to make separate class for "region" layer
@@ -409,12 +528,13 @@ class	kpn_neuralnet : public sc_module
 			*max11_to_conv12,
 			*conv12_to_conv13,
 			*conv13_to_conv14,
-			*conv14_to_region,
-			*region_to_writer;
+			*conv14_to_region;
+//			*region_to_writer;
 
 	sc_fifo<float*>  *reader_to_writer; 
-	sc_fifo<int>    *layer_region_to_writer; 
+//	sc_fifo<int>    *layer_region_to_writer; 
 	sc_fifo<int>    *int_reader_to_writer; 
+	sc_fifo<char*>  *char_reader_to_writer; 
 			//*conv2_to_detection,
 			//*detection_to_writer;
 
@@ -423,7 +543,7 @@ class	kpn_neuralnet : public sc_module
 	conv_layer	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
 	region_layer	*region;
 	image_reader	*reader0;
-	image_writer	*writer0;
+//	image_writer	*writer0;
 
   // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
@@ -452,11 +572,12 @@ class	kpn_neuralnet : public sc_module
 		conv12_to_conv13   	= new sc_fifo<float*>(1);
                 conv13_to_conv14   	= new sc_fifo<float*>(1);
 		conv14_to_region   	= new sc_fifo<float*>(1);
-		region_to_writer 	= new sc_fifo<float*>(1);
+//		region_to_writer 	= new sc_fifo<float*>(1);
 
-		reader_to_writer 	= new sc_fifo<float*>(1); 
-		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
-		layer_region_to_writer 	= new sc_fifo<int>(1);
+		reader_to_writer 	= new sc_fifo<float*>(2); 
+		int_reader_to_writer	= new sc_fifo<int>(4); // needed to send im.w and im.h
+		char_reader_to_writer  	= new sc_fifo<char*>(2);
+//		layer_region_to_writer 	= new sc_fifo<int>(1);
 
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.
@@ -464,6 +585,7 @@ class	kpn_neuralnet : public sc_module
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->imd_out(*int_reader_to_writer); 
+		reader0->im_name_out(*char_reader_to_writer);
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
 		conv0 = new conv_layer("conv0",0,3,1,16, 1, LEAKY, true, "conv0.weights");
 		conv0->in(*reader_to_conv0);
@@ -529,14 +651,19 @@ class	kpn_neuralnet : public sc_module
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
                                true, 1, 1, true, 0.6, true);
 		region->in(*conv14_to_region);
-		region->out(*region_to_writer);
-		region->l_out(*layer_region_to_writer);
+		region->im_in(*reader_to_writer);
+		region->imd_in(*int_reader_to_writer); 
+		region->im_name_in(*char_reader_to_writer); 
+//		region->out(*region_to_writer);
+//		region->l_out(*layer_region_to_writer);
 
+		/*		
 		writer0 = new image_writer("image_writer",images);
 		writer0->in(*region_to_writer);
 		writer0->l_in(*layer_region_to_writer); 
 		writer0->im_in(*reader_to_writer);
-		writer0->imd_in(*int_reader_to_writer);  
+		writer0->imd_in(*int_reader_to_writer); 
+		 */
 	}
 };
 
