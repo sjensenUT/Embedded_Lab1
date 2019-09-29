@@ -449,21 +449,26 @@ void backward_bias(float *bias_updates, float *delta, int batch, int n, int size
 void forward_convolutional_layer(convolutional_layer l, network net)
 {
     int i, j;
-
+    printf("in forward convolutional layer\n");
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
-
+    printf("Hello 1\n");
     if(l.xnor){
         binarize_weights(l.weights, l.n, l.c/l.groups*l.size*l.size, l.binary_weights);
         swap_binary(&l);
         binarize_cpu(net.input, l.c*l.h*l.w*l.batch, l.binary_input);
         net.input = l.binary_input;
     }
-
+    printf("Hello 2\n");
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
+    printf("Hello 3\n");
+    printf("attempting to access l.batch\n");
+    printf("l.batch = %d\n", l.batch);
     for(i = 0; i < l.batch; ++i){
+	printf("In outer loop, i = %d\n", i);
         for(j = 0; j < l.groups; ++j){
+	    printf("in inner loop j = %d\n", j);
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;
@@ -477,13 +482,14 @@ void forward_convolutional_layer(convolutional_layer l, network net)
             gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
         }
     }
+    printf("Hello 4\n");
 
     if(l.batch_normalize){
         forward_batchnorm_layer(l, net);
     } else {
         add_bias(l.output, l.biases, l.batch, l.n, l.out_h*l.out_w);
     }
-
+    printf("Hello 5\n");
     activate_array(l.output, l.outputs*l.batch, l.activation);
     if(l.binary || l.xnor) swap_binary(&l);
 }

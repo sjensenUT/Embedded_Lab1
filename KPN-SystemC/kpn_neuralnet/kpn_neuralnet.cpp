@@ -215,20 +215,16 @@ class	conv_layer : public kahn_process
 	const	int pad;
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
-	const	int width;
-	const	int height;
 	
   	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
   	convolutional_layer l;
 
-	conv_layer(sc_module_name name, int _width, int _height, int _layerIndex, int _filterSize, int _stride,
+	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride,
              int _numFilters, int _pad, ACTIVATION _activation, bool _batchNormalize,
              const char* _weightsFileName)
 	:	kahn_process(name),
-		width(_width),
-		height(_height),
 		stride(_stride),
 		numFilters(_numFilters),
 		layerIndex(_layerIndex),
@@ -247,7 +243,7 @@ class	conv_layer : public kahn_process
     		}
 
     		// Call make_convolutional_layer() to create the layer object
-    		l = make_convolutional_layer(BATCH, this->height, this->width, CHANNELS, this->numFilters, groups,
+    		l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
           		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
           		0, 0, 0);  
  
@@ -298,7 +294,7 @@ class	conv_layer : public kahn_process
     		dummyNetwork.workspace = (float*) calloc(1, workspace_size);
 		cout << "forward convoluting" << endl;
     		forward_convolutional_layer(l, dummyNetwork);
-
+		
 	   	cout << "freeing" << endl;
 		free(dummyNetwork.workspace);
     		// Send off the layer's output to the next layer!
@@ -318,8 +314,6 @@ class	max_layer : public kahn_process
 	const	int stride;
 	const	int layerIndex;
 	const	int filterSize;	
-	const   int width;
-	const 	int height; 
 	
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
@@ -378,8 +372,6 @@ class	region_layer : public kahn_process
 	const bool absolute;
 	const float thresh;
 	const bool random;
-	const int width;
-	const int height;
 	
 	sc_fifo_in<float*> in;
 //	sc_fifo_out<float*> out;
@@ -393,13 +385,11 @@ class	region_layer : public kahn_process
 	image ** alphabets; 
 	layer l;	
 
-	region_layer(sc_module_name name, int _width, int _height, float _anchors[], bool _biasMatch, int _classes,
+	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
                int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
                int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
                bool _absolute, float _thresh, bool _random) 
 	:	kahn_process(name),
-		width(_width),
-		height(_height),
 		anchors(_anchors),
 		biasMatch(_biasMatch),
 		classes(_classes),
