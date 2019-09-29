@@ -56,7 +56,8 @@ class	image_reader : public kahn_process
   // Queue data type should be changed to image
 	sc_fifo_out<float*> out;
 	sc_fifo_out<float*> im_out; 
-	sc_fifo_out<int> imd_out; 
+	sc_fifo_out<int> im_w_out; 
+	sc_fifo_out<int> im_h_out; 
 	sc_fifo_out<char*> im_name_out; 
   	layer l;
 
@@ -86,12 +87,12 @@ class	image_reader : public kahn_process
 			// this float* to deallocate the data.
 			out->write(sized.data);
 			im_out->write(orig.data);
-			imd_out->write(orig.w);
-			imd_out->write(orig.h); //give both width in height in queue of length 2
+			im_w_out->write(orig.w);
+			im_h_out->write(orig.h); //give both width in height in queue of length 2
 			char name[10];
-			sprintf(name,"image %d",i); 
-			im_name_out->write(name);
+			sprintf(name,"image %d",i);			
 			free_image(sized); 
+			im_name_out->write(name);
 		}
 	}
 }; 
@@ -304,8 +305,8 @@ class	conv_layer : public kahn_process
 		out->write(l.output);
 
     		// Now we're done with the workspace - deallocate it or else memory leaks.
-		free(dummyNetwork.input);
-		free(input); 
+		//free(dummyNetwork.input);
+		//free(input); 
 
 	}
 };
@@ -385,7 +386,8 @@ class	region_layer : public kahn_process
 //	sc_fifo_out<int>  l_out; // this is to pass the l.classes parameter for draw_detections
 	
 	sc_fifo_in<float*> im_in; 
-	sc_fifo_in<int> imd_in; // for width and height of image
+	sc_fifo_in<int> im_w_in; // for width and height of image
+	sc_fifo_in<int> im_h_in; 
 	sc_fifo_in<char*> im_name_in; 
 
 	image ** alphabets; 
@@ -429,8 +431,8 @@ class	region_layer : public kahn_process
 		in->read(data);
 		im_name_in->read(image_name);
 		im_in->read(im.data);
-		imd_in->read(im.w);
-		imd_in->read(im.h); 
+		im_w_in->read(im.w);
+		im_h_in->read(im.h); 
 	
 		cout << "forwarding detection layer @ iter " << iter << endl;
 		network dummyNetwork;
@@ -551,7 +553,7 @@ class	kpn_neuralnet : public sc_module
 
 	sc_fifo<float*>  *reader_to_writer; 
 //	sc_fifo<int>    *layer_region_to_writer; 
-	sc_fifo<int>    *int_reader_to_writer; 
+	sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
 	sc_fifo<char*>  *char_reader_to_writer; 
 			//*conv2_to_detection,
 			//*detection_to_writer;
@@ -592,12 +594,13 @@ class	kpn_neuralnet : public sc_module
 		conv14_to_region   	= new sc_fifo<float*>(1);
 //		region_to_writer 	= new sc_fifo<float*>(1);
 
-		reader_to_writer 	= new sc_fifo<float*>(2); 
-		int_reader_to_writer	= new sc_fifo<int>(4); // needed to send im.w and im.h
-		char_reader_to_writer  	= new sc_fifo<char*>(2);
-//		layer_region_to_writer 	= new sc_fifo<int>(1)
 		reader_to_writer 	= new sc_fifo<float*>(1); 
-		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
+		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
+		int2_reader_to_writer 	= new sc_fifo<int>(1); 
+		char_reader_to_writer  	= new sc_fifo<char*>(1);
+//		layer_region_to_writer 	= new sc_fifo<int>(1)
+//		reader_to_writer 	= new sc_fifo<float*>(1); 
+//		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
 //		layer_region_to_writer 	= new sc_fifo<int>(1);
 		
     // Here is where we will indicate the parameters for each layer. These can
@@ -605,7 +608,8 @@ class	kpn_neuralnet : public sc_module
 		reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
-		reader0->imd_out(*int_reader_to_writer); 
+		reader0->im_w_out(*int_reader_to_writer); 
+		reader0->im_h_out(*int2_reader_to_writer);
 		reader0->im_name_out(*char_reader_to_writer);
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
 		conv0 = new conv_layer("conv0",0,3,1,16, 1, LEAKY, true, "conv0.weights");
@@ -673,7 +677,8 @@ class	kpn_neuralnet : public sc_module
                                true, 1, 1, true, 0.6, true);
 		region->in(*conv14_to_region);
 		region->im_in(*reader_to_writer);
-		region->imd_in(*int_reader_to_writer); 
+		region->im_w_in(*int_reader_to_writer); 
+		region->im_h_in(*int2_reader_to_writer);
 		region->im_name_in(*char_reader_to_writer); 
 //		region->out(*region_to_writer);
 //		region->l_out(*layer_region_to_writer);
