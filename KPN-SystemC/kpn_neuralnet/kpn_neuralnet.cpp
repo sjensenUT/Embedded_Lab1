@@ -75,8 +75,8 @@ class	image_reader : public kahn_process
 
 			// read images[i] from file
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
-      // Done with orig, just need sized.
-      // free_image(orig);
+      			// Done with orig, just need sized.
+      			// free_image(orig);
  			image sized = resize_image(orig, WIDTH, HEIGHT);
       			// Done with orig, just need sized.
       			// free_image(orig);
@@ -214,16 +214,20 @@ class	conv_layer : public kahn_process
 	const	int pad;
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
+	const	int width;
+	const	int height;
 	
   	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
   	convolutional_layer l;
 
-	conv_layer(sc_module_name name, int _layerIndex, int _filterSize, int _stride,
+	conv_layer(sc_module_name name, int _width, int _height, int _layerIndex, int _filterSize, int _stride,
              int _numFilters, int _pad, ACTIVATION _activation, bool _batchNormalize,
              const char* _weightsFileName)
 	:	kahn_process(name),
+		width(_width),
+		height(_height),
 		stride(_stride),
 		numFilters(_numFilters),
 		layerIndex(_layerIndex),
@@ -242,7 +246,7 @@ class	conv_layer : public kahn_process
     		}
 
     		// Call make_convolutional_layer() to create the layer object
-    		l = make_convolutional_layer(BATCH, HEIGHT, WIDTH, CHANNELS, this->numFilters, groups,
+    		l = make_convolutional_layer(BATCH, this->height, this->width, CHANNELS, this->numFilters, groups,
           		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
           		0, 0, 0);  
  
@@ -313,7 +317,9 @@ class	max_layer : public kahn_process
 	const	int stride;
 	const	int layerIndex;
 	const	int filterSize;	
-
+	const   int width;
+	const 	int height; 
+	
 	sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
@@ -371,6 +377,8 @@ class	region_layer : public kahn_process
 	const bool absolute;
 	const float thresh;
 	const bool random;
+	const int width;
+	const int height;
 	
 	sc_fifo_in<float*> in;
 //	sc_fifo_out<float*> out;
@@ -383,11 +391,13 @@ class	region_layer : public kahn_process
 	image ** alphabets; 
 	layer l;	
 
-	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
+	region_layer(sc_module_name name, int _width, int _height, float _anchors[], bool _biasMatch, int _classes,
                int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
                int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
                bool _absolute, float _thresh, bool _random) 
 	:	kahn_process(name),
+		width(_width),
+		height(_height),
 		anchors(_anchors),
 		biasMatch(_biasMatch),
 		classes(_classes),
@@ -432,79 +442,79 @@ class	region_layer : public kahn_process
 			
 			
 						
-			float thresh = 0.45;
-			float hier_thresh = 0.5;
-			float hier = hier_thresh; 
-			int nboxes = 0; 
+		float thresh = 0.45;
+		float hier_thresh = 0.5;
+		float hier = hier_thresh; 
+		int nboxes = 0; 
 			
-			// this is returning an invalid read error: 
-			// FIXME: Find the guts of get_network_boxes and draw_detections
-			//	detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
- 			cout << "attempting to detect" << endl;
-			char ** names = NULL; 
+		// this is returning an invalid read error: 
+		// FIXME: Find the guts of get_network_boxes and draw_detections
+		//	detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
+ 		cout << "attempting to detect" << endl;
+		char ** names = NULL; 
 	
-			int w = im.w;
-			int h = im.h; 	
+		int w = im.w;
+		int h = im.h; 	
     			//layer l = net->layers[t->n - 1];
     			//get_network_boxes -> make network boxes
-   			int i;
-			int * map = nullptr; 
-			int relative = 0; 
+   		int i;
+		int * map = nullptr; 
+		int relative = 0; 
 
-			// get network boxes -> make network boxes -> num detections
+		// get network boxes -> make network boxes -> num detections
 				
 
-			cout << "the type of l is: " << l.type << endl; 
-			// FIXME: should be able to minimize this to just the l.type == REGION options
-    			//if(l.type == YOLO){
-			//	nboxes += yolo_num_detections(l, thresh);
-			//}
-			if(l.type == DETECTION || l.type == REGION){
-				nboxes += l.w*l.h*l.n;
-			}
+		cout << "the type of l is: " << l.type << endl; 
+		// FIXME: should be able to minimize this to just the l.type == REGION options
+    		//if(l.type == YOLO){
+		//	nboxes += yolo_num_detections(l, thresh);
+		//}
+		if(l.type == DETECTION || l.type == REGION){
+			nboxes += l.w*l.h*l.n;
+		}
 			//if(num) *num = nboxes;
-    			detection *dets = (detection *) calloc(nboxes, sizeof(detection));
-    			for(i = 0; i < nboxes; ++i){
+    		detection *dets = (detection *) calloc(nboxes, sizeof(detection));
+    		for(i = 0; i < nboxes; ++i){
         		dets[i].prob = (float *) calloc(l.classes, sizeof(float));
-        			if(l.coords > 4){
-		            		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
-        			}
-    			}
+        		if(l.coords > 4){
+		       		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
+        		}
+    		}
 				
 			// finished make network boxes. should have dets
 		        //if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
 		        //    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
 		        //    dets += count;
 		  	//}
-		        if(l.type == REGION){
-		            get_region_detections(l, w, h, WIDTH, HEIGHT, thresh, map, hier, relative, dets);
-		            dets += l.w*l.h*l.n;
-		        }	
-		        if(l.type == DETECTION){
-		            get_detection_detections(l, w, h, thresh, dets);
-		            dets += l.w*l.h*l.n;
-		        }
-			// draw detections
+		 if(l.type == REGION){
+		        get_region_detections(l, w, h, WIDTH, HEIGHT, thresh, map, hier, relative, dets);
+		 	dets += l.w*l.h*l.n;
+		 }	
+		 if(l.type == DETECTION){
+		        get_detection_detections(l, w, h, thresh, dets);
+		 	dets += l.w*l.h*l.n;
+		 }
+		// draw detections
 		 		
-			draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
+		draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
 
 			
-			free_detections(dets, nboxes); 
+		free_detections(dets, nboxes); 
 				
-			cout << "attempting to write" << endl; 
+		cout << "attempting to write" << endl; 
 			
 			 
-			// dump to file
-			//outFN = "predicted_output_";
-			//outFN += i;
-			char outFN[100];
-			sprintf(outFN,"%s_testOut",image_name); 
-			save_image(im,outFN);
-		        // TODO - create the output file.
-			delete[] data;
-			delete[] image_name; 
-			free_image(im); 
-			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
+		// dump to file
+		//outFN = "predicted_output_";
+		//outFN += i;
+		char outFN[100];
+		sprintf(outFN,"%s_testOut",image_name); 
+		save_image(im,outFN);
+		// TODO - create the output file.
+		delete[] data;
+		delete[] image_name; 
+		free_image(im); 
+		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
 		//}
 	}
