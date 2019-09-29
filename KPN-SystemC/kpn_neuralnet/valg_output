@@ -1,0 +1,72 @@
+forwarding convolutional layer 14 @ iter 1
+==25017== Use of uninitialised value of size 8
+==25017==    at 0x42D25C: make_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x42D5F3: get_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x405BAB: image_writer::process() (kpn_neuralnet.cpp:154)
+==25017==    by 0x405476: kahn_process::main() (kahn_process.h:27)
+==25017==    by 0x4ECCD35: sc_core::sc_thread_cor_fn(void*) (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED42C0: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED427F: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017== 
+==25017== Invalid read of size 4
+==25017==    at 0x42D25C: make_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x42D5F3: get_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x405BAB: image_writer::process() (kpn_neuralnet.cpp:154)
+==25017==    by 0x405476: kahn_process::main() (kahn_process.h:27)
+==25017==    by 0x4ECCD35: sc_core::sc_thread_cor_fn(void*) (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED42C0: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED427F: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==  Address 0xfffffffffffffc5c is not stack'd, malloc'd or (recently) free'd
+==25017== 
+==25017== 
+==25017== Process terminating with default action of signal 11 (SIGSEGV)
+==25017==  Access not within mapped region at address 0xFFFFFFFFFFFFFC5C
+==25017==    at 0x42D25C: make_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x42D5F3: get_network_boxes (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x405BAB: image_writer::process() (kpn_neuralnet.cpp:154)
+==25017==    by 0x405476: kahn_process::main() (kahn_process.h:27)
+==25017==    by 0x4ECCD35: sc_core::sc_thread_cor_fn(void*) (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED42C0: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED427F: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==  If you believe this happened as a result of a stack
+==25017==  overflow in your program's main thread (unlikely but
+==25017==  possible), you can try to increase the size of the
+==25017==  main thread stack using the --main-stacksize= flag.
+==25017==  The main thread stack size used in this run was 8388608.
+==25017== 
+==25017== HEAP SUMMARY:
+==25017==     in use at exit: 8,265,226,797 bytes in 1,847 blocks
+==25017==   total heap usage: 7,229 allocs, 5,382 frees, 8,603,745,727 bytes allocated
+==25017== 
+==25017== 90,816 bytes in 95 blocks are definitely lost in loss record 651 of 713
+==25017==    at 0x4C2BFB9: calloc (vg_replace_malloc.c:762)
+==25017==    by 0x463C13: make_image (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x46793F: load_image_stb (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x4694F0: load_image (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x469C0E: load_image_color (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x469CB1: load_alphabet (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x405A39: image_writer::process() (kpn_neuralnet.cpp:121)
+==25017==    by 0x405476: kahn_process::main() (kahn_process.h:27)
+==25017==    by 0x4ECCD35: sc_core::sc_thread_cor_fn(void*) (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED42C0: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED427F: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017== 
+==25017== 13,858,872 (24,576 direct, 13,834,296 indirect) bytes in 8 blocks are definitely lost in loss record 681 of 713
+==25017==    at 0x4C2BFB9: calloc (vg_replace_malloc.c:762)
+==25017==    by 0x469C76: load_alphabet (in /home/ecelrc/students/jfarley/EMBED/Embedded_Lab1/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.x)
+==25017==    by 0x405A39: image_writer::process() (kpn_neuralnet.cpp:121)
+==25017==    by 0x405476: kahn_process::main() (kahn_process.h:27)
+==25017==    by 0x4ECCD35: sc_core::sc_thread_cor_fn(void*) (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED42C0: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017==    by 0x4ED427F: ??? (in /misc/linuxws/packages/systemc-2.3.1/lib-linux64/libsystemc-2.3.1.so)
+==25017== 
+==25017== LEAK SUMMARY:
+==25017==    definitely lost: 115,392 bytes in 103 blocks
+==25017==    indirectly lost: 13,834,296 bytes in 665 blocks
+==25017==      possibly lost: 0 bytes in 0 blocks
+==25017==    still reachable: 8,251,277,109 bytes in 1,079 blocks
+==25017==                       of which reachable via heuristic:
+==25017==                         stdstring          : 11,459 bytes in 169 blocks
+==25017==                         newarray           : 151,640 bytes in 11 blocks
+==25017==         suppressed: 0 bytes in 0 blocks
+
