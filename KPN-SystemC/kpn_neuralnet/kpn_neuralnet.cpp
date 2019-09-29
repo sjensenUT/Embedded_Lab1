@@ -11,6 +11,7 @@
 #include "../kahn_process.h"
 
 #include "darknet.h"
+#include "array_ops.h"
 #include "../../darknet/src/convolutional_layer.h"
 #include "../../darknet/src/maxpool_layer.h"
 #include "../../darknet/src/region_layer.h"
@@ -72,9 +73,9 @@ class	image_reader : public kahn_process
 
 			// read images[i] from file
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
-      image sized = resize_image(orig, WIDTH, HEIGHT);
-      // Done with orig, just need sized.
-      // free_image(orig);
+ 			image sized = resize_image(orig, WIDTH, HEIGHT);
+      			// Done with orig, just need sized.
+      			// free_image(orig);
 
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
@@ -96,7 +97,6 @@ class	image_writer : public kahn_process
 	int	iter;
 
 	strs	images;
-
   // Queue data type should be changed to image
 	sc_fifo_in<float*> in;
 	sc_fifo_in<int> l_in; // for l.classes for draw_detections. classes is an int. 
@@ -181,7 +181,7 @@ class	image_writer : public kahn_process
 class	conv_layer : public kahn_process
 {
 	public:
-
+	
 	const	int stride;
 	const	int numFilters;
 	const	int layerIndex;
@@ -385,13 +385,15 @@ class	region_layer : public kahn_process
 		l_out->write(l.classes); 
 	}
 };
+	
+	
 
 // Might need to make separate class for "region" layer
 
 class	kpn_neuralnet : public sc_module
 {
 	public:
-
+	
   // Declare all queues between our layers here
   // I think the data type for all of them will be image
 	sc_fifo<float*>	*reader_to_conv0, 
@@ -457,7 +459,7 @@ class	kpn_neuralnet : public sc_module
 		reader_to_writer 	= new sc_fifo<float*>(1); 
 		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
 		layer_region_to_writer 	= new sc_fifo<int>(1);
-
+		
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.
 		reader0 = new image_reader("image_reader",images);
@@ -539,6 +541,8 @@ class	kpn_neuralnet : public sc_module
 		writer0->imd_in(*int_reader_to_writer);  
 	}
 };
+
+
 
 // This will probably remain as-is.
 int	sc_main(int argc, char * argv[]) 
