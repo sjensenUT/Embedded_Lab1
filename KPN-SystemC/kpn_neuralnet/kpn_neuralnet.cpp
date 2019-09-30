@@ -22,6 +22,7 @@
 
 using	std::cout;
 using	std::endl;
+using std::string;
 using std::size_t;
 typedef std::vector<std::string> strs;
 
@@ -57,7 +58,7 @@ class	image_reader : public kahn_process
 	sc_fifo_out<float*> im_out; 
 	sc_fifo_out<int> im_w_out; 
 	sc_fifo_out<int> im_h_out; 
-	sc_fifo_out<char*> im_name_out; 
+	sc_fifo_out<string> im_name_out; 
   	layer l;
 
 	image_reader(sc_module_name name, strs _images)
@@ -88,9 +89,9 @@ class	image_reader : public kahn_process
 			im_w_out->write(orig.w);
 			im_h_out->write(orig.h); //give both width in height in queue of length 2
 			char name[10];
-			sprintf(name,"image%d",i);			
-	   //	free_image(sized); 
-			im_name_out->write(name);
+			sprintf(name,"image%zu",i);
+      string name_str(name);			
+      im_name_out->write(name_str);
 		}
 	}
 
@@ -288,7 +289,7 @@ class	region_layer : public kahn_process
 	sc_fifo_in<float*> im_in; 
 	sc_fifo_in<int> im_w_in; // for width and height of image
 	sc_fifo_in<int> im_h_in; 
-	sc_fifo_in<char*> im_name_in; 
+	sc_fifo_in<string> im_name_in; 
 
 	image ** alphabets; 
 	layer l;	
@@ -322,7 +323,7 @@ class	region_layer : public kahn_process
 	void	process() override
 	{
 		float* data;
-		char* image_name = NULL; 
+		string image_name; 
 		image im; 
 
 	
@@ -334,7 +335,7 @@ class	region_layer : public kahn_process
 	  im.c = 3;
 
 		cout << "forwarding detection layer @ iter " << iter << endl;
-    
+ 
   	network dummyNetwork;
 	 	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
@@ -426,10 +427,10 @@ class	region_layer : public kahn_process
 		//outFN = "predicted_output_";
 		//outFN += i;
 		char outFN[100];
-		sprintf(outFN,"%s_testOut",image_name); 
-		save_image(im,outFN);
+		sprintf(outFN,"%s_testOut",image_name.c_str()); 
+		cout << "Saving image" << endl;
+    save_image(im,outFN);
 		// TODO - create the output file.
-//    delete[] data;
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
@@ -469,7 +470,7 @@ class	kpn_neuralnet : public sc_module
 	sc_fifo<float*>  *reader_to_writer; 
 //	sc_fifo<int>    *layer_region_to_writer; 
 	sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
-	sc_fifo<char*>  *char_reader_to_writer; 
+	sc_fifo<string>  *char_reader_to_writer; 
 			//*conv2_to_detection,
 			//*detection_to_writer;
 
@@ -513,7 +514,7 @@ class	kpn_neuralnet : public sc_module
 		reader_to_writer 	= new sc_fifo<float*>(1); 
 		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
 		int2_reader_to_writer 	= new sc_fifo<int>(1); 
-		char_reader_to_writer  	= new sc_fifo<char*>(1);
+		char_reader_to_writer  	= new sc_fifo<string>(1);
 //		layer_region_to_writer 	= new sc_fifo<int>(1)
 //		reader_to_writer 	= new sc_fifo<float*>(1); 
 //		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
