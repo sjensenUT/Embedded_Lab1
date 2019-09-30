@@ -493,7 +493,7 @@ class	region_layer : public kahn_process
 		 //if(l.type == REGION){
 		 cout << "get region detections " << endl;
 		 get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		 dets += l.w*l.h*l.n;
+		 //dets += l.w*l.h*l.n;
 		 //}	
 		 //if(l.type == DETECTION){
 		 //      get_detection_detections(l, w, h, thresh, dets);
