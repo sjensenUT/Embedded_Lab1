@@ -468,6 +468,10 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
     for(i = 0; i < l.batch; ++i){
         for(j = 0; j < l.groups; ++j){
+	    printf("in inner loop j = %d\n", j);
+	    printf("trying to access net.input\n");
+	    printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
+	    printf("finished printing net input\n"); 
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;

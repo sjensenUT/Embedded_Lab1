@@ -88,7 +88,7 @@ class	image_reader : public kahn_process
       printf("%p\n", (void*)sized.data);
       printf("%f\n", (sized.data)[0]);
 
-    	out->write(sized.data);
+			out->write(sized.data);
 			im_out->write(orig.data);
 			im_w_out->write(orig.w);
 			im_h_out->write(orig.h); //give both width in height in queue of length 2
@@ -261,7 +261,7 @@ class	conv_layer : public kahn_process
 
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
-
+		cout << "l.size = " << l.size << endl;
 		load(layerIndex, "biases", l.biases, l.n);
 
 		if(l.batch_normalize)
@@ -295,7 +295,9 @@ class	conv_layer : public kahn_process
     		// the previous layer, while "workspace" points to an array of floats that we will
     		// create just before calling. The size can be determined by layer.get_workspace_size().
     		network dummyNetwork;
-    		dummyNetwork.input = input;
+    		cout << "input[0] = " << input[0] << endl;
+		dummyNetwork.input = input;
+		
 		cout << "getting workspace size" << endl; 
     		size_t workspace_size = get_convolutional_workspace_size(l);
 		cout << "allocating workspace memory" << endl; 
