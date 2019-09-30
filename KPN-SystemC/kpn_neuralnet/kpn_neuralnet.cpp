@@ -435,16 +435,22 @@ class	region_layer : public kahn_process
 		im_in->read(im.data);
 		im_w_in->read(im.w);
 		im_h_in->read(im.h); 
-	
+	  im.c = 3;
+
 		cout << "forwarding detection layer @ iter " << iter << endl;
-		network dummyNetwork;
-	   	dummyNetwork.input = data;
+	
+    printf("Reading image data (detection)\n");
+    printf("%p\n", (void*)data);
+    printf("%f\n", data[0]);
+    printf("%p\n", (void*)im.data);
+    printf("%f\n", (im.data)[0]);
+    
+  	network dummyNetwork;
+	 	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
 		//should this be l.delta?
 		//out->write(l.output);
-		//l_out->write(l.classes); 
-			
-			
+		//l_out->write(l.classes); 		
 						
 		float thresh = 0.45;
 		float hier_thresh = 0.5;
@@ -461,7 +467,7 @@ class	region_layer : public kahn_process
 		int h = im.h; 	
     			//layer l = net->layers[t->n - 1];
     			//get_network_boxes -> make network boxes
-   		int i;
+   	int i;
 		int * map = nullptr; 
 		int relative = 0; 
 
@@ -476,14 +482,15 @@ class	region_layer : public kahn_process
 		if(l.type == DETECTION || l.type == REGION){
 			nboxes += l.w*l.h*l.n;
 		}
-			//if(num) *num = nboxes;
-    		detection *dets = (detection *) calloc(nboxes, sizeof(detection));
-    		for(i = 0; i < nboxes; ++i){
-        		dets[i].prob = (float *) calloc(l.classes, sizeof(float));
-        		if(l.coords > 4){
-		       		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
-        		}
-    		}
+
+		//if(num) *num = nboxes;
+   	detection *dets = (detection *) calloc(nboxes, sizeof(detection));
+   	for(i = 0; i < nboxes; ++i){
+     	dets[i].prob = (float *) calloc(l.classes, sizeof(float));
+      if(l.coords > 4){
+		    dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
+      }
+  	}
 				
 			// finished make network boxes. should have dets
 		        //if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
@@ -491,17 +498,18 @@ class	region_layer : public kahn_process
 		        //    dets += count;
 		  	//}
 		 if(l.type == REGION){
-		        get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		 	dets += l.w*l.h*l.n;
+       get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
+		   dets += l.w*l.h*l.n;
 		 }	
-		 if(l.type == DETECTION){
-		        get_detection_detections(l, w, h, thresh, dets);
-		 	dets += l.w*l.h*l.n;
+		 if(l.type == DETECTION){   
+       get_detection_detections(l, w, h, thresh, dets);
+		   dets += l.w*l.h*l.n;
 		 }
 		// draw detections
-		 		
+		
+    float nms = 0.45;
+    if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 		
 		draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
-
 			
 		free_detections(dets, nboxes); 
 				

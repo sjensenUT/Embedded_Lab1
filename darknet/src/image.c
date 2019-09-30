@@ -240,6 +240,10 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
 {
     int i,j;
 
+    printf("Drawing detections on image.\n");
+    printf("W H C : %d %d %d\n", im.w, im.h, im.c);
+    printf("Num Thresh Classes: %d %9.6f %d\n", num, thresh, classes);
+
     for(i = 0; i < num; ++i){
         char labelstr[4096] = {0};
         int class = -1;
