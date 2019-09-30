@@ -1212,6 +1212,9 @@ void load_convolutional_weights(layer l, FILE *fp)
         push_convolutional_layer(l);
     }
 #endif
+
+    printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
+    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
 }
 
 

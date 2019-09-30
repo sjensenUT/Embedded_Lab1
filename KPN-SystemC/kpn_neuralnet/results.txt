@@ -1,0 +1,192 @@
+instantiated image_reader
+instantiated convolutional layer 0 with filter size of 3, stride of 1 and 16 filters
+l.size = 3
+loaded parameters of layer 0
+Biases : -2.431962 -6.111609 0.747506 ...
+Weights: 0.357370 0.397533 0.228080 ...
+instantiated max layer 1 with filter size of 2 and stride of 2
+instantiated convolutional layer 2 with filter size of 3, stride of 1 and 32 filters
+l.size = 3
+loaded parameters of layer 2
+Biases : -1.202042 1.237125 -1.732700 ...
+Weights: -0.072507 -0.058047 -0.092860 ...
+instantiated max layer 3 with filter size of 2 and stride of 2
+instantiated convolutional layer 4 with filter size of 3, stride of 1 and 64 filters
+l.size = 3
+loaded parameters of layer 4
+Biases : -1.366577 -1.170707 -1.658825 ...
+Weights: 0.082953 0.046356 -0.119608 ...
+instantiated max layer 5 with filter size of 2 and stride of 2
+instantiated convolutional layer 6 with filter size of 3, stride of 1 and 128 filters
+l.size = 3
+loaded parameters of layer 6
+Biases : -1.555444 -0.637555 -0.301279 ...
+Weights: -0.091498 -0.039436 0.000820 ...
+instantiated max layer 7 with filter size of 2 and stride of 2
+instantiated convolutional layer 8 with filter size of 3, stride of 1 and 256 filters
+l.size = 3
+loaded parameters of layer 8
+Biases : -2.631703 -2.224973 -1.333563 ...
+Weights: 0.011091 -0.002940 0.000823 ...
+instantiated max layer 9 with filter size of 2 and stride of 2
+instantiated convolutional layer 10 with filter size of 3, stride of 1 and 512 filters
+l.size = 3
+loaded parameters of layer 10
+Biases : -2.018725 -1.097163 -0.998052 ...
+Weights: -0.010252 -0.000840 -0.013810 ...
+instantiated max layer 11 with filter size of 2 and stride of 2
+instantiated convolutional layer 12 with filter size of 3, stride of 1 and 1024 filters
+l.size = 3
+loaded parameters of layer 12
+Biases : -3.991081 -2.537517 -3.584137 ...
+Weights: -0.002867 -0.010984 -0.016160 ...
+instantiated convolutional layer 13 with filter size of 3, stride of 1 and 512 filters
+l.size = 3
+loaded parameters of layer 13
+Biases : 0.187170 0.238074 0.032887 ...
+Weights: -0.000981 -0.004665 -0.009093 ...
+instantiated convolutional layer 14 with filter size of 1, stride of 1 and 425 filters
+l.size = 1
+loaded parameters of layer 14
+Biases : 0.032695 0.069263 -0.193286 ...
+Weights: -0.002045 -0.001358 0.004811 ...
+instantiating region layer
+reading image ../../darknet/data/dog.jpg @ iter 0
+orig.data[0] : 0.223529
+sized.data[0] : 0.500000
+reading image ../../darknet/data/dog.jpg @ iter 2
+orig.data[0] : 0.223529
+sized.data[0] : 0.500000
+forwarding convolutional layer 0 @ iter 0
+inputs of layer 0, are 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000
+getting workspace size
+allocating workspace memory
+forward convoluting
+outputs of layer 0, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
+freeing
+forwarding max layer 1 @ iter 0
+forwarding convolutional layer 0 @ iter 1
+inputs of layer 0, are 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000 0.500000
+getting workspace size
+allocating workspace memory
+forward convoluting
+outputs of layer 0, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
+freeing
+forwarding convolutional layer 2 @ iter 0
+inputs of layer 2, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
+getting workspace size
+allocating workspace memory
+forward convoluting
+outputs of layer 2, are -0.170149 -0.170063 -0.172987 -0.220254 -0.288143 -0.328921 -0.230782 -0.154297 -0.093060 -0.093476
+freeing
+forwarding max layer 1 @ iter 1
+forwarding max layer 3 @ iter 0
+forwarding convolutional layer 2 @ iter 1
+inputs of layer 2, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
+getting workspace size
+allocating workspace memory
+forward convoluting
+outputs of layer 2, are -0.170149 -0.170063 -0.172987 -0.220254 -0.288143 -0.328921 -0.230782 -0.154297 -0.093060 -0.093476
+freeing
+forwarding convolutional layer 4 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding max layer 3 @ iter 1
+forwarding max layer 5 @ iter 0
+forwarding convolutional layer 4 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 6 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding max layer 5 @ iter 1
+forwarding max layer 7 @ iter 0
+forwarding convolutional layer 6 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 8 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding max layer 7 @ iter 1
+forwarding max layer 9 @ iter 0
+forwarding convolutional layer 8 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 10 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding max layer 9 @ iter 1
+forwarding max layer 11 @ iter 0
+forwarding convolutional layer 10 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 12 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding max layer 11 @ iter 1
+forwarding convolutional layer 13 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 12 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 14 @ iter 0
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding convolutional layer 13 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting
+freeing
+forwarding detection layer @ iter 0
+attempting to detect
+0: person
+1: bicycle
+2: car
+3: motorbike
+4: aeroplane
+5: bus
+6: train
+7: truck
+8: boat
+9: traffic light
+the type of l is: 22
+Region: 22 DETECTION: 5
+setting nboxes
+Nboxes = 845
+get region detections 
+draw detections
+Drawing detections on image.
+W H C : 768 576 3
+Num Thresh Classes: 845  0.450000 80
+free detections
+attempting to write
+writing predictions to image 0_testOut  @ iter 0
+forwarding convolutional layer 14 @ iter 1
+getting workspace size
+allocating workspace memory
+forward convoluting

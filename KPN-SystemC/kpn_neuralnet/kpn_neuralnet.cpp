@@ -75,11 +75,10 @@ class	image_reader : public kahn_process
 
 			// read images[i] from file
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
-      			// Done with orig, just need sized.
-      			// free_image(orig);
- 			image sized = resize_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
-      			// Done with orig, just need sized.
-      			// free_image(orig);
+ 			image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+      printf("orig.data[0] : %f\n", (orig.data)[0]);
+      printf("sized.data[0] : %f\n", (sized.data)[0]);
 
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
@@ -270,7 +269,8 @@ class	conv_layer : public kahn_process
 		load(layerIndex, "weights", l.weights, num);
 
 		printf("loaded parameters of layer %i\n", layerIndex);
-
+    printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
+    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
   	}
 
 	void	process() override
@@ -286,18 +286,33 @@ class	conv_layer : public kahn_process
     		// and "workspace" elements of the network struct. "input" is simply the output of
     		// the previous layer, while "workspace" points to an array of floats that we will
     		// create just before calling. The size can be determined by layer.get_workspace_size().
-    		network dummyNetwork;
-    		cout << "input[0] = " << input[0] << endl;
+    network dummyNetwork;
 		dummyNetwork.input = input;
-		
+
+    if (layerIndex < 3) {	
+	    printf("inputs of layer %d, are", layerIndex);
+      for(int j = 0; j < 10; j++){
+        printf(" %f", input[j]);
+      }
+    	printf("\n");
+    } 
+	
 		cout << "getting workspace size" << endl; 
     		size_t workspace_size = get_convolutional_workspace_size(l);
 		cout << "allocating workspace memory" << endl; 
     		dummyNetwork.workspace = (float*) calloc(1, workspace_size);
 		cout << "forward convoluting" << endl;
     		forward_convolutional_layer(l, dummyNetwork);
-		
-	   	cout << "freeing" << endl;
+	
+    if (layerIndex < 3) {
+	    printf("outputs of layer %d, are", layerIndex);
+      for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+      }
+    	printf("\n");
+    }
+	
+   	cout << "freeing" << endl;
 		free(dummyNetwork.workspace);
     		// Send off the layer's output to the next layer!
 		out->write(l.output);
@@ -493,8 +508,10 @@ class	region_layer : public kahn_process
 		 //if(l.type == REGION){
 		 cout << "get region detections " << endl;
 		 get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		 //dets += l.w*l.h*l.n;
-		 //}	
+		 // Not sure if this should be commented or not
+     //dets += l.w*l.h*l.n;
+		
+     //}	
 		 //if(l.type == DETECTION){
 		 //      get_detection_detections(l, w, h, thresh, dets);
 		 //	dets += l.w*l.h*l.n;
@@ -573,7 +590,8 @@ class	kpn_neuralnet : public sc_module
   // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-		strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
