@@ -88,7 +88,7 @@ class	image_reader : public kahn_process
 			im_w_out->write(orig.w);
 			im_h_out->write(orig.h); //give both width in height in queue of length 2
 			char name[10];
-			sprintf(name,"image %d",i);			
+			sprintf(name,"image%d",i);			
 	   //	free_image(sized); 
 			im_name_out->write(name);
 		}
@@ -520,7 +520,7 @@ class	region_layer : public kahn_process
   	// draw detections
 	  cout << "draw detections" << endl;
     float nms = 0.45;
-    if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
+  		if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
 		draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
 
 	 	cout << "free detections" << endl; 
@@ -536,7 +536,7 @@ class	region_layer : public kahn_process
 		sprintf(outFN,"%s_testOut",image_name); 
 		save_image(im,outFN);
 		// TODO - create the output file.
-    delete[] data;
+//    delete[] data;
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
