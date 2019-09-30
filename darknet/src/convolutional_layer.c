@@ -450,7 +450,6 @@ void backward_bias(float *bias_updates, float *delta, int batch, int n, int size
 void forward_convolutional_layer(convolutional_layer l, network net)
 {
     int i, j;
-    printf("in forward convolutional layer\n");
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
     if(l.xnor){
         binarize_weights(l.weights, l.n, l.c/l.groups*l.size*l.size, l.binary_weights);
@@ -461,17 +460,17 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
-    printf("l.groups    = %d\n", l.groups);
-    printf("l.batch     = %d\n", l.batch);
-    printf("l.nweights  = %d\n", l.nweights);
-    printf("Workspace size: %zu\n", get_workspace_size(l));
-    printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
+    //printf("l.groups    = %d\n", l.groups);
+    //printf("l.batch     = %d\n", l.batch);
+    //printf("l.nweights  = %d\n", l.nweights);
+    //printf("Workspace size: %zu\n", get_workspace_size(l));
+    //printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
     for(i = 0; i < l.batch; ++i){
         for(j = 0; j < l.groups; ++j){
-	    printf("in inner loop j = %d\n", j);
-	    printf("trying to access net.input\n");
-	    printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
-	    printf("finished printing net input\n"); 
+	          //printf("in inner loop j = %d\n", j);
+	          //printf("trying to access net.input\n");
+	          //printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
+	          //printf("finished printing net input\n"); 
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;
@@ -485,14 +484,12 @@ void forward_convolutional_layer(convolutional_layer l, network net)
             gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
         }
     }
-    printf("Hello 4\n");
 
     if(l.batch_normalize){
         forward_batchnorm_layer(l, net);
     } else {
         add_bias(l.output, l.biases, l.batch, l.n, l.out_h*l.out_w);
     }
-    printf("Hello 5\n");
     activate_array(l.output, l.outputs*l.batch, l.activation);
     if(l.binary || l.xnor) swap_binary(&l);
 }
