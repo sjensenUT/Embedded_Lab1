@@ -243,12 +243,12 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
     printf("Drawing detections on image.\n");
     printf("W H C : %d %d %d\n", im.w, im.h, im.c);
     printf("Num Thresh Classes: %d %9.6f %d\n", num, thresh, classes);
-
+    
     for(i = 0; i < num; ++i){
         char labelstr[4096] = {0};
         int class = -1;
         for(j = 0; j < classes; ++j){
-            if (dets[i].prob[j] > thresh){
+             if (dets[i].prob[j] > thresh){
                 if (class < 0) {
                     strcat(labelstr, names[j]);
                     class = j;

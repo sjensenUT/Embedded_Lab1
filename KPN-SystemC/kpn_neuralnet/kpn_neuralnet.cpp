@@ -84,10 +84,6 @@ class	image_reader : public kahn_process
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
 			// this float* to deallocate the data.
-		  printf("Sending out the first data\n");
-      printf("%p\n", (void*)sized.data);
-      printf("%f\n", (sized.data)[0]);
-
 			out->write(sized.data);
 			im_out->write(orig.data);
 			im_w_out->write(orig.w);
@@ -286,10 +282,6 @@ class	conv_layer : public kahn_process
  
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-    printf("Reading image data\n");
-    printf("%p\n", (void*)input);
-    printf("%f\n", input[0]);
-
     		// Create a dummy network object. forward_convolutional_layer only uses the "input"
     		// and "workspace" elements of the network struct. "input" is simply the output of
     		// the previous layer, while "workspace" points to an array of floats that we will
@@ -351,10 +343,6 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-    printf("Reading image data (maxpool)\n");
-    printf("%p\n", (void*)data);
-    printf("%f\n", data[0]);
- 
    	// Call forward_maxpool_layer() here, read from layer.output and write to out
    	// Create a dummy network object. The function only uses network.input
    	network dummyNetwork;
@@ -438,12 +426,6 @@ class	region_layer : public kahn_process
 	  im.c = 3;
 
 		cout << "forwarding detection layer @ iter " << iter << endl;
-	
-    printf("Reading image data (detection)\n");
-    printf("%p\n", (void*)data);
-    printf("%f\n", data[0]);
-    printf("%p\n", (void*)im.data);
-    printf("%f\n", (im.data)[0]);
     
   	network dummyNetwork;
 	 	dummyNetwork.input = data;
@@ -461,27 +443,38 @@ class	region_layer : public kahn_process
 		// FIXME: Find the guts of get_network_boxes and draw_detections
 		//	detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
  		cout << "attempting to detect" << endl;
-		char ** names = NULL; 
-	
+		
+    		list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
+		//	cout << "OPTIONS: " <<*options << endl;
+    		char *name_list = option_find_str(options, "names", "../../darknet/data/coco.names");
+    		char **names = get_labels(name_list);
+	//	char ** names = NULL; 
+		int i;
+		for(i = 0; i < 10; i++){
+			printf("%d: %s\n",i,names[i]);
+		}	
 		int w = im.w;
 		int h = im.h; 	
     			//layer l = net->layers[t->n - 1];
     			//get_network_boxes -> make network boxes
-   	int i;
 		int * map = nullptr; 
 		int relative = 0; 
 
 		// get network boxes -> make network boxes -> num detections
 				
-
+		// l.type is region
 		cout << "the type of l is: " << l.type << endl; 
+		cout << "Region: " << REGION << " DETECTION: " << DETECTION <<endl; 
 		// FIXME: should be able to minimize this to just the l.type == REGION options
     		//if(l.type == YOLO){
 		//	nboxes += yolo_num_detections(l, thresh);
 		//}
+
+		cout << "setting nboxes" << endl;
 		if(l.type == DETECTION || l.type == REGION){
 			nboxes += l.w*l.h*l.n;
 		}
+    printf("Nboxes = %d\n", nboxes);
 
 		//if(num) *num = nboxes;
    	detection *dets = (detection *) calloc(nboxes, sizeof(detection));
@@ -497,20 +490,23 @@ class	region_layer : public kahn_process
 		        //    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
 		        //    dets += count;
 		  	//}
-		 if(l.type == REGION){
-       get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		   dets += l.w*l.h*l.n;
-		 }	
-		 if(l.type == DETECTION){   
-       get_detection_detections(l, w, h, thresh, dets);
-		   dets += l.w*l.h*l.n;
-		 }
-		// draw detections
-		
+		 //if(l.type == REGION){
+		 cout << "get region detections " << endl;
+		 get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
+		 //dets += l.w*l.h*l.n;
+		 //}	
+		 //if(l.type == DETECTION){
+		 //      get_detection_detections(l, w, h, thresh, dets);
+		 //	dets += l.w*l.h*l.n;
+		 //}
+	
+  	// draw detections
+	  cout << "draw detections" << endl;
     float nms = 0.45;
-    if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 		
+    if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
 		draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
-			
+
+	 	cout << "free detections" << endl; 
 		free_detections(dets, nboxes); 
 				
 		cout << "attempting to write" << endl; 
@@ -523,8 +519,7 @@ class	region_layer : public kahn_process
 		sprintf(outFN,"%s_testOut",image_name); 
 		save_image(im,outFN);
 		// TODO - create the output file.
-		delete[] data;
-		delete[] image_name; 
+    delete[] data;
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
