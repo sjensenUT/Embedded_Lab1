@@ -77,8 +77,8 @@ class	image_reader : public kahn_process
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
  			image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-      printf("orig.data[0] : %f\n", (orig.data)[0]);
-      printf("sized.data[0] : %f\n", (sized.data)[0]);
+		      	printf("orig.data[0] : %f\n", (orig.data)[0]);
+      			printf("sized.data[0] : %f\n", (sized.data)[0]);
 
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
@@ -96,113 +96,6 @@ class	image_reader : public kahn_process
 
 }; 
 
-/*
-class	image_writer : public kahn_process
-{
-	public:
-
-	int	iter;
-	
-	strs	images;
-<<<<<<< HEAD
-	images ** alphabets; 
-
-=======
->>>>>>> 909823bbb7184f6e39cb5de3121846ff0303bed3
-  // Queue data type should be changed to image
-	sc_fifo_in<float*> in;
-	sc_fifo_in<int> l_in; // for l.classes for draw_detections. classes is an int. 
-	sc_fifo_in<float*> im_in; 
-	sc_fifo_in<int> imd_in; // for width and height of image
-
-	image_writer(sc_module_name name, strs _images)
-	:	kahn_process(name),
-		images(_images)
-	{
-		
-		alphabets = load_alphabet(); 
-		cout << "instantiated image_writer" << endl;
-	}
-
-	void	process() override
-	{
-		float*  val;
-		image im;
-		int classes; 
-		cout <<  "inside the image writer function" <<endl; 
-
-		//FIXME: this function can't seem to find the data/labels that it needs. Tried putting the alphabet in different places
-		// new comment
-		 this is the load_alphabet code
-    		int i, j;
-		const int nsize = 8;
-		image **alphabets = (image**)malloc(nsize);
-    		for(j = 0; j < nsize; ++j){
-        	alphabets[j] = (image*)malloc(128);
-        	for(i = 32; i < 127; ++i){
-            			char buff[256];
-	            		sprintf(buff, "data/labels/%d_%d.png", i, j);
-        	    		alphabets[j][i] = load_image_color(buff, 0, 0);
-        		}	
-    		}
-					
-		//std::string outFN;
-		// shouldn't need for loop anymore because dependent
-		//for(size_t i=0; i<images.size(); i++)
-		//{
-			// read values from "in"
-			in->read(val);
-			l_in->read(classes); 
-
-			network dummyNetwork;
-        	        dummyNetwork.input = val;
-			
-						
-			float thresh = 0.45;
-			float hier_thresh = 0.5;
-			im_in->read(im.data);
-			imd_in->read(im.w);
-			imd_in->read(im.h); 
-			int nboxes = 0; 
-			
-			// this is returning an invalid read error: 
-			detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
- 			cout << "attempting to detect" << endl;
-			char ** names = NULL; 
-	
-			//draw_detections(im, dets, nboxes, thresh, names, alphabets, classes);
-			
-    			//layer l = net->layers[t->n - 1];
-   			int i;
-			int nboxes = num_detections(net, thresh);
-		    	if(num) *num = nboxes;
-    			detection *dets = calloc(nboxes, sizeof(detection));
-    			for(i = 0; i < nboxes; ++i){
-        		dets[i].prob = calloc(l.classes, sizeof(float));
-        		if(l.coords > 4){
-		            dets[i].mask = calloc(l.coords-4, sizeof(float));
-        }
-    }
-			free_detections(dets, nboxes); 
-				
-			cout << "attempting to write" << endl; 
-
-			//save_image(im, "test_predictions.png");
-			free(val); 
-			// dump to file
-			//outFN = "predicted_output_";
-			//outFN += i;
-			char outFN[50];
-			sprintf(outFN,"my_test_predicted_output %d",i); 
-			save_image(im,outFN);
-		        // TODO - create the output file.
-			free_image(im); 
-			cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
-		//}
-		free(alphabets); 
-	}
-};
-*/
 class	conv_layer : public kahn_process
 {
 	public:
@@ -269,8 +162,8 @@ class	conv_layer : public kahn_process
 		load(layerIndex, "weights", l.weights, num);
 
 		printf("loaded parameters of layer %i\n", layerIndex);
-    printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
-    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
+    		printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
+    		printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
   	}
 
 	void	process() override
@@ -286,16 +179,16 @@ class	conv_layer : public kahn_process
     		// and "workspace" elements of the network struct. "input" is simply the output of
     		// the previous layer, while "workspace" points to an array of floats that we will
     		// create just before calling. The size can be determined by layer.get_workspace_size().
-    network dummyNetwork;
+    		network dummyNetwork;
 		dummyNetwork.input = input;
 
-    if (layerIndex < 3) {	
-	    printf("inputs of layer %d, are", layerIndex);
-      for(int j = 0; j < 10; j++){
-        printf(" %f", input[j]);
-      }
-    	printf("\n");
-    } 
+    		if (layerIndex < 3) {	
+			printf("inputs of layer %d, are", layerIndex);
+     		for(int j = 0; j < 10; j++){
+        		printf(" %f", input[j]);
+      		}
+    			printf("\n");
+    		}	 
 	
 		cout << "getting workspace size" << endl; 
     		size_t workspace_size = get_convolutional_workspace_size(l);
@@ -304,15 +197,15 @@ class	conv_layer : public kahn_process
 		cout << "forward convoluting" << endl;
     		forward_convolutional_layer(l, dummyNetwork);
 	
-    if (layerIndex < 3) {
-	    printf("outputs of layer %d, are", layerIndex);
-      for(int j = 0; j < 10; j++){
-        printf(" %f", l.output[j]);
-      }
-    	printf("\n");
-    }
+    		if (layerIndex < 3) {
+	    		printf("outputs of layer %d, are", layerIndex);
+      			for(int j = 0; j < 10; j++){
+        			printf(" %f", l.output[j]);
+      			}
+    			printf("\n");
+    		}
 	
-   	cout << "freeing" << endl;
+   		cout << "freeing" << endl;
 		free(dummyNetwork.workspace);
     		// Send off the layer's output to the next layer!
 		out->write(l.output);
@@ -489,35 +382,35 @@ class	region_layer : public kahn_process
 		if(l.type == DETECTION || l.type == REGION){
 			nboxes += l.w*l.h*l.n;
 		}
-    printf("Nboxes = %d\n", nboxes);
+    		printf("Nboxes = %d\n", nboxes);
 
 		//if(num) *num = nboxes;
-   	detection *dets = (detection *) calloc(nboxes, sizeof(detection));
-   	for(i = 0; i < nboxes; ++i){
-     	dets[i].prob = (float *) calloc(l.classes, sizeof(float));
-      if(l.coords > 4){
-		    dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
-      }
-  	}
-				
-			// finished make network boxes. should have dets
-		        //if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
-		        //    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
-		        //    dets += count;
-		  	//}
-		 //if(l.type == REGION){
-		 cout << "get region detections " << endl;
-		 get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		 // Not sure if this should be commented or not
-     //dets += l.w*l.h*l.n;
+   		detection *dets = (detection *) calloc(nboxes, sizeof(detection));
+   		for(i = 0; i < nboxes; ++i){
+     			dets[i].prob = (float *) calloc(l.classes, sizeof(float));
+      			if(l.coords > 4){
+		    		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
+      			}
+  		}
+						
+		// finished make network boxes. should have dets
+		//if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
+		//    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
+		//    dets += count;
+		//}
+		//if(l.type == REGION){
+		cout << "get region detections " << endl;
+		get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
+		// Not sure if this should be commented or not
+     		//dets += l.w*l.h*l.n;
 		
-     //}	
-		 //if(l.type == DETECTION){
-		 //      get_detection_detections(l, w, h, thresh, dets);
-		 //	dets += l.w*l.h*l.n;
-		 //}
+     		//}	
+		//if(l.type == DETECTION){
+		//      get_detection_detections(l, w, h, thresh, dets);
+		//	dets += l.w*l.h*l.n;
+		//}
 	
-  	// draw detections
+  		// draw detections
 	  cout << "draw detections" << endl;
     float nms = 0.45;
   		if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 

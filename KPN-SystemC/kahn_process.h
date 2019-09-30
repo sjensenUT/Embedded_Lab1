@@ -24,8 +24,9 @@ class	kahn_process : public sc_module
 		SC_THREAD(main);
 	}
 
-	void	main()	{ while(true) {process(); iter++;} }
-
+	//void	main()	{ while(true) {process(); iter++;} }
+	void  main()  { process(); iter++; }
+	
 	protected:
 
 	int iter = 0;
