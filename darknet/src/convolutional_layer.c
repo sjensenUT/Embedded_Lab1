@@ -409,6 +409,7 @@ void resize_convolutional_layer(convolutional_layer *l, int w, int h)
     cudnn_convolutional_setup(l);
 #endif
 #endif
+    printf("Resizing convolutional workspace!\n");
     l->workspace_size = get_workspace_size(*l);
 }
 
@@ -451,33 +452,31 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     int i, j;
     printf("in forward convolutional layer\n");
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
-    printf("Hello 1\n");
     if(l.xnor){
         binarize_weights(l.weights, l.n, l.c/l.groups*l.size*l.size, l.binary_weights);
         swap_binary(&l);
         binarize_cpu(net.input, l.c*l.h*l.w*l.batch, l.binary_input);
         net.input = l.binary_input;
     }
-    printf("Hello 2\n");
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
-    printf("Hello 3\n");
-    printf("attempting to access l.batch\n");
-    printf("l.batch = %d\n", l.batch);
+    printf("l.groups    = %d\n", l.groups);
+    printf("l.batch     = %d\n", l.batch);
+    printf("l.nweights  = %d\n", l.nweights);
+    printf("Workspace size: %zu\n", get_workspace_size(l));
+    printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
     for(i = 0; i < l.batch; ++i){
-	printf("In outer loop, i = %d\n", i);
         for(j = 0; j < l.groups; ++j){
-	    printf("in inner loop j = %d\n", j);
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;
             float *im =  net.input + (i*l.groups + j)*l.c/l.groups*l.h*l.w;
-
+            
             if (l.size == 1) {
                 b = im;
             } else {
-                im2col_cpu(im, l.c/l.groups, l.h, l.w, l.size, l.stride, l.pad, b);
+              im2col_cpu(im, l.c/l.groups, l.h, l.w, l.size, l.stride, l.pad, b);
             }
             gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
         }

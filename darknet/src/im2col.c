@@ -6,9 +6,11 @@ float im2col_get_pixel(float *im, int height, int width, int channels,
     row -= pad;
     col -= pad;
 
+//     printf("W %d H %d R %d C %d Ch %d Elem %d\n", width, height, row, col, channel,
+//             col + width*(row + height*channel));
     if (row < 0 || col < 0 ||
         row >= height || col >= width) return 0;
-    return im[col + width*(row + height*channel)];
+     return im[col + width*(row + height*channel)];
 }
 
 //From Berkeley Vision's Caffe!
@@ -31,6 +33,7 @@ void im2col_cpu(float* data_im,
                 int im_row = h_offset + h * stride;
                 int im_col = w_offset + w * stride;
                 int col_index = (c * height_col + h) * width_col + w;
+                //printf("COL_INDEX = %d\n", col_index);
                 data_col[col_index] = im2col_get_pixel(data_im, height, width, channels,
                         im_row, im_col, c_im, pad);
             }

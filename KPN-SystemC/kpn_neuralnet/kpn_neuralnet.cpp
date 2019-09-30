@@ -84,16 +84,21 @@ class	image_reader : public kahn_process
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
 			// this float* to deallocate the data.
-			out->write(sized.data);
+		  printf("Sending out the first data\n");
+      printf("%p\n", (void*)sized.data);
+      printf("%f\n", (sized.data)[0]);
+
+    	out->write(sized.data);
 			im_out->write(orig.data);
 			im_w_out->write(orig.w);
 			im_h_out->write(orig.h); //give both width in height in queue of length 2
 			char name[10];
 			sprintf(name,"image %d",i);			
-			free_image(sized); 
+	   //	free_image(sized); 
 			im_name_out->write(name);
 		}
 	}
+
 }; 
 
 /*
@@ -278,8 +283,12 @@ class	conv_layer : public kahn_process
 
     		// Read the output from the previos layer
 		in->read(input);
-
+ 
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
+
+    printf("Reading image data\n");
+    printf("%p\n", (void*)input);
+    printf("%f\n", input[0]);
 
     		// Create a dummy network object. forward_convolutional_layer only uses the "input"
     		// and "workspace" elements of the network struct. "input" is simply the output of
