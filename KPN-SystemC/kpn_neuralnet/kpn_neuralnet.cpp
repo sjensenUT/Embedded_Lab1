@@ -558,7 +558,6 @@ class	kpn_neuralnet : public sc_module
 		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, "conv14.weights");
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
-
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
                                true, 1, 1, true, 0.6, true, 13, 13);
 		region->in(*conv14_to_region);
@@ -566,19 +565,8 @@ class	kpn_neuralnet : public sc_module
 		region->im_w_in(*int_reader_to_writer); 
 		region->im_h_in(*int2_reader_to_writer);
 		region->im_name_in(*char_reader_to_writer); 
-//		region->out(*region_to_writer);
-//		region->l_out(*layer_region_to_writer);
-
-		/*		
-		writer0 = new image_writer("image_writer",images);
-		writer0->in(*region_to_writer);
-		writer0->l_in(*layer_region_to_writer); 
-		writer0->im_in(*reader_to_writer);
-		writer0->imd_in(*int_reader_to_writer); 
-		 */
 	}
 };
-/*
 class   conv_layer_unfused : public sc_module
 {
     public:
@@ -591,35 +579,32 @@ class   conv_layer_unfused : public sc_module
     conv_layer_unfused(sc_module_name name, int layerIndex, int **coords, int c,  int filterSize,
              int stride, int numFilters, int pad, ACTIVATION activation,
              bool batchNormalize) : sc_module(name)
-    {
+    {   
         for(int i = 0; i < 9; i++){
-            std::string nodeName = "conv" << layerIndex << "_" << i;
             int w = coords[i][2] - coords[i][0] + 1;
-            int h = coords[i][3] - coords[i][1] + 1; 
-            conv[i] = new conv_layer(nodeName, layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, "");
+            int h = coords[i][3] - coords[i][1] + 1;
+            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
         }
         int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
         int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
         int totalWidth = widths[0] + widths[1] + widths[2];
         int totalHeight = heights[0] + heights[1] + heights[2];
-        merge = new merge_layer("merge" << layerIndex, widths, heights, c);
-        scatter = new scatter_layer("scatter" << layerIndex, totalWidth, totalHeight, c);
+        merge = new merge_layer("merge", widths, heights, c);
+ 
+        scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
         *scatter_to_conv = new sc_fifo<float*>[9];
         *conv_to_merge = new sc_fifo<float*>[9];
         for(int i = 0; i < 9; i++){
             scatter_to_conv[0] = new sc_fifo<float*>(1);
             conv_to_merge[0] = new sc_fifo<float*>(1);
-        }
-        
+        } 
     }
-
-    
 };
-*/
+
 // This will probably remain as-is.
 int	sc_main(int argc, char * argv[]) 
 {
 	kpn_neuralnet knn0("kpn_neuralnet");
 	sc_start();
 	return 0;
-};
+}
