@@ -13,6 +13,7 @@
 
 #include "darknet.h"
 #include "array_ops.h"
+#include "merge_scatter.h"
 #include "../../darknet/src/convolutional_layer.h"
 #include "../../darknet/src/maxpool_layer.h"
 #include "../../darknet/src/region_layer.h"
@@ -255,7 +256,6 @@ class	max_layer : public kahn_process
 	}
 };
 
-// Necessary? Not sure yolov2-tiny has a "detection" layer, whatever that is.
 class	region_layer : public kahn_process
 {
 	public:
@@ -411,10 +411,6 @@ class	region_layer : public kahn_process
 	}
 
 };
-	
-	
-
-// Might need to make separate class for "region" layer
 
 class	kpn_neuralnet : public sc_module
 {
@@ -582,13 +578,48 @@ class	kpn_neuralnet : public sc_module
 		 */
 	}
 };
+/*
+class   conv_layer_unfused : public sc_module
+{
+    public:
+    sc_fifo<float*> **scatter_to_conv,
+        **conv_to_merge;
+    
+    scatter_layer *scatter;
+    conv_layer **conv;
+    merge_layer *merge;
+    conv_layer_unfused(sc_module_name name, int layerIndex, int **coords, int c,  int filterSize,
+             int stride, int numFilters, int pad, ACTIVATION activation,
+             bool batchNormalize) : sc_module(name)
+    {
+        for(int i = 0; i < 9; i++){
+            std::string nodeName = "conv" << layerIndex << "_" << i;
+            int w = coords[i][2] - coords[i][0] + 1;
+            int h = coords[i][3] - coords[i][1] + 1; 
+            conv[i] = new conv_layer(nodeName, layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, "");
+        }
+        int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
+        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
+        int totalWidth = widths[0] + widths[1] + widths[2];
+        int totalHeight = heights[0] + heights[1] + heights[2];
+        merge = new merge_layer("merge" << layerIndex, widths, heights, c);
+        scatter = new scatter_layer("scatter" << layerIndex, totalWidth, totalHeight, c);
+        *scatter_to_conv = new sc_fifo<float*>[9];
+        *conv_to_merge = new sc_fifo<float*>[9];
+        for(int i = 0; i < 9; i++){
+            scatter_to_conv[0] = new sc_fifo<float*>(1);
+            conv_to_merge[0] = new sc_fifo<float*>(1);
+        }
+        
+    }
 
-
-
+    
+};
+*/
 // This will probably remain as-is.
 int	sc_main(int argc, char * argv[]) 
 {
 	kpn_neuralnet knn0("kpn_neuralnet");
 	sc_start();
 	return 0;
-}
+};
