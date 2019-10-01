@@ -343,6 +343,10 @@ class	region_layer : public kahn_process
     l.mask_scale = 1;
     l.class_scale = classScale;;
     l.bias_match = biasMatch;
+
+    for (int i = 0; i < 10; i++) {
+        l.biases[i] = ANCHORS[i];   
+    }
 		alphabets = load_alphabet(); 
 	}
 

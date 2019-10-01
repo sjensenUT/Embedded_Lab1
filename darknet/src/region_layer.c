@@ -347,6 +347,15 @@ void correct_region_boxes(detection *dets, int n, int w, int h, int netw, int ne
     }
     for (i = 0; i < n; ++i){
         box b = dets[i].bbox;
+
+        int j;
+        for (j = 0; j < 80; j++) {
+            if (dets[i].prob[j] > 0.5) {
+                printf("Original box dims are x y w h: %f %f %f %f\n",
+                    b.x, b.y, b.w, b.h);
+            }
+        }
+
         b.x =  (b.x - (netw - new_w)/2./netw) / ((float)new_w/netw); 
         b.y =  (b.y - (neth - new_h)/2./neth) / ((float)new_h/neth); 
         b.w *= (float)netw/new_w;
@@ -358,6 +367,13 @@ void correct_region_boxes(detection *dets, int n, int w, int h, int netw, int ne
             b.h *= h;
         }
         dets[i].bbox = b;
+
+        for (j = 0; j < 80; j++) {
+            if (dets[i].prob[j] > 0.5) {
+                printf("Corrected box dims to x y w h: %f %f %f %f\n",
+                    b.x, b.y, b.w, b.h);
+            }
+        }
     }
 }
 
@@ -367,7 +383,11 @@ void get_region_detections(layer l, int w, int h, int netw, int neth, float thre
     printf("get_region_detections parameters:\n");
     printf("w: %d, h: %d, netw: %d, neth: %d, thresh: %f\n", w,h,netw,neth,thresh);
     printf("tree_thresh: %f, relative: %d\n", tree_thresh, relative);
-
+    printf("l. w h n: %d %d %d\n", l.w, l.h, l.n);
+    printf("l. outputs classes batch: %d %d %d\n", l.outputs, l.classes, l.batch); 
+    printf("l.biases: %f %f %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2],
+           l.biases[3], l.biases[4]);
+ 
     int i,j,n,z;
     float *predictions = l.output;
     if (l.batch == 2) {
@@ -433,6 +453,7 @@ void get_region_detections(layer l, int w, int h, int netw, int neth, float thre
                         int class_index = entry_index(l, 0, n*l.w*l.h + i, l.coords + 1 + j);
                         float prob = scale*predictions[class_index];
                         dets[index].prob[j] = (prob > thresh) ? prob : 0;
+                        if (prob > thresh) printf("Found something, prob %f\n", prob);
                     }
                 }
             }
