@@ -183,13 +183,11 @@ class	conv_layer : public kahn_process
     		network dummyNetwork;
 		dummyNetwork.input = input;
 
-    		if (layerIndex < 3) {	
-			printf("inputs of layer %d, are", layerIndex);
-     		for(int j = 0; j < 10; j++){
-        		printf(" %f", input[j]);
-      		}
-    			printf("\n");
-    		}	 
+		printf("inputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", input[j]);
+    }
+    printf("\n");
 	
 		cout << "getting workspace size" << endl; 
     		size_t workspace_size = get_convolutional_workspace_size(l);
@@ -198,13 +196,11 @@ class	conv_layer : public kahn_process
 		cout << "forward convoluting" << endl;
     		forward_convolutional_layer(l, dummyNetwork);
 	
-    		if (layerIndex < 3) {
-	    		printf("outputs of layer %d, are", layerIndex);
-      			for(int j = 0; j < 10; j++){
-        			printf(" %f", l.output[j]);
-      			}
-    			printf("\n");
-    		}
+	  printf("outputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n");
 	
    		cout << "freeing" << endl;
 		free(dummyNetwork.workspace);
@@ -252,12 +248,25 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
+		printf("inputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", data[j]);
+    }
+    printf("\n");
+
    	// Call forward_maxpool_layer() here, read from layer.output and write to out
    	// Create a dummy network object. The function only uses network.input
    	network dummyNetwork;
   	dummyNetwork.input = data;
    	forward_maxpool_layer(l, dummyNetwork);
-		out->write(data);	
+
+	  printf("outputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n");
+  
+  	out->write(l.output);	
 	}
 };
 
@@ -317,6 +326,23 @@ class	region_layer : public kahn_process
 	{
 		cout << "instantiating region layer" << endl;
 		l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
+    l.log        = 0;
+    l.sqrt       = 0;
+    l.softmax    = softMax;
+    l.background = 0;
+    l.max_boxes  = 30;
+    l.jitter     = jitter;
+    l.rescore    = rescore;
+    l.thresh     = thresh;
+    l.classfix   = 0;
+    l.absolute   = absolute;
+    l.random     = random;
+    l.coord_scale = coordScale;
+    l.object_scale = objScale;
+    l.noobject_scale = noObjectScale;
+    l.mask_scale = 1;
+    l.class_scale = classScale;;
+    l.bias_match = biasMatch;
 		alphabets = load_alphabet(); 
 	}
 
@@ -325,7 +351,6 @@ class	region_layer : public kahn_process
 		float* data;
 		string image_name; 
 		image im; 
-
 	
 		in->read(data);
 		im_name_in->read(image_name);
@@ -339,53 +364,39 @@ class	region_layer : public kahn_process
   	network dummyNetwork;
 	 	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
-		//should this be l.delta?
-		//out->write(l.output);
-		//l_out->write(l.classes); 		
-						
-		float thresh = 0.45;
-		float hier_thresh = 0.5;
-		float hier = hier_thresh; 
+
+	  printf("outputs of region layer, are");
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n");
+
+		// NOTE: this threshold value is NOT the same thing as l.thresh
+		// This comes from the -thresh flag specified when running darknet's
+		// detector example. The layer's threshold (l.thresh) comes from the 
+		// cfg file.
+    float det_thresh = 0.5;
 		int nboxes = 0; 
 			
-		// this is returning an invalid read error: 
-		// FIXME: Find the guts of get_network_boxes and draw_detections
-		//	detection *dets = get_network_boxes(&dummyNetwork, im.w, im.h, thresh, hier_thresh, 0,1, &nboxes);
  		cout << "attempting to detect" << endl;
 		
-    		list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
-		//	cout << "OPTIONS: " <<*options << endl;
-    		char *name_list = option_find_str(options, "names", "../../darknet/data/coco.names");
-    		char **names = get_labels(name_list);
-	//	char ** names = NULL; 
+    list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
+    char *name_list = option_find_str(options, "names", "../../darknet/data/coco.names");
+    char **names = get_labels(name_list);
 		int i;
-		for(i = 0; i < 10; i++){
-			printf("%d: %s\n",i,names[i]);
-		}	
 		int w = im.w;
 		int h = im.h; 	
-    			//layer l = net->layers[t->n - 1];
-    			//get_network_boxes -> make network boxes
+    //get_network_boxes -> make network boxes
 		int * map = nullptr; 
-		int relative = 0; 
+		int relative = 1; 
 
 		// get network boxes -> make network boxes -> num detections
 				
-		// l.type is region
-		cout << "the type of l is: " << l.type << endl; 
-		cout << "Region: " << REGION << " DETECTION: " << DETECTION <<endl; 
-		// FIXME: should be able to minimize this to just the l.type == REGION options
-    		//if(l.type == YOLO){
-		//	nboxes += yolo_num_detections(l, thresh);
-		//}
 
-		cout << "setting nboxes" << endl;
 		if(l.type == DETECTION || l.type == REGION){
 			nboxes += l.w*l.h*l.n;
 		}
-    		printf("Nboxes = %d\n", nboxes);
 
-		//if(num) *num = nboxes;
    		detection *dets = (detection *) calloc(nboxes, sizeof(detection));
    		for(i = 0; i < nboxes; ++i){
      			dets[i].prob = (float *) calloc(l.classes, sizeof(float));
@@ -394,47 +405,29 @@ class	region_layer : public kahn_process
       			}
   		}
 						
-		// finished make network boxes. should have dets
-		//if(l.type == YOLO){ // originally net->w and net->h replaced with im.w and im.h
-		//    int count = get_yolo_detections(l, w, h, im.w, im.h, thresh, map, relative, dets);
-		//    dets += count;
-		//}
-		//if(l.type == REGION){
 		cout << "get region detections " << endl;
-		get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, thresh, map, hier, relative, dets);
-		// Not sure if this should be commented or not
-     		//dets += l.w*l.h*l.n;
+		get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, det_thresh, map, 0.5, relative, dets);
+    //dets += l.w*l.h*l.n;
 		
-     		//}	
-		//if(l.type == DETECTION){
-		//      get_detection_detections(l, w, h, thresh, dets);
-		//	dets += l.w*l.h*l.n;
-		//}
-	
-  		// draw detections
+  	// draw detections
 	  cout << "draw detections" << endl;
     float nms = 0.45;
-  		if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
-		draw_detections(im, dets, nboxes, thresh, names, alphabets, l.classes);
+    if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
+		draw_detections(im, dets, nboxes, det_thresh, names, alphabets, l.classes);
 
 	 	cout << "free detections" << endl; 
 		free_detections(dets, nboxes); 
 				
 		cout << "attempting to write" << endl; 
 			
-			 
 		// dump to file
-		//outFN = "predicted_output_";
-		//outFN += i;
 		char outFN[100];
 		sprintf(outFN,"%s_testOut",image_name.c_str()); 
 		cout << "Saving image" << endl;
     save_image(im,outFN);
-		// TODO - create the output file.
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
-		//}
 	}
 
 };
@@ -574,7 +567,7 @@ class	kpn_neuralnet : public sc_module
                 conv10->in(*max9_to_conv10);
                 conv10->out(*conv10_to_max11);
 		
-		max11 = new max_layer("max11",11, 13, 13, 512, 2,2);
+		max11 = new max_layer("max11",11, 13, 13, 512, 2,1);
                 max11->in(*conv10_to_max11);
                 max11->out(*max11_to_conv12);
 

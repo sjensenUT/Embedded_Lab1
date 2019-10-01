@@ -363,6 +363,11 @@ void correct_region_boxes(detection *dets, int n, int w, int h, int netw, int ne
 
 void get_region_detections(layer l, int w, int h, int netw, int neth, float thresh, int *map, float tree_thresh, int relative, detection *dets)
 {
+   
+    printf("get_region_detections parameters:\n");
+    printf("w: %d, h: %d, netw: %d, neth: %d, thresh: %f\n", w,h,netw,neth,thresh);
+    printf("tree_thresh: %f, relative: %d\n", tree_thresh, relative);
+
     int i,j,n,z;
     float *predictions = l.output;
     if (l.batch == 2) {
