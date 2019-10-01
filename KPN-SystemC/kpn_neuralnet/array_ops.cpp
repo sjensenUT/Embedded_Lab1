@@ -26,26 +26,27 @@ int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int
 	return result;
 	
 }
-/*
-float* getSubArray(float arr[], int coords[], int width, int height, int numChannels){
-	int x1 = coords[0];
-        int y1 = coords[1];
-        int x2 = coords[2];
-        int y2 = coords[3];
-	
-	float *result = new float[(x2 - x1 + 1)*(y2 - y1 + 1)*numChannels];
-	int n = 0;
-	for(int i = y1; i <= y2; i++){
-		for(int j = x1; j <= x2; j++){
-			for(int k = 0; k < numChannels; k++){
-				result[n] = arr[(width*i + j)*numChannels + k];
-				n++;
-			}
-		}
-	}	
-	return result;
-}
 
+float* getSubArray(float arr[], const int coords[], int width, int height, int numChannels){
+    int x1 = coords[0];
+    int y1 = coords[1];
+    int x2 = coords[2];
+    int y2 = coords[3];
+
+    float *result = new float[(x2 - x1 + 1)*(y2 - y1 + 1)*numChannels];
+    int n = 0;
+    for(int i = 0; i < numChannels; i++){
+        for(int j = y1; j <= y2; j++){
+            for(int k = x1; k <= x2; k++){
+                result[n] = arr[i*width*height + j*width + k];
+                n++;
+            }
+        }
+    }
+    return result;
+}
+                
+/*
 float* horzCat(float arr1[], float arr2[], int width1, int width2, int height, int numChannels){
 	int totalWidth = width1 + width2;
 	float *result = new float[totalWidth*height*numChannels];

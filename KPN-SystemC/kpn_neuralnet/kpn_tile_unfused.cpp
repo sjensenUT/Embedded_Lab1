@@ -29,10 +29,53 @@ class   merge_layer : public kahn_process
     {
         float **data = new float*[9];
         for(int i = 0; i < 9; i++){
-            in[i].read(data[i]);   
+            in[i]->read(data[i]);   
         }
-        cout << "merging tiles "  << " @ iter " << iter << endl;
+        cout << "merging tiles @ iter " << iter << endl;
         float *output = mergeTiles(data, this->tileWidths, this->tileHeights, this->numChannels);
         out.write(output);
     }
 };
+
+class   scatter_layer : public kahn_process
+{
+    public:
+
+    const   int **coords;
+    const   int width;
+    const   int height;
+    const   int numChannels;
+
+    sc_fifo_in<float*> in;
+    sc_fifo_out<float*> *out;
+
+    scatter_layer(sc_module_name name, const int **_coords, int _width, int _height, int _numChannels)
+    :   kahn_process(name),
+        coords(_coords),
+        width(_width),
+        height(_height),
+        numChannels(_numChannels)
+    {
+        cout << "instantiated scatter layer " << endl;
+
+    }
+
+    void    process() override
+    {
+        float *data;
+        in->read(data);
+        cout << "scattering tiles @ iter " << iter << endl;
+        float **output = new float*[9];
+        for(int i = 0; i < 9; i++){
+            output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
+        }
+        for(int i = 0; i < 9; i++){
+            out[i].write(output[i]);
+        }
+         
+    }
+};
+
+
+
+
