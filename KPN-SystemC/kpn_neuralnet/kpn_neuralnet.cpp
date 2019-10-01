@@ -457,8 +457,8 @@ class	kpn_neuralnet : public sc_module
   // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-		//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		strs images = {"../../darknet/data/dog.jpg"};
+		strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		//strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
