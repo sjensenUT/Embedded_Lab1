@@ -26,7 +26,7 @@ int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int
 	return result;
 	
 }
-
+/*
 float* getSubArray(float arr[], int coords[], int width, int height, int numChannels){
 	int x1 = coords[0];
         int y1 = coords[1];
@@ -89,25 +89,25 @@ float* vertCat(float arr1[], float arr2[], int width, int height1, int height2, 
         }
         return result;
 }
-
-float* mergeTiles(float **tiles, int widths[], int heights[], int numChannels){
-        int totalWidth = widths[0] + widths[1] + widths[2];
+*/
+float* mergeTiles(float **tiles, const int widths[], const int heights[], int numChannels){
+    int totalWidth = widths[0] + widths[1] + widths[2];
 	int totalHeight = heights[1] + heights[2] + heights[3];
-        float *result = new float[totalWidth*totalHeight*numChannels];
-        int p = 0;
-	for(int i = 0; i < 3; i++){
-	        for(int j = 0; j < heights[i]; j++){
-       	        	for(int k = 0; k < 3; k++){
-                        	for(int m = 0; m < widths[k]; m++){
-					for(int n = 0; n < numChannels; n++){
-						result[p] = tiles[3*i + k][(j*widths[k]+ m)*numChannels + n];
-						p++;
+    float *result = new float[totalWidth*totalHeight*numChannels];
+    int p = 0;
+	for(int i = 0; i < numChannels; i++){
+	    for(int j = 0; j < 3; j++){
+       	     for(int k = 0; k < heights[j]; k++){
+                for(int m = 0; m < 3; m++){
+				    for(int n = 0; n < widths[m]; n++){
+					    result[p] = tiles[3*j + m][i*heights[j]*widths[m] + k*widths[m] + n];
+					    p++;
 					}
-                        	}
-                	}
-        	}
+                }
+             }
+        }
 	}
-        return result;
+    return result;
 }
 
 /*
