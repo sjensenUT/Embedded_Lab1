@@ -409,7 +409,6 @@ void resize_convolutional_layer(convolutional_layer *l, int w, int h)
     cudnn_convolutional_setup(l);
 #endif
 #endif
-    printf("Resizing convolutional workspace!\n");
     l->workspace_size = get_workspace_size(*l);
 }
 

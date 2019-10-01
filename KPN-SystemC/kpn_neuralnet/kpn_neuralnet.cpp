@@ -78,9 +78,6 @@ class	image_reader : public kahn_process
 			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
  			image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-		      	printf("orig.data[0] : %f\n", (orig.data)[0]);
-      			printf("sized.data[0] : %f\n", (sized.data)[0]);
-
 			// sized.data is now the float* that points to the float array that will
 			// be the output/input of each layer. The image writer will call free on 
 			// this float* to deallocate the data.
@@ -140,14 +137,6 @@ class	conv_layer : public kahn_process
           		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
           		0, 0, 0);  
  
- 		// Load the weights into the layer
-    		//FILE* weightsFile = fopen(_weightsFileName, "r");
-    		//if(weightsFile) {
-      		//	load_convolutional_weights(l, weightsFile);   
-    		//} else {
-      		//	cout << "Could not find weights file " << _weightsFileName << endl;
-    		//}
-
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
 		cout << "l.size = " << l.size << endl;
@@ -162,52 +151,48 @@ class	conv_layer : public kahn_process
 
 		load(layerIndex, "weights", l.weights, num);
 
-		printf("loaded parameters of layer %i\n", layerIndex);
-    		printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
-    		printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
+//		printf("loaded parameters of layer %i\n", layerIndex);
+//   	printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
+//    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
   	}
 
 	void	process() override
 	{
 		float* input;
 
-    		// Read the output from the previos layer
+    // Read the output from the previos layer
 		in->read(input);
  
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-    		// Create a dummy network object. forward_convolutional_layer only uses the "input"
-    		// and "workspace" elements of the network struct. "input" is simply the output of
-    		// the previous layer, while "workspace" points to an array of floats that we will
-    		// create just before calling. The size can be determined by layer.get_workspace_size().
-    		network dummyNetwork;
+   	// Create a dummy network object. forward_convolutional_layer only uses the "input"
+    // and "workspace" elements of the network struct. "input" is simply the output of
+    // the previous layer, while "workspace" points to an array of floats that we will
+    // create just before calling. The size can be determined by layer.get_workspace_size().
+    network dummyNetwork;
 		dummyNetwork.input = input;
 
-		printf("inputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", input[j]);
-    }
-    printf("\n");
+//		printf("inputs of layer %d, are", layerIndex);
+//    for(int j = 0; j < 10; j++){
+//        printf(" %f", input[j]);
+//    }
+//    printf("\n");
 	
-		cout << "getting workspace size" << endl; 
-    		size_t workspace_size = get_convolutional_workspace_size(l);
-		cout << "allocating workspace memory" << endl; 
-    		dummyNetwork.workspace = (float*) calloc(1, workspace_size);
-		cout << "forward convoluting" << endl;
-    		forward_convolutional_layer(l, dummyNetwork);
+    size_t workspace_size = get_convolutional_workspace_size(l);
+    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    forward_convolutional_layer(l, dummyNetwork);
 	
-	  printf("outputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", l.output[j]);
-    }
-    printf("\n");
+//	  printf("outputs of layer %d, are", layerIndex);
+//    for(int j = 0; j < 10; j++){
+//        printf(" %f", l.output[j]);
+//    }
+//    printf("\n");
 	
-   		cout << "freeing" << endl;
 		free(dummyNetwork.workspace);
-    		// Send off the layer's output to the next layer!
+    // Send off the layer's output to the next layer!
 		out->write(l.output);
 
-    		// Now we're done with the workspace - deallocate it or else memory leaks.
+    // Now we're done with the workspace - deallocate it or else memory leaks.
 		//free(dummyNetwork.input);
 		//free(input); 
 
@@ -248,11 +233,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-		printf("inputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", data[j]);
-    }
-    printf("\n");
+//    printf("inputs of layer %d, are", layerIndex);
+//    for(int j = 0; j < 10; j++){
+//        printf(" %f", data[j]);
+//    }
+//    printf("\n");
 
    	// Call forward_maxpool_layer() here, read from layer.output and write to out
    	// Create a dummy network object. The function only uses network.input
@@ -260,11 +245,11 @@ class	max_layer : public kahn_process
   	dummyNetwork.input = data;
    	forward_maxpool_layer(l, dummyNetwork);
 
-	  printf("outputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", l.output[j]);
-    }
-    printf("\n");
+//	  printf("outputs of layer %d, are", layerIndex);
+//    for(int j = 0; j < 10; j++){
+//        printf(" %f", l.output[j]);
+//    }
+//    printf("\n");
   
   	out->write(l.output);	
 	}
@@ -369,11 +354,11 @@ class	region_layer : public kahn_process
 	 	dummyNetwork.input = data;
 		forward_region_layer(l, dummyNetwork);
 
-	  printf("outputs of region layer, are");
-    for(int j = 0; j < 10; j++){
-        printf(" %f", l.output[j]);
-    }
-    printf("\n");
+//	  printf("outputs of region layer, are");
+//    for(int j = 0; j < 10; j++){
+//        printf(" %f", l.output[j]);
+//    }
+//    printf("\n");
 
 		// NOTE: this threshold value is NOT the same thing as l.thresh
 		// This comes from the -thresh flag specified when running darknet's
@@ -381,8 +366,6 @@ class	region_layer : public kahn_process
 		// cfg file.
     float det_thresh = 0.5;
 		int nboxes = 0; 
-			
- 		cout << "attempting to detect" << endl;
 		
     list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
     char *name_list = option_find_str(options, "names", "../../darknet/data/coco.names");
@@ -409,25 +392,18 @@ class	region_layer : public kahn_process
       			}
   		}
 						
-		cout << "get region detections " << endl;
 		get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, det_thresh, map, 0.5, relative, dets);
-    //dets += l.w*l.h*l.n;
 		
   	// draw detections
-	  cout << "draw detections" << endl;
     float nms = 0.45;
     if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
 		draw_detections(im, dets, nboxes, det_thresh, names, alphabets, l.classes);
 
-	 	cout << "free detections" << endl; 
 		free_detections(dets, nboxes); 
 				
-		cout << "attempting to write" << endl; 
-			
 		// dump to file
 		char outFN[100];
 		sprintf(outFN,"%s_testOut",image_name.c_str()); 
-		cout << "Saving image" << endl;
     save_image(im,outFN);
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;

@@ -82,7 +82,6 @@ void do_nms_sort(detection *dets, int total, int classes, float thresh)
                 box b = dets[j].bbox;
                 if (box_iou(a, b) > thresh){
                     dets[j].prob[k] = 0;
-                    printf("Found duplicate\n");
                 }
             }
         }
