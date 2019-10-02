@@ -21,6 +21,8 @@
 #include "../../darknet/src/activations.h"
 #include "../../darknet/src/image.h"
 #include "kpn_neuralnet.h" 
+#include "image_data.h"
+
 using	std::cout;
 using	std::endl;
 using std::string;
@@ -31,6 +33,8 @@ typedef std::vector<std::string> strs;
 const int IMAGE_WIDTH  = 416;
 const int IMAGE_HEIGHT = 416;
 const int BATCH        = 1;
+
+const int BIGGEST_FIFO_SIZE = 416 * 416 * 16;
 
 // Constant float array to hold the anchors for the region layer
 // whatever that means
@@ -73,7 +77,7 @@ void image_reader::process()
 {
 	for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "reading image " << images[i] << " @ iter " << iter++ << endl;
+		cout << "reading image " << images[i] << " @ iter " << iter << endl;
 
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
@@ -82,8 +86,8 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-		out->write(sized.data);
-		im_out->write(orig.data);
+    writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
+		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
 		char name[10];
@@ -122,8 +126,8 @@ int* getCropCoords (int* inputCoords, int* outputCoords) {
     int cropped_height = outputCoords[3] - outputCoords[1] + 1;
     int left_crop   = outputCoords[0] - inputCoords[0];
     int top_crop    = outputCoords[1] - inputCoords[1];
-    int right_crop  = inputCoords[2]  - outputCoords[2];
-    int bottom_crop = inputCoords[3]  - outputCoords[3];
+    //int right_crop  = inputCoords[2]  - outputCoords[2];
+    //int bottom_crop = inputCoords[3]  - outputCoords[3];
     croppedCoords[0] = left_crop;
     croppedCoords[1] = top_crop;
     croppedCoords[2] = left_crop + cropped_width - 1;
@@ -181,7 +185,6 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
             inputCoords[j] = _inputCoords[j];
             outputCoords[j] = _outputCoords[j];
         }
-        printCoords();
     }
 
 }
@@ -191,8 +194,7 @@ void conv_layer::process()
     float* input;
 
     // Read the output from the previos layer
-    in->read(input);
-
+    input = readImageData(&in, l.w, l.h, l.c);
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
@@ -221,6 +223,9 @@ void conv_layer::process()
     free(dummyNetwork.workspace);
 
     float* outputImage = l.output;
+    int outputWidth    = l.out_w;
+    int outputHeight   = l.out_h;
+    int outputChans    = this->numFilters;
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
@@ -231,11 +236,16 @@ void conv_layer::process()
         //printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
         //        inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
         //        outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
+        outputImage  = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
+        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
+        outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
+
     // Send off the layer's output to the next layer!
-    out->write(outputImage);
+    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
+
 }
+
 
 max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
     int _stride, bool _crop, int* _inputCoords, int* _outputCoords)
@@ -251,7 +261,6 @@ max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _
     l = make_maxpool_layer(BATCH, _h, _w, _c, this->filterSize, 
                        this->stride, filterSize-1);
 
-    // Copy the input and output coordinates.
     if (crop) {
         inputCoords = new int[4];
         outputCoords = new int[4];
@@ -260,14 +269,15 @@ max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _
             outputCoords[j] = _outputCoords[j];
         }
     }
-
 }
+
 
 void max_layer::process()
 {
-    float* data;
 
-    in->read(data);
+    float* data;
+    data = readImageData(&in, l.w, l.h, l.c);
+
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
     //printf("inputs of layer %d, are", layerIndex);
@@ -283,6 +293,9 @@ void max_layer::process()
     forward_maxpool_layer(l, dummyNetwork);
 
     float* outputImage = l.output;
+    int outputWidth  = l.out_w;
+    int outputHeight = l.out_h;
+    int outputChans  = l.c;
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
@@ -294,19 +307,23 @@ void max_layer::process()
 
         // Calculate the relative coordinates for cropping
         int* cropCoords = getCropCoords(preCropCoords, outputCoords);
-        printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
-            preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
-            outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-        outputImage = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+        //printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+        //    preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
+        //    outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        outputImage  = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
+        outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
     // Send off the layer's output to the next layer!
-    out->write(outputImage);	
+    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
+
 }
+
 
 region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h) 
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c) 
 :	kahn_process(name),
     anchors(_anchors),
     biasMatch(_biasMatch),
@@ -322,7 +339,8 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
     coordScale(_coordScale),
     absolute(_absolute),
     thresh(_thresh),
-    random(_random)
+    random(_random),
+    chans(_c)
 {
     cout << "instantiating region layer" << endl;
     l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
@@ -350,22 +368,24 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
         alphabets = load_alphabet(); 
 }
 
+
 void region_layer::process()
 {
 	float* data;
 	string image_name; 
 	image im; 
 	
-	in->read(data);
+  data = readImageData(&in, l.w, l.h, this->chans);
+
 	im_name_in->read(image_name);
-	im_in->read(im.data);
 	im_w_in->read(im.w);
 	im_h_in->read(im.h); 
 	im.c = 3;
+  im.data = readImageData(&im_in, im.w, im.h, im.c);
 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
-  	network dummyNetwork;
+  network dummyNetwork;
 	dummyNetwork.input = data;
 	forward_region_layer(l, dummyNetwork);
 
@@ -379,7 +399,7 @@ void region_layer::process()
 	// This comes from the -thresh flag specified when running darknet's
 	// detector example. The layer's threshold (l.thresh) comes from the 
 	// cfg file.
-    float det_thresh = 0.5;
+  float det_thresh = 0.5;
 	int nboxes = 0; 
 		
     list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
@@ -418,9 +438,12 @@ void region_layer::process()
 	// dump to file
 	char outFN[100];
 	sprintf(outFN,"%s_testOut",image_name.c_str()); 
-    save_image(im,outFN);
+  save_image(im,outFN);
+
 	free_image(im); 
-	cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
+  free(data);
+
+	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
 	//free(alphabets);  Now part of the constructor and I don't free it here? 
 }
 
@@ -429,17 +452,18 @@ int coerce (int val, int min, int max) {
   if (val > max) return max;
   return val;
 }
+
 conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
                    int inputWidth, int inputHeight, int c, int filterSize, int stride, int numFilters, int pad,
                    ACTIVATION activation, bool batchNormalize) : sc_module(name)
 {
     cout << "instantiating fused conv layer" << endl;
     cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
-    for(int i = 0; i < 9; i++){
-        for(int j = 0; j < 4; j++){
-            cout << "coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
-        }
-    } 
+//    for(int i = 0; i < 9; i++){
+//        for(int j = 0; j < 4; j++){
+//            cout << "coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
+//        }
+//    } 
     int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
                                 coords[1][2] - coords[1][0] + 1,
                                 coords[2][2] - coords[2][0] + 1 };
@@ -452,13 +476,15 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
         int paddedCoords[9][4];
         calcPrevCoords(coords, paddedCoords, stride, filterSize, inputWidth, inputHeight, "convolutional");
         for (int j = 0; j < 9; j++) {
-            printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
-                paddedCoords[j][0], paddedCoords[j][1],
-                paddedCoords[j][2], paddedCoords[j][3]);
+            //printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
+            //    paddedCoords[j][0], paddedCoords[j][1],
+            //    paddedCoords[j][2], paddedCoords[j][3]);
             //cout << "in conv_layer instantiation loop i = " << i << endl;
             int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
             int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
-            conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+            string name = "conv";
+            name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
+            conv[j] = new conv_layer(name.c_str(), layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
                 true, paddedCoords[j], coords[j]);
         }
         scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
@@ -476,8 +502,8 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
     }
     merge = new merge_layer("merge", widths, heights, numFilters);
     for(int i = 0; i < 9; i++){
-        scatter_to_conv[i] = new sc_fifo<float*>(1);
-        conv_to_merge[i] = new sc_fifo<float*>(1);
+        scatter_to_conv[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv_to_merge[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
         conv[i]->in(*scatter_to_conv[i]);
         conv[i]->out(*conv_to_merge[i]);
         scatter->out[i](*scatter_to_conv[i]);
@@ -492,11 +518,12 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
 {
     cout << "instantiating fused max layer" << endl;
     cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
-    for(int i = 0; i < 9; i++){
-        for(int j = 0; j < 4; j++){
-            cout << "(max) coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
-        }
-    } 
+    //for(int i = 0; i < 9; i++){
+    //    for(int j = 0; j < 4; j++){
+    //        cout << "(max) coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
+    //    }
+    //} 
+ 
     int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
                                 coords[1][2] - coords[1][0] + 1,
                                 coords[2][2] - coords[2][0] + 1 };
@@ -512,7 +539,6 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
             printf("Tile %d padded coordinates (max): (%d, %d) (%d, %d)\n", j,
                 paddedCoords[j][0], paddedCoords[j][1],
                 paddedCoords[j][2], paddedCoords[j][3]);
-            //cout << "in conv_layer instantiation loop i = " << i << endl;
             int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
             int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
 
@@ -522,22 +548,21 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
                                     true, paddedCoords[j], coords[j]);
         }
         scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
-
-    }else{
+    } else {
         for(int j = 0; j < 9; j++){
-            //cout << "in conv_layer instantiation loop i = " << i << endl;
             int w = coords[j][2] - coords[j][0] + 1;
             int h = coords[j][3] - coords[j][1] + 1;
             maxl[j] = new max_layer("max", layerIndex, w, h, c, size, stride,
                                 false, NULL, NULL);
         }
         scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
-
     }
+
     merge = new merge_layer("merge", widths, heights, c);
+
     for(int i = 0; i < 9; i++){
-        scatter_to_max[i] = new sc_fifo<float*>(1);
-        max_to_merge[i] = new sc_fifo<float*>(1);
+        scatter_to_max[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max_to_merge[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
         maxl[i]->in(*scatter_to_max[i]);
         maxl[i]->out(*max_to_merge[i]);
         scatter->out[i](*scatter_to_max[i]);
@@ -553,7 +578,7 @@ class	kpn_neuralnet : public sc_module
 	
   // Declare all queues between our layers here
   // I think the data type for all of them will be image
-	sc_fifo<float*>	*reader_to_conv0, 
+	sc_fifo<float>	*reader_to_conv0, 
 			*conv0_to_max1, 
 			*max1_to_conv2,
 			*conv2_to_max3,
@@ -571,7 +596,7 @@ class	kpn_neuralnet : public sc_module
 			*conv14_to_region;
 //			*region_to_writer;
 
-	sc_fifo<float*>  *reader_to_writer; 
+	sc_fifo<float>  *reader_to_writer; 
 //	sc_fifo<int>    *layer_region_to_writer; 
 	sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
 	sc_fifo<string>  *char_reader_to_writer; 
@@ -579,11 +604,10 @@ class	kpn_neuralnet : public sc_module
 			//*detection_to_writer;
 
   // Declare all layers here
-	max_layer	*max3, *max5, *max7, *max9, *max11;
-	conv_layer	*conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
-	conv_layer_unfused *conv0;
-    max_layer_unfused *max1;
-    region_layer	*region;
+	conv_layer_unfused *conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12,
+                     *conv13, *conv14;
+  max_layer_unfused *max1, *max3, *max5, *max7, *max9, *max11;
+  region_layer	*region;
 	image_reader	*reader0;
 //	image_writer	*writer0;
 
@@ -599,36 +623,31 @@ class	kpn_neuralnet : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 	= new sc_fifo<float*>(1);
-		conv0_to_max1   	= new sc_fifo<float*>(1);
-		max1_to_conv2   	= new sc_fifo<float*>(1);
-		conv2_to_max3   	= new sc_fifo<float*>(1);
-        max3_to_conv4   	= new sc_fifo<float*>(1);
-		conv4_to_max5   	= new sc_fifo<float*>(1);
-        max5_to_conv6   	= new sc_fifo<float*>(1);
-		conv6_to_max7   	= new sc_fifo<float*>(1);
-        max7_to_conv8   	= new sc_fifo<float*>(1);
-		conv8_to_max9   	= new sc_fifo<float*>(1);
-        max9_to_conv10   	= new sc_fifo<float*>(1);
-		conv10_to_max11   	= new sc_fifo<float*>(1);
-        max11_to_conv12   	= new sc_fifo<float*>(1);
-		conv12_to_conv13   	= new sc_fifo<float*>(1);
-        conv13_to_conv14   	= new sc_fifo<float*>(1);
-		conv14_to_region   	= new sc_fifo<float*>(1);
-//		region_to_writer 	= new sc_fifo<float*>(1);
+		reader_to_conv0 	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv0_to_max1   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		max1_to_conv2   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv2_to_max3   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max3_to_conv4   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv4_to_max5   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max5_to_conv6   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv6_to_max7   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max7_to_conv8   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv8_to_max9   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max9_to_conv10   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv10_to_max11   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max11_to_conv12   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv12_to_conv13   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv13_to_conv14   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv14_to_region   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 
-		reader_to_writer 	= new sc_fifo<float*>(1); 
+		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
 		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
 		int2_reader_to_writer 	= new sc_fifo<int>(1); 
 		char_reader_to_writer  	= new sc_fifo<string>(1);
-//		layer_region_to_writer 	= new sc_fifo<int>(1)
-//		reader_to_writer 	= new sc_fifo<float*>(1); 
-//		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
-//		layer_region_to_writer 	= new sc_fifo<int>(1);
 		
-        // Here is where we will indicate the parameters for each layer. These can
-        // be found in the cfg file for yolov2-tiny in the darknet folder.
-	    reader0 = new image_reader("image_reader",images);
+    // Here is where we will indicate the parameters for each layer. These can
+    // be found in the cfg file for yolov2-tiny in the darknet folder.
+	  reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->im_w_out(*int_reader_to_writer); 
@@ -636,89 +655,84 @@ class	kpn_neuralnet : public sc_module
 		reader0->im_name_out(*char_reader_to_writer);
 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-        int tileCoords[9][4];
-        getTileCoords(416, 416, tileCoords);
-        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
-        conv0->scatter->in(*reader_to_conv0);
-        conv0->merge->out(*conv0_to_max1);
-        //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
-		//conv0->in(*reader_to_conv0);
-		//conv0->out(*conv0_to_max1);
+    int tileCoords[9][4];
+    getTileCoords(416, 416, tileCoords);
+    conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
+    conv0->scatter->in(*reader_to_conv0);
+    conv0->merge->out(*conv0_to_max1);
 
-//      max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
-//                       int inputWidth, int inputHeight, int c, int size, int stride,
-//                       int pad ) 
+    getTileCoords(208, 208, tileCoords); // These are the output coordinates
+    max1 = new max_layer_unfused("max1", 1, tileCoords, 416, 416, 16, 2, 2, true); 
+    max1->scatter->in(*conv0_to_max1);
+    max1->merge->out(*max1_to_conv2);
 
-        getTileCoords(208, 208, tileCoords); // These are the output coordinates
-        max1 = new max_layer_unfused("max1", 1, tileCoords, 416, 416, 16, 2, 2, true); 
-        max1->scatter->in(*conv0_to_max1);
-        max1->merge->out(*max1_to_conv2);
+    conv2 = new conv_layer_unfused("conv2", 2, tileCoords, 208, 208, 16, 3, 1, 32,
+                1, LEAKY, true);
+    conv2->scatter->in(*max1_to_conv2);
+    conv2->merge->out(*conv2_to_max3);
 
-//		max1 = new max_layer("max1",1, 416, 416, 16, 2,2);
-//		max1->in(*conv0_to_max1);
-//		max1->out(*max1_to_conv2);
+	  getTileCoords(104, 104, tileCoords); // These are the output coordinates
+    max3 = new max_layer_unfused("max3", 3, tileCoords, 208, 208, 32, 2, 2, true); 
+    max3->scatter->in(*conv2_to_max3);
+    max3->merge->out(*max3_to_conv4);
 
-		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, false, NULL, NULL);
-		conv2->in(*max1_to_conv2);
-		conv2->out(*conv2_to_max3);
-
+	  conv4 = new conv_layer_unfused("conv4", 4, tileCoords, 104, 104, 32, 3, 1, 64,
+                1, LEAKY, true);
+    conv4->scatter->in(*max3_to_conv4);
+    conv4->merge->out(*conv4_to_max5);
 		
-		max3 = new max_layer("max3",3, 208, 208, 32, 2,2, false, NULL, NULL);
-        max3->in(*conv2_to_max3);
-        max3->out(*max3_to_conv4);
+    getTileCoords(52, 52, tileCoords);
+		max5 = new max_layer_unfused("max5",5, tileCoords, 104, 104, 64, 2, 2, true);
+    max5->scatter->in(*conv4_to_max5);
+    max5->merge->out(*max5_to_conv6);
 		
-        conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
-        conv4->in(*max3_to_conv4);
-        conv4->out(*conv4_to_max5);
+    conv6 = new conv_layer_unfused("conv6",6,tileCoords, 52, 52, 64,3,1,128,
+                1, LEAKY, true);
+    conv6->scatter->in(*max5_to_conv6);
+    conv6->merge->out(*conv6_to_max7);
 
-		
-		max5 = new max_layer("max5",5, 104, 104, 64, 2, 2, false, NULL, NULL);
-        max5->in(*conv4_to_max5);
-        max5->out(*max5_to_conv6);
-		
-		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL);
-        conv6->in(*max5_to_conv6);
-        conv6->out(*conv6_to_max7);
+	  getTileCoords(26, 26, tileCoords);
+		max7 = new max_layer_unfused("max7",7, tileCoords, 52, 52, 128, 2, 2, true);
+    max7->scatter->in(*conv6_to_max7);
+    max7->merge->out(*max7_to_conv8);	
 
-	
-		max7 = new max_layer("max7",7, 52, 52, 128, 2,2, false, NULL, NULL);
-        max7->in(*conv6_to_max7);
-        max7->out(*max7_to_conv8);
-		
+		conv8 = new conv_layer_unfused("conv8",8,tileCoords, 26, 26, 128, 3,1,256,
+               1, LEAKY ,true);
+    conv8->scatter->in(*max7_to_conv8);
+    conv8->merge->out(*conv8_to_max9);
 
-		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL);
-        conv8->in(*max7_to_conv8);
-        conv8->out(*conv8_to_max9);
-
+	  getTileCoords(13, 13, tileCoords);	
+		max9 = new max_layer_unfused("max9",9, tileCoords, 26, 26, 256, 2,2, true);
+    max9->scatter->in(*conv8_to_max9);
+    max9->merge->out(*max9_to_conv10);
 		
-		max9 = new max_layer("max9",9, 26, 26, 256, 2,2, false, NULL, NULL);
-        max9->in(*conv8_to_max9);
-        max9->out(*max9_to_conv10);
-		
-		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL);
-        conv10->in(*max9_to_conv10);
-        conv10->out(*conv10_to_max11);
+		conv10 = new conv_layer_unfused("conv10",10, tileCoords, 13, 13, 256, 3,1,512,
+                1, LEAKY, true);
+    conv10->scatter->in(*max9_to_conv10);
+    conv10->merge->out(*conv10_to_max11);
 	
     // !!! NOTE !!! this is the only max layer with stride=1
-		max11 = new max_layer("max11",11, 13, 13, 512, 2,1, false, NULL, NULL);
-        max11->in(*conv10_to_max11);
-        max11->out(*max11_to_conv12);
+		max11 = new max_layer_unfused("max11",11, tileCoords, 13, 13, 512, 2, 1, true);
+    max11->scatter->in(*conv10_to_max11);
+    max11->merge->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, false, NULL, NULL);
-        conv12->in(*max11_to_conv12);
-        conv12->out(*conv12_to_conv13);
+		conv12 = new conv_layer_unfused("conv12",12, tileCoords, 13, 13, 512, 3,1,1024,
+                1, LEAKY, true);
+    conv12->scatter->in(*max11_to_conv12);
+    conv12->merge->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true, false, NULL, NULL);
-        conv13->in(*conv12_to_conv13);
-        conv13->out(*conv13_to_conv14);
+		conv13 = new conv_layer_unfused("conv13",13,tileCoords, 13, 13, 1024, 3,1,512,
+                1, LEAKY, true);
+    conv13->scatter->in(*conv12_to_conv13);
+    conv13->merge->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, false, NULL, NULL);
-        conv14->in(*conv13_to_conv14);
-        conv14->out(*conv14_to_region);
-
+		conv14 = new conv_layer_unfused("conv14",14,tileCoords, 13, 13, 512, 1,1, 425,
+                 1, LINEAR, false);
+    conv14->scatter->in(*conv13_to_conv14);
+    conv14->merge->out(*conv14_to_region);
 
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                               true, 1, 1, true, 0.6, true, 13, 13);
+                               true, 1, 1, true, 0.6, true, 13, 13, 425);
 		region->in(*conv14_to_region);
 		region->im_in(*reader_to_writer);
 		region->im_w_in(*int_reader_to_writer); 

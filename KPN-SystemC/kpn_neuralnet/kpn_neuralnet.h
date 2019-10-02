@@ -7,8 +7,8 @@ class   image_reader : public kahn_process
 
     std::vector<std::string> images;
 
-    sc_fifo_out<float*> out;
-    sc_fifo_out<float*> im_out;
+    sc_fifo_out<float> out;
+    sc_fifo_out<float> im_out;
     sc_fifo_out<int> im_w_out;
     sc_fifo_out<int> im_h_out;
     sc_fifo_out<std::string> im_name_out;
@@ -34,8 +34,8 @@ class   conv_layer : public kahn_process
     int* outputCoords;
 
 
-    sc_fifo_in<float*> in;
-    sc_fifo_out<float*> out;
+    sc_fifo_in<float> in;
+    sc_fifo_out<float> out;
 
     convolutional_layer l;
     
@@ -55,8 +55,8 @@ class   max_layer : public kahn_process
     const   int layerIndex;
     const   int filterSize;
 
-    sc_fifo_in<float*> in;
-    sc_fifo_out<float*> out;
+    sc_fifo_in<float> in;
+    sc_fifo_out<float> out;
 
     layer l;
     const bool crop;
@@ -88,10 +88,11 @@ class   region_layer : public kahn_process
     const bool absolute;
     const float thresh;
     const bool random;
+    const int chans;
 
-    sc_fifo_in<float*> in;
+    sc_fifo_in<float> in;
 
-    sc_fifo_in<float*> im_in;
+    sc_fifo_in<float> im_in;
     sc_fifo_in<int> im_w_in; // for width and height of image
     sc_fifo_in<int> im_h_in;
     sc_fifo_in<std::string> im_name_in;
@@ -102,7 +103,7 @@ class   region_layer : public kahn_process
     region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore,
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h);
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c);
     void    process() override;
 };
 
@@ -110,7 +111,7 @@ class   region_layer : public kahn_process
 class   conv_layer_unfused : public sc_module
 {
     public:
-    sc_fifo<float*> *scatter_to_conv[9],
+    sc_fifo<float> *scatter_to_conv[9],
         *conv_to_merge[9];
 
     scatter_layer *scatter;
@@ -124,7 +125,7 @@ class   conv_layer_unfused : public sc_module
 class max_layer_unfused : public sc_module
 {
     public:
-    sc_fifo<float*> *scatter_to_max[9],
+    sc_fifo<float> *scatter_to_max[9],
         *max_to_merge[9];
 
     scatter_layer *scatter;
