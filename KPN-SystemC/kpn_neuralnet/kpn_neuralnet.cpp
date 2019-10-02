@@ -241,16 +241,22 @@ class	conv_layer : public kahn_process
             //int top_crop    = outputCoords[1] - inputCoords[1];
             //int right_crop  = inputCoords[2]  - outputCoords[2];
             //int bottom_crop = inputCoords[3]  - outputCoords[3];
-            //int cropCoords[4] = { left_crop, top_crop,
+            //int cropCoords2[4] = { left_crop, top_crop,
             //                 left_crop + cropped_width,
             //                  left_crop + cropped_height };
-
+            
             int cropX1 = outputCoords[0] - inputCoords[0];
             int cropY1 = outputCoords[1] - inputCoords[1];
             int cropX2 = outputCoords[2] - inputCoords[0];
             int cropY2 = outputCoords[3] - inputCoords[1];
             int cropCoords[4] = {cropX1, cropY1, cropX2, cropY2};
             
+            printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
+                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
+
+            //printf("Relative crop coordinates 2 are (%d, %d) (%d, %d)\n",
+            //    cropCoords2[0], cropCoords2[1], cropCoords2[2], cropCoords2[3]);
+                         
             printf("Cropping tile %d\n", layerIndex);
             printf("l.c = %d\n", l.c);
             printf("l.w = %d\n", l.w);
@@ -260,8 +266,6 @@ class	conv_layer : public kahn_process
             printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
                 inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
                 outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-            printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
-                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
             outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
         }
 
