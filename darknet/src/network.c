@@ -185,6 +185,11 @@ network *make_network(int n)
     return net;
 }
 
+float get_pixel(image m, int x, int y, int c)
+{
+  return m.data[c*m.h*m.w + y*m.w + x];
+}
+
 void forward_network(network *netp)
 {
 #ifdef GPU
@@ -198,22 +203,49 @@ void forward_network(network *netp)
     for(i = 0; i < net.n; ++i){
         net.index = i;
         layer l = net.layers[i];
+
 //	int j;
 //      	printf("inputs of layer %d, are", i);
 //	    	for(j = 0; j < 10; j++){
 //		    	printf(" %f", net.input[j]);
 //	    	}
 //	      printf("\n");
+
         if(l.delta){
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
         }
         l.forward(l, net);
         net.input = l.output;
+
 //	printf("outputs of layer %d, are", i);
 //        for(j = 0; j < 10; j++){
 //                printf(" %f", l.output[j]);
 //        }
 //	printf("\n");
+
+/*
+        image outputImage;
+        outputImage.w = l.w;
+        outputImage.h = l.h;
+        outputImage.c = 16; // hard code for layer 0 output
+        outputImage.data = l.output;
+
+        int x, y, c;
+        if (i == 0) {
+          for (c = 0; c < outputImage.c; c++) {
+            printf("Channel %d:\n", c);
+            for (y = 0; y < outputImage.h; y++) {
+              for (x = 0; x < outputImage.w; x++) {
+                printf("%f ", get_pixel(outputImage, x, y, c));
+              }
+              printf("\n");
+            }
+            printf("\n");
+          }
+          printf("\n");
+        }
+*/
+
         if(l.truth) {
             net.truth = l.output;
         }

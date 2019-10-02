@@ -2,29 +2,29 @@
 #include <stdio.h>
 using namespace std;
 
-int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int prevHeight, std::string prevLayerType){
-        int x1 = coords[0];
-	int y1 = coords[1];
-	int x2 = coords[2];
-	int y2 = coords[3];
-	int *result = new int[4];
-	cout << "hello1" << endl;
-	if(prevLayerType.compare("convolutional") == 0){
-		result[0] = max(0, stride*x1 - filterSize/2);
-		result[1] = max(0, stride*y1 - filterSize/2);
-		result[2] = min(stride*x2 + filterSize/2, prevWidth - 1);
-		result[3] = min(stride*y2 + filterSize/2, prevHeight - 1);
-	}else{
-		result[0] = stride*x1;
-                result[1] = stride*y1;
-                result[2] = min(stride*x2 + stride - 1, prevWidth - 1);
-                result[3] = min(stride*y2 + stride - 1, prevHeight - 1);
-		//cout << "hello2" << endl;
-	}	
-	cout << "hello3" << endl;
-	//cout << result[0] << ", " << result[1] << ", " << result[2] << ", " << result[3] << endl;
-	return result;
-	
+void calcPrevCoords(int coords[9][4], int prevCoords[9][4], int stride, int filterSize, int prevWidth, int prevHeight, std::string layerType){
+//    cout << "stride = " << stride << ", filterSize = " << filterSize << ", prevWidth = " << prevWidth << ", prevHeight = " << prevHeight << endl;
+    for(int i = 0; i < 9; i++){
+       // cout << "i = " << i << endl;
+      int x1 = coords[i][0];
+	    int y1 = coords[i][1];
+	    int x2 = coords[i][2];
+	    int y2 = coords[i][3];
+      //cout << "x1 = " << x1 << ", y1 = " << y1 << ", x2 = " << x2 << ", y2 = " << y2 << endl;
+	    if(layerType.compare("convolutional") == 0){
+		    prevCoords[i][0] = max(0, stride*x1 - filterSize/2);
+		    prevCoords[i][1] = max(0, stride*y1 - filterSize/2);
+		    prevCoords[i][2] = min(stride*x2 + filterSize/2, prevWidth - 1);
+		    prevCoords[i][3] = min(stride*y2 + filterSize/2, prevHeight - 1);
+        //cout << "prevX1 = " << prevCoords[i][0] << ", prevY1 = " << prevCoords[i][1] << ", prevX2 = " << prevCoords[i][2] << ", prevY2 = " << prevCoords[i][3] << endl;
+	    }else{
+		    prevCoords[i][0] = stride*x1;
+            prevCoords[i][1] = stride*y1;
+            prevCoords[i][2] = min(stride*x2 + stride - 1, prevWidth - 1);
+            prevCoords[i][3] = min(stride*y2 + stride - 1, prevHeight - 1);
+	    }	
+	    //cout << result[0] << ", " << result[1] << ", " << result[2] << ", " << result[3] << endl;
+	}
 }
 
 float* getSubArray(float arr[], const int coords[], int width, int height, int numChannels){
@@ -33,6 +33,9 @@ float* getSubArray(float arr[], const int coords[], int width, int height, int n
     int x2 = coords[2];
     int y2 = coords[3];
 
+//    cout << "getSubArray:" << endl;
+//    printf("Coords (%d, %d) to (%d, %d), w = %d, h = %d\n",
+//        x1, y1, x2, y2, width, height);
     float *result = new float[(x2 - x1 + 1)*(y2 - y1 + 1)*numChannels];
     int n = 0;
     for(int i = 0; i < numChannels; i++){
@@ -92,22 +95,30 @@ float* vertCat(float arr1[], float arr2[], int width, int height1, int height2, 
 }
 */
 float* mergeTiles(float **tiles, const int widths[], const int heights[], int numChannels){
+    //cout << "in mergeTiles" << endl;
+    //cout << "tiles[0][0] = " << tiles[0][0] << endl;
+    //cout << "calculating total width and height" << endl;
     int totalWidth = widths[0] + widths[1] + widths[2];
-	int totalHeight = heights[1] + heights[2] + heights[3];
+    int totalHeight = heights[0] + heights[1] + heights[2];
+//    cout << "totalWidth = " << totalWidth << endl;
+//    cout << "totalHeight = " << totalHeight << endl;
     float *result = new float[totalWidth*totalHeight*numChannels];
     int p = 0;
-	for(int i = 0; i < numChannels; i++){
-	    for(int j = 0; j < 3; j++){
-       	     for(int k = 0; k < heights[j]; k++){
-                for(int m = 0; m < 3; m++){
-				    for(int n = 0; n < widths[m]; n++){
+    //cout << "beginning tile merge" << endl;
+    for(int i = 0; i < numChannels; i++){ // CHANNELS
+	    for(int j = 0; j < 3; j++){ // TILE ROW
+       	for(int k = 0; k < heights[j]; k++){ // Y COORDINATE
+          for(int m = 0; m < 3; m++){ // TILE COL
+				    for(int n = 0; n < widths[m]; n++){ // X COORDINATE
 					    result[p] = tiles[3*j + m][i*heights[j]*widths[m] + k*widths[m] + n];
 					    p++;
-					}
-                }
-             }
+            }
+          }
         }
-	}
+      }
+    }
+
+    //cout << "tile merge complete" << endl;
     return result;
 }
 

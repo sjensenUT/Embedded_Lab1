@@ -39,13 +39,13 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
 
 
 void getTileCoords(int width, int height, int coords[9][4]){
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
+    for(int i = 0; i < 3; i++){ // TILE ROW
+        for(int j = 0; j < 3; j++){ // TILE COL
             //coords[i*3 + j] = new int[4] {j*width/3, i*height/3, (j+1)*width/3 - 1, (i+1)*height/3 - 1};
             coords[i*3 + j][0] = j*width/3;
             coords[i*3 + j][1] = i*height/3;
-            coords[i*3 + j][2] = (j+1)*width/3 - 1;
-            coords[i*3 + j][3] = (i+1)*height/3 - 1;
+            coords[i*3 + j][2] = (j == 2) ? width-1  : (j+1)*width/3 - 1;
+            coords[i*3 + j][3] = (i == 2) ? height-1 : (i+1)*height/3 - 1;
         }
     }
 }
@@ -108,6 +108,21 @@ class	image_reader : public kahn_process
 
 }; 
 
+
+float get_pixel(image m, int x, int y, int c)
+{
+  return m.data[c*m.h*m.w + y*m.w + x];
+}
+
+void printChannels(image m, int x, int y)
+{
+  printf("(%d,%d): ", x, y);
+  for (int c = 0; c < m.c; c++) {
+    cout << get_pixel(m, x, y, c) << " ";
+  }
+  cout << endl;
+}
+
 class	conv_layer : public kahn_process
 {
 	public:
@@ -119,15 +134,29 @@ class	conv_layer : public kahn_process
 	const	int pad;
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
-	
-  	sc_fifo_in<float*> in;
+    const bool crop;
+	int* inputCoords;
+    int* outputCoords;
+
+
+    sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  	convolutional_layer l;
+    convolutional_layer l;
+
+
+    void printCoords() {
+        printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
+            this->inputCoords[0],
+            this->inputCoords[1],
+            this->inputCoords[2],
+            this->inputCoords[3]);  
+    }
+
 
 	conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, const char* _weightsFileName)
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords)
 	:	kahn_process(name),
 		stride(_stride),
 		numFilters(_numFilters),
@@ -135,25 +164,28 @@ class	conv_layer : public kahn_process
 		filterSize(_filterSize),
 		pad(_pad),
 		activation(_activation),
-		batchNormalize(_batchNormalize)
+		batchNormalize(_batchNormalize),
+        crop(_crop)
+
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
-		int groups  = 1;
-    		// Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
-    		// filter size rounding down (see parse_convolutional() in darknet's parser.c)
-    		int padding = 0;
-    		if (this->pad != 0) {
-      			padding = this->filterSize / 2;
-    		}
 
-    		// Call make_convolutional_layer() to create the layer object
-    		l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
-          		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
-          		0, 0, 0);  
+		int groups  = 1;
+        // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+        // filter size rounding down (see parse_convolutional() in darknet's parser.c)
+        int padding = 0;
+        if (this->pad != 0) {
+            padding = this->filterSize / 2;
+        }
+
+        // Call make_convolutional_layer() to create the layer object
+        l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
+            this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+            0, 0, 0);  
  
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
-		cout << "l.size = " << l.size << endl;
+		//cout << "l.size = " << l.size << endl;
 		load(layerIndex, "biases", l.biases, l.n);
 
 		if(l.batch_normalize)
@@ -168,33 +200,45 @@ class	conv_layer : public kahn_process
 //		printf("loaded parameters of layer %i\n", layerIndex);
 //   	printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
 //    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
-  	}
+
+    // Copy the input and output coordinates.
+        if (crop) {
+            inputCoords = new int[4];
+            outputCoords = new int[4];
+            for (int j = 0; j < 4; j++) {
+                inputCoords[j] = _inputCoords[j];
+                outputCoords[j] = _outputCoords[j];
+            }
+            printCoords();
+        }
+
+    }
 
 	void	process() override
 	{
 		float* input;
 
-    // Read the output from the previos layer
+        // Read the output from the previos layer
 		in->read(input);
  
 		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
-   	// Create a dummy network object. forward_convolutional_layer only uses the "input"
-    // and "workspace" elements of the network struct. "input" is simply the output of
-    // the previous layer, while "workspace" points to an array of floats that we will
-    // create just before calling. The size can be determined by layer.get_workspace_size().
-    network dummyNetwork;
-		dummyNetwork.input = input;
+   	    // Create a dummy network object. forward_convolutional_layer only uses the "input"
+        // and "workspace" elements of the network struct. "input" is simply the output of
+        // the previous layer, while "workspace" points to an array of floats that we will
+        // create just before calling. The size can be determined by layer.get_workspace_size().
+        network dummyNetwork;
+        dummyNetwork.input = input;
 
-//		printf("inputs of layer %d, are", layerIndex);
+//  	printf("inputs of layer %d, are", layerIndex);
 //    for(int j = 0; j < 10; j++){
 //        printf(" %f", input[j]);
 //    }
 //    printf("\n");
 	
-    size_t workspace_size = get_convolutional_workspace_size(l);
-    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
-    forward_convolutional_layer(l, dummyNetwork);
+        size_t workspace_size = get_convolutional_workspace_size(l);
+        dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+        forward_convolutional_layer(l, dummyNetwork);
 	
 //	  printf("outputs of layer %d, are", layerIndex);
 //    for(int j = 0; j < 10; j++){
@@ -203,13 +247,49 @@ class	conv_layer : public kahn_process
 //    printf("\n");
 	
 		free(dummyNetwork.workspace);
+
+    float* outputImage = l.output;
+
+    // Now it's time to crop the data if this layer is configured to do cropping.
+    if (crop) {
+        
+        // Calculate the relative coordinates for cropping
+        int cropped_width = outputCoords[2] - outputCoords[0] + 1;
+        int cropped_height = outputCoords[3] - outputCoords[1] + 1;
+        int left_crop   = outputCoords[0] - inputCoords[0];
+        int top_crop    = outputCoords[1] - inputCoords[1];
+        int right_crop  = inputCoords[2]  - outputCoords[2];
+        int bottom_crop = inputCoords[3]  - outputCoords[3];
+        int cropCoords[4] = { left_crop, top_crop,
+                              left_crop + cropped_width - 1,
+                              top_crop + cropped_height - 1};
+
+//        printf("Cropping tile %d in layer %d\n", tileNumber, layerIndex);
+//        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+//               inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
+//               outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+//        printf("Crop amounts (left, top, right, bottom): (%d, %d, %d, %d)\n", 
+//               left_crop, top_crop, right_crop, bottom_crop);
+//        printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
+//                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
+        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, numFilters);
+
+        //printf("Relative crop coordinates 2 are (%d, %d) (%d, %d)\n",
+        //    cropCoords2[0], cropCoords2[1], cropCoords2[2], cropCoords2[3]);
+                         
+        printf("Cropping tile %d\n", layerIndex);
+        printf("l.c = %d\n", l.c);
+        printf("l.w = %d\n", l.w);
+        printf("l.h = %d\n", l.h);
+        printf("this->numFilters = %d\n", this->numFilters);
+
+        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+                inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
+                outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
+    }
     // Send off the layer's output to the next layer!
-		out->write(l.output);
-
-    // Now we're done with the workspace - deallocate it or else memory leaks.
-		//free(dummyNetwork.input);
-		//free(input); 
-
+		out->write(outputImage);
 	}
 };
 
@@ -247,25 +327,25 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-//    printf("inputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", data[j]);
-//    }
-//    printf("\n");
+//        printf("inputs of layer %d, are", layerIndex);
+//        for(int j = 0; j < 10; j++){
+//            printf(" %f", data[j]);
+//        }
+//        printf("\n");
 
-   	// Call forward_maxpool_layer() here, read from layer.output and write to out
-   	// Create a dummy network object. The function only uses network.input
-   	network dummyNetwork;
-  	dummyNetwork.input = data;
-   	forward_maxpool_layer(l, dummyNetwork);
+   	    // Call forward_maxpool_layer() here, read from layer.output and write to out
+   	    // Create a dummy network object. The function only uses network.input
+   	    network dummyNetwork;
+  	    dummyNetwork.input = data;
+   	    forward_maxpool_layer(l, dummyNetwork);
 
-//	  printf("outputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", l.output[j]);
-//    }
-//    printf("\n");
+	    /*printf("outputs of layer %d, are", layerIndex);
+        for(int j = 0; j < 10; j++){
+            printf(" %f", l.output[j]);
+        }
+        printf("\n");*/
   
-  	out->write(l.output);	
+  	    out->write(l.output);	
 	}
 };
 
@@ -424,39 +504,96 @@ class	region_layer : public kahn_process
 	}
 };
 
+int coerce (int val, int min, int max) {
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+}
+
 class   conv_layer_unfused : public sc_module
 {
     public:
-    sc_fifo<float*> **scatter_to_conv,
-        **conv_to_merge;
+    sc_fifo<float*> *scatter_to_conv[9],
+        *conv_to_merge[9];
 
     scatter_layer *scatter;
-    conv_layer **conv;
+    conv_layer *conv[9];
     merge_layer *merge;
-    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4], int c,  int filterSize,
-             int stride, int numFilters, int pad, ACTIVATION activation,
-             bool batchNormalize) : sc_module(name)
+    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+                       int inputWidth, int inputHeight, int c, int filterSize, int stride, int numFilters, int pad,
+                       ACTIVATION activation, bool batchNormalize) : sc_module(name)
     {
+        cout << "instantiating fused conv layer" << endl;
+        cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
         for(int i = 0; i < 9; i++){
-            int w = coords[i][2] - coords[i][0] + 1;
-            int h = coords[i][3] - coords[i][1] + 1;
-            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
-        }
-        int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
-        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
-        int totalWidth = widths[0] + widths[1] + widths[2];
-        int totalHeight = heights[0] + heights[1] + heights[2];
-        merge = new merge_layer("merge", widths, heights, c);
+            for(int j = 0; j < 4; j++){
+                cout << "coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
+            }
+        } 
+        int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
+                                    coords[1][2] - coords[1][0] + 1,
+                                    coords[2][2] - coords[2][0] + 1 };
+        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
+                                    coords[3][3] - coords[3][1] + 1,
+                                    coords[6][3] - coords[6][1] + 1 };
+        //int outputWidth = widths[0] + widths[1] + widths[2];
+        //int outputHeight = heights[0] + heights[1] + heights[2];
 
-        scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
-        //scatter_to_conv = new sc_fifo<float*>[9];
-        //conv_to_merge = new sc_fifo<float*>[9];
+        // Determine how much padding we should use for each tile.
+        //int padding = 0;
+        //if (pad) padding = filterSize / 2;
+        
+        // Create the padded coordinates
+        if(pad){
+            int paddedCoords[9][4];
+            calcPrevCoords(coords, paddedCoords, stride, filterSize, inputWidth, inputHeight, "convolutional");
+            for (int j = 0; j < 9; j++) {
+                /*// Top-left X coordinate
+                paddedCoords[j][0] = coerce(coords[j][0] - padding, 0, totalWidth); 
+                // Top-left Y coordinate
+                paddedCoords[j][1] = coerce(coords[j][1] - padding, 0, totalHeight); 
+                // Bottom-right X coordinate
+                paddedCoords[j][2] = coerce(coords[j][2] + padding, 0, totalWidth); 
+                // Bottom-right Y coordinate
+                paddedCoords[j][3] = coerce(coords[j][3] + padding, 0, totalHeight);*/ 
+                printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
+                    paddedCoords[j][0], paddedCoords[j][1],
+                    paddedCoords[j][2], paddedCoords[j][3]);
+                //cout << "in conv_layer instantiation loop i = " << i << endl;
+                int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
+                int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
+                conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+                    true, paddedCoords[j], coords[j]);
+            }
+            scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
+
+        }else{
+            for(int j = 0; j < 9; j++){
+                //cout << "in conv_layer instantiation loop i = " << i << endl;
+                int w = coords[j][2] - coords[j][0] + 1;
+                int h = coords[j][3] - coords[j][1] + 1;
+                conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+                                      false, NULL, NULL);
+            }
+            scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
+
+        }
+        //cout << "beginning merge instantiation" << endl;
+        merge = new merge_layer("merge", widths, heights, numFilters);
+        //cout << "finished instantiating merge layer" << endl;
         for(int i = 0; i < 9; i++){
+            //cout << "in fifo assignment loop i = " << i << endl;
+            //cout << "assigning scatter_to_conv" << endl;
             scatter_to_conv[i] = new sc_fifo<float*>(1);
+            //cout << "assigning conv_to_merge" << endl;
             conv_to_merge[i] = new sc_fifo<float*>(1);
+            //cout << "assigning conv.in" << endl;
             conv[i]->in(*scatter_to_conv[i]);
+            //cout << "assigning conv.out" << endl;
             conv[i]->out(*conv_to_merge[i]);
+            //cout << "assigning scatter.out" << endl;
             scatter->out[i](*scatter_to_conv[i]);
+            //cout << "assigning merge.in" << endl;
             merge->in[i](*conv_to_merge[i]);
         }
     }
@@ -517,17 +654,17 @@ class	kpn_neuralnet : public sc_module
 		conv0_to_max1   	= new sc_fifo<float*>(1);
 		max1_to_conv2   	= new sc_fifo<float*>(1);
 		conv2_to_max3   	= new sc_fifo<float*>(1);
-                max3_to_conv4   	= new sc_fifo<float*>(1);
+        max3_to_conv4   	= new sc_fifo<float*>(1);
 		conv4_to_max5   	= new sc_fifo<float*>(1);
-                max5_to_conv6   	= new sc_fifo<float*>(1);
+        max5_to_conv6   	= new sc_fifo<float*>(1);
 		conv6_to_max7   	= new sc_fifo<float*>(1);
-                max7_to_conv8   	= new sc_fifo<float*>(1);
+        max7_to_conv8   	= new sc_fifo<float*>(1);
 		conv8_to_max9   	= new sc_fifo<float*>(1);
-                max9_to_conv10   	= new sc_fifo<float*>(1);
+        max9_to_conv10   	= new sc_fifo<float*>(1);
 		conv10_to_max11   	= new sc_fifo<float*>(1);
-                max11_to_conv12   	= new sc_fifo<float*>(1);
+        max11_to_conv12   	= new sc_fifo<float*>(1);
 		conv12_to_conv13   	= new sc_fifo<float*>(1);
-                conv13_to_conv14   	= new sc_fifo<float*>(1);
+        conv13_to_conv14   	= new sc_fifo<float*>(1);
 		conv14_to_region   	= new sc_fifo<float*>(1);
 //		region_to_writer 	= new sc_fifo<float*>(1);
 
@@ -554,7 +691,7 @@ class	kpn_neuralnet : public sc_module
         //int testCoords[][] = new int[][2];
         //testCoords[0] = new int[2] {1, 2};
         //testCoords[1] = new int[2] {3, 4};
-        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 3, 3, 1, 16, 1,  LEAKY, true);
+        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
         conv0->scatter->in(*reader_to_conv0);
         conv0->merge->out(*conv0_to_max1);
         //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
@@ -565,58 +702,62 @@ class	kpn_neuralnet : public sc_module
 		max1->in(*conv0_to_max1);
 		max1->out(*max1_to_conv2);
 
-		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, "conv2.weights");
+		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, false, NULL, NULL);
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
 
 		
 		max3 = new max_layer("max3",3, 208, 208, 32, 2,2);
-                max3->in(*conv2_to_max3);
-                max3->out(*max3_to_conv4);
+        max3->in(*conv2_to_max3);
+        max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, "conv4.weights");
-                conv4->in(*max3_to_conv4);
-                conv4->out(*conv4_to_max5);
+    	conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
+        conv4->in(*max3_to_conv4);
+        conv4->out(*conv4_to_max5);
+
 		
 		max5 = new max_layer("max5",5, 104, 104, 64, 2, 2);
-                max5->in(*conv4_to_max5);
-                max5->out(*max5_to_conv6);
+        max5->in(*conv4_to_max5);
+        max5->out(*max5_to_conv6);
 		
-		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, "conv6.weights");
-                conv6->in(*max5_to_conv6);
-                conv6->out(*conv6_to_max7);
+		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL);
+        conv6->in(*max5_to_conv6);
+        conv6->out(*conv6_to_max7);
+
 	
 		max7 = new max_layer("max7",7, 52, 52, 128, 2,2);
-                max7->in(*conv6_to_max7);
-                max7->out(*max7_to_conv8);
+        max7->in(*conv6_to_max7);
+        max7->out(*max7_to_conv8);
 		
-		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, "conv8.weights");
-                conv8->in(*max7_to_conv8);
-                conv8->out(*conv8_to_max9);
+
+		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL);
+        conv8->in(*max7_to_conv8);
+        conv8->out(*conv8_to_max9);
+
 		
 		max9 = new max_layer("max9",9, 26, 26, 256, 2,2);
-                max9->in(*conv8_to_max9);
-                max9->out(*max9_to_conv10);
+        max9->in(*conv8_to_max9);
+        max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, "conv10.weights");
-                conv10->in(*max9_to_conv10);
-                conv10->out(*conv10_to_max11);
-		
+		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL);
+        conv10->in(*max9_to_conv10);
+        conv10->out(*conv10_to_max11);
+	
 		max11 = new max_layer("max11",11, 13, 13, 512, 2,1);
-                max11->in(*conv10_to_max11);
-                max11->out(*max11_to_conv12);
+        max11->in(*conv10_to_max11);
+        max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, "conv12.weights");
-                conv12->in(*max11_to_conv12);
-                conv12->out(*conv12_to_conv13);
+		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, false, NULL, NULL);
+        conv12->in(*max11_to_conv12);
+        conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true,"conv13.weights");
-                conv13->in(*conv12_to_conv13);
-                conv13->out(*conv13_to_conv14);
+		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true, false, NULL, NULL);
+        conv13->in(*conv12_to_conv13);
+        conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, "conv14.weights");
-                conv14->in(*conv13_to_conv14);
-                conv14->out(*conv14_to_region);
+		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, false, NULL, NULL);
+        conv14->in(*conv13_to_conv14);
+        conv14->out(*conv14_to_region);
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
                                true, 1, 1, true, 0.6, true, 13, 13);
 		region->in(*conv14_to_region);
@@ -628,9 +769,9 @@ class	kpn_neuralnet : public sc_module
 };
 
 // This will probably remain as-is.
-int	sc_main(int argc, char * argv[]) 
+int sc_main(int argc, char * argv[]) 
 {
-	kpn_neuralnet knn0("kpn_neuralnet");
-	sc_start();
-	return 0;
+    kpn_neuralnet knn0("kpn_neuralnet");
+    sc_start();
+    return 0;
 }
