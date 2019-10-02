@@ -39,13 +39,13 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
 
 
 void getTileCoords(int width, int height, int coords[9][4]){
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
+    for(int i = 0; i < 3; i++){ // TILE ROW
+        for(int j = 0; j < 3; j++){ // TILE COL
             //coords[i*3 + j] = new int[4] {j*width/3, i*height/3, (j+1)*width/3 - 1, (i+1)*height/3 - 1};
             coords[i*3 + j][0] = j*width/3;
             coords[i*3 + j][1] = i*height/3;
-            coords[i*3 + j][2] = (j+1)*width/3 - 1;
-            coords[i*3 + j][3] = (i+1)*height/3 - 1;
+            coords[i*3 + j][2] = (j == 2) ? width-1  : (j+1)*width/3 - 1;
+            coords[i*3 + j][3] = (i == 2) ? height-1 : (i+1)*height/3 - 1;
         }
     }
 }
@@ -123,6 +123,7 @@ class	conv_layer : public kahn_process
   const bool crop;
 	int* inputCoords;
   int* outputCoords;
+  int  tileNumber;
 
   sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
@@ -130,7 +131,7 @@ class	conv_layer : public kahn_process
   convolutional_layer l;
 
   void printCoords() {
-      printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
+      printf("Layer %d tile %d input coords: %d %d %d %d\n", layerIndex, tileNumber,
           this->inputCoords[0],
           this->inputCoords[1],
           this->inputCoords[2],
@@ -139,7 +140,8 @@ class	conv_layer : public kahn_process
 
 	conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords)
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords,
+             int _tileNumber)
 	:	kahn_process(name),
 		stride(_stride),
 		numFilters(_numFilters),
@@ -148,7 +150,8 @@ class	conv_layer : public kahn_process
 		pad(_pad),
 		activation(_activation),
 		batchNormalize(_batchNormalize),
-    crop(_crop)
+    crop(_crop),
+    tileNumber(_tileNumber)
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
@@ -212,7 +215,7 @@ class	conv_layer : public kahn_process
     network dummyNetwork;
 		dummyNetwork.input = input;
 
-//		printf("inputs of layer %d, are", layerIndex);
+//  	printf("inputs of layer %d, are", layerIndex);
 //    for(int j = 0; j < 10; j++){
 //        printf(" %f", input[j]);
 //    }
@@ -239,19 +242,21 @@ class	conv_layer : public kahn_process
         int cropped_height = outputCoords[3] - outputCoords[1];
         int left_crop   = outputCoords[0] - inputCoords[0];
         int top_crop    = outputCoords[1] - inputCoords[1];
-//        int right_crop  = inputCoords[2]  - outputCoords[2];
-//        int bottom_crop = inputCoords[3]  - outputCoords[3];
+        int right_crop  = inputCoords[2]  - outputCoords[2];
+        int bottom_crop = inputCoords[3]  - outputCoords[3];
         int cropCoords[4] = { left_crop, top_crop,
                               left_crop + cropped_width,
                               left_crop + cropped_height };
 
-        printf("Cropping tile %d\n", layerIndex);
+        printf("Cropping tile %d in layer %d\n", tileNumber, layerIndex);
         printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
                inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
                outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        printf("Crop amounts (left, top, right, bottom): (%d, %d, %d, %d)\n", 
+               left_crop, top_crop, right_crop, bottom_crop);
         printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
                 cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
-        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, l.c);
+        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, numFilters);
     }
 
     // Send off the layer's output to the next layer!
@@ -293,11 +298,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-        /*printf("inputs of layer %d, are", layerIndex);
+        printf("inputs of layer %d, are", layerIndex);
         for(int j = 0; j < 10; j++){
             printf(" %f", data[j]);
         }
-        printf("\n");*/
+        printf("\n");
 
    	    // Call forward_maxpool_layer() here, read from layer.output and write to out
    	    // Create a dummy network object. The function only uses network.input
@@ -500,13 +505,13 @@ class   conv_layer_unfused : public sc_module
         int paddedCoords[9][4];
         for (int j = 0; j < 9; j++) {
             // Top-left X coordinate
-            paddedCoords[j][0] = coerce(coords[j][0] - padding, 0, totalWidth); 
+            paddedCoords[j][0] = coerce(coords[j][0] - padding, 0, totalWidth-1); 
             // Top-left Y coordinate
-            paddedCoords[j][1] = coerce(coords[j][1] - padding, 0, totalHeight); 
+            paddedCoords[j][1] = coerce(coords[j][1] - padding, 0, totalHeight-1); 
             // Bottom-right X coordinate
-            paddedCoords[j][2] = coerce(coords[j][2] + padding, 0, totalWidth); 
+            paddedCoords[j][2] = coerce(coords[j][2] + padding, 0, totalWidth-1); 
             // Bottom-right Y coordinate
-            paddedCoords[j][3] = coerce(coords[j][3] + padding, 0, totalHeight); 
+            paddedCoords[j][3] = coerce(coords[j][3] + padding, 0, totalHeight-1); 
             printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
                    paddedCoords[j][0], paddedCoords[j][1],
                    paddedCoords[j][2], paddedCoords[j][3]);
@@ -517,7 +522,7 @@ class   conv_layer_unfused : public sc_module
             int w = paddedCoords[i][2] - paddedCoords[i][0] + 1;
             int h = paddedCoords[i][3] - paddedCoords[i][1] + 1;
             conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
-                                      true, paddedCoords[i], coords[i]);
+                                      true, paddedCoords[i], coords[i], i);
         }
 
         //cout << "instantiating width and height arrays " << endl;
@@ -657,7 +662,7 @@ class	kpn_neuralnet : public sc_module
 		max1->in(*conv0_to_max1);
 		max1->out(*max1_to_conv2);
 
-		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, false, NULL, NULL);
+		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, false, NULL, NULL, 0);
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
 
@@ -666,7 +671,7 @@ class	kpn_neuralnet : public sc_module
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
+		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL, 0);
                 conv4->in(*max3_to_conv4);
                 conv4->out(*conv4_to_max5);
 		
@@ -674,7 +679,7 @@ class	kpn_neuralnet : public sc_module
                 max5->in(*conv4_to_max5);
                 max5->out(*max5_to_conv6);
 		
-		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL);
+		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL, 0);
                 conv6->in(*max5_to_conv6);
                 conv6->out(*conv6_to_max7);
 	
@@ -682,7 +687,7 @@ class	kpn_neuralnet : public sc_module
                 max7->in(*conv6_to_max7);
                 max7->out(*max7_to_conv8);
 		
-		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL);
+		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL, 0);
                 conv8->in(*max7_to_conv8);
                 conv8->out(*conv8_to_max9);
 		
@@ -690,7 +695,7 @@ class	kpn_neuralnet : public sc_module
                 max9->in(*conv8_to_max9);
                 max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL);
+		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL, 0);
                 conv10->in(*max9_to_conv10);
                 conv10->out(*conv10_to_max11);
 		
@@ -698,15 +703,15 @@ class	kpn_neuralnet : public sc_module
                 max11->in(*conv10_to_max11);
                 max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, false, NULL, NULL);
+		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, false, NULL, NULL, 0);
                 conv12->in(*max11_to_conv12);
                 conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true, false, NULL, NULL);
+		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true, false, NULL, NULL, 0);
                 conv13->in(*conv12_to_conv13);
                 conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, false, NULL, NULL);
+		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, false, NULL, NULL, 0);
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
