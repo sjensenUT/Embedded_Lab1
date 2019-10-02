@@ -8,7 +8,6 @@ int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int
 	int x2 = coords[2];
 	int y2 = coords[3];
 	int *result = new int[4];
-	cout << "hello1" << endl;
 	if(prevLayerType.compare("convolutional") == 0){
 		result[0] = max(0, stride*x1 - filterSize/2);
 		result[1] = max(0, stride*y1 - filterSize/2);
@@ -21,7 +20,6 @@ int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int
                 result[3] = min(stride*y2 + stride - 1, prevHeight - 1);
 		//cout << "hello2" << endl;
 	}	
-	cout << "hello3" << endl;
 	//cout << result[0] << ", " << result[1] << ", " << result[2] << ", " << result[3] << endl;
 	return result;
 	
@@ -33,6 +31,9 @@ float* getSubArray(float arr[], const int coords[], int width, int height, int n
     int x2 = coords[2];
     int y2 = coords[3];
 
+//    cout << "getSubArray:" << endl;
+//    printf("Coords (%d, %d) to (%d, %d), w = %d, h = %d\n",
+//        x1, y1, x2, y2, width, height);
     float *result = new float[(x2 - x1 + 1)*(y2 - y1 + 1)*numChannels];
     int n = 0;
     for(int i = 0; i < numChannels; i++){
@@ -96,24 +97,25 @@ float* mergeTiles(float **tiles, const int widths[], const int heights[], int nu
     //cout << "tiles[0][0] = " << tiles[0][0] << endl;
     //cout << "calculating total width and height" << endl;
     int totalWidth = widths[0] + widths[1] + widths[2];
-	int totalHeight = heights[0] + heights[1] + heights[2];
-    //cout << "totalWidth = " << totalWidth << endl;
-    //cout << "totalHeight = " << totalHeight << endl;
+    int totalHeight = heights[0] + heights[1] + heights[2];
+//    cout << "totalWidth = " << totalWidth << endl;
+//    cout << "totalHeight = " << totalHeight << endl;
     float *result = new float[totalWidth*totalHeight*numChannels];
     int p = 0;
     //cout << "beginning tile merge" << endl;
-	for(int i = 0; i < numChannels; i++){
-	    for(int j = 0; j < 3; j++){
-       	     for(int k = 0; k < heights[j]; k++){
-                for(int m = 0; m < 3; m++){
-				    for(int n = 0; n < widths[m]; n++){
+    for(int i = 0; i < numChannels; i++){ // CHANNELS
+	    for(int j = 0; j < 3; j++){ // TILE ROW
+       	for(int k = 0; k < heights[j]; k++){ // Y COORDINATE
+          for(int m = 0; m < 3; m++){ // TILE COL
+				    for(int n = 0; n < widths[m]; n++){ // X COORDINATE
 					    result[p] = tiles[3*j + m][i*heights[j]*widths[m] + k*widths[m] + n];
 					    p++;
-					}
-                }
-             }
+            }
+          }
         }
-	}
+      }
+    }
+
     //cout << "tile merge complete" << endl;
     return result;
 }

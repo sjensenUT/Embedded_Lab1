@@ -109,6 +109,20 @@ class	image_reader : public kahn_process
 }; 
 
 
+float get_pixel(image m, int x, int y, int c)
+{
+  return m.data[c*m.h*m.w + y*m.w + x];
+}
+
+void printChannels(image m, int x, int y)
+{
+  printf("(%d,%d): ", x, y);
+  for (int c = 0; c < m.c; c++) {
+    cout << get_pixel(m, x, y, c) << " ";
+  }
+  cout << endl;
+}
+
 class	conv_layer : public kahn_process
 {
 	public:
@@ -237,25 +251,26 @@ class	conv_layer : public kahn_process
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
+        
         // Calculate the relative coordinates for cropping
-        int cropped_width = outputCoords[2] - outputCoords[0];
-        int cropped_height = outputCoords[3] - outputCoords[1];
+        int cropped_width = outputCoords[2] - outputCoords[0] + 1;
+        int cropped_height = outputCoords[3] - outputCoords[1] + 1;
         int left_crop   = outputCoords[0] - inputCoords[0];
         int top_crop    = outputCoords[1] - inputCoords[1];
         int right_crop  = inputCoords[2]  - outputCoords[2];
         int bottom_crop = inputCoords[3]  - outputCoords[3];
         int cropCoords[4] = { left_crop, top_crop,
-                              left_crop + cropped_width,
-                              left_crop + cropped_height };
+                              left_crop + cropped_width - 1,
+                              top_crop + cropped_height - 1};
 
-        printf("Cropping tile %d in layer %d\n", tileNumber, layerIndex);
-        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
-               inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
-               outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-        printf("Crop amounts (left, top, right, bottom): (%d, %d, %d, %d)\n", 
-               left_crop, top_crop, right_crop, bottom_crop);
-        printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
-                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
+//        printf("Cropping tile %d in layer %d\n", tileNumber, layerIndex);
+//        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+//               inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
+//               outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+//        printf("Crop amounts (left, top, right, bottom): (%d, %d, %d, %d)\n", 
+//               left_crop, top_crop, right_crop, bottom_crop);
+//        printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
+//                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
         outputImage = getSubArray(l.output, cropCoords, l.w, l.h, numFilters);
     }
 
@@ -298,11 +313,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-        printf("inputs of layer %d, are", layerIndex);
-        for(int j = 0; j < 10; j++){
-            printf(" %f", data[j]);
-        }
-        printf("\n");
+//        printf("inputs of layer %d, are", layerIndex);
+//        for(int j = 0; j < 10; j++){
+//            printf(" %f", data[j]);
+//        }
+//        printf("\n");
 
    	    // Call forward_maxpool_layer() here, read from layer.output and write to out
    	    // Create a dummy network object. The function only uses network.input
@@ -500,10 +515,11 @@ class   conv_layer_unfused : public sc_module
         // Determine how much padding we should use for each tile.
         int padding = 0;
         if (pad) padding = filterSize / 2;
+
         
-        // Create the padded coordinates
-        int paddedCoords[9][4];
-        for (int j = 0; j < 9; j++) {
+       // Create the padded coordinates
+       int paddedCoords[9][4];
+       for (int j = 0; j < 9; j++) {
             // Top-left X coordinate
             paddedCoords[j][0] = coerce(coords[j][0] - padding, 0, totalWidth-1); 
             // Top-left Y coordinate
