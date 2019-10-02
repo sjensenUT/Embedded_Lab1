@@ -371,10 +371,11 @@ class	max_layer : public kahn_process
           printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
                 preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
                 outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-          outputImage = getSubArray(l.output, cropCoords, l.w, l.h, l.c);
+          outputImage = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
     }
+
     // Send off the layer's output to the next layer!
-		out->write(outputImage);     // TODO : CROP
+		out->write(outputImage);
 
 	    /*printf("outputs of layer %d, are", layerIndex);
         for(int j = 0; j < 10; j++){
