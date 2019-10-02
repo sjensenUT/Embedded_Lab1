@@ -247,11 +247,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-        printf("inputs of layer %d, are", layerIndex);
+        /*printf("inputs of layer %d, are", layerIndex);
         for(int j = 0; j < 10; j++){
             printf(" %f", data[j]);
         }
-        printf("\n");
+        printf("\n");*/
 
    	    // Call forward_maxpool_layer() here, read from layer.output and write to out
    	    // Create a dummy network object. The function only uses network.input
@@ -259,11 +259,11 @@ class	max_layer : public kahn_process
   	    dummyNetwork.input = data;
    	    forward_maxpool_layer(l, dummyNetwork);
 
-	    printf("outputs of layer %d, are", layerIndex);
+	    /*printf("outputs of layer %d, are", layerIndex);
         for(int j = 0; j < 10; j++){
             printf(" %f", l.output[j]);
         }
-        printf("\n");
+        printf("\n");*/
   
   	    out->write(l.output);	
 	}

@@ -20,10 +20,10 @@ void merge_layer::process()
         for(int i = 0; i < 9; i++){
             in[i]->read(data[i]);   
         }        
-        cout << "merging tiles @ iter " << iter << endl;
-        cout << "data[0][0] = " << data[0][0] << endl; 
+        //cout << "merging tiles @ iter " << iter << endl;
+        //cout << "data[0][0] = " << data[0][0] << endl; 
         float *output = mergeTiles(data, this->tileWidths, this->tileHeights, this->numChannels);
-        cout << "finished merging tiles" << endl;
+        //cout << "finished merging tiles" << endl;
         out->write(output);
 }
 
@@ -52,7 +52,6 @@ void scatter_layer::process()
         output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
     }
     for(int i = 0; i < 9; i++){
-        //cout << "output[]"
         out[i]->write(output[i]);
     }
          
