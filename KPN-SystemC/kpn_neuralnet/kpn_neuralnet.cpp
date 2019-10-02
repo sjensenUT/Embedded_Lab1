@@ -21,6 +21,8 @@
 #include "../../darknet/src/activations.h"
 #include "../../darknet/src/image.h"
 #include "kpn_neuralnet.h" 
+#include "image_data.h"
+
 using	std::cout;
 using	std::endl;
 using std::string;
@@ -31,6 +33,8 @@ typedef std::vector<std::string> strs;
 const int IMAGE_WIDTH  = 416;
 const int IMAGE_HEIGHT = 416;
 const int BATCH        = 1;
+
+const int BIGGEST_FIFO_SIZE = 416 * 416 * 16;
 
 // Constant float array to hold the anchors for the region layer
 // whatever that means
@@ -62,34 +66,6 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 }
 
 
-// Writes image data to a float fifo
-// Also frees the data once this is done.
-void writeImageData ( sc_fifo_out<float> *out, float* data,
-                      int w, int h, int c )
-{
-    for (int ii = 0; ii < c; ii++) {
-        for (int jj = 0; jj < h; jj++) {
-            for (int kk = 0; kk < w; kk++) {
-                out->write(data[ii*h*w + jj*w + kk]);
-            }
-        }
-    }
-    free(data);
-}
-
-float* readImageData ( sc_fifo_in<float> *in,
-                     int w, int h, int c ) {
-    float* data = (float*) calloc(c*h*w, sizeof(float));
-    for (int ii = 0; ii < c; ii++) {
-        for (int jj = 0; jj < h; jj++) {
-            for (int kk = 0; kk < w; kk++) {
-                in->read(data[ii*h*w + jj*w + kk]);
-            }
-         }
-    }
-    return data;
-}
-
 image_reader::image_reader(sc_module_name name, strs _images)
 :	kahn_process(name),
 	images(_images)
@@ -101,7 +77,7 @@ void image_reader::process()
 {
 	for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "reading image " << images[i] << " @ iter " << iter++ << endl;
+		cout << "reading image " << images[i] << " @ iter " << iter << endl;
 
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
@@ -110,8 +86,7 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-		out->write(sized.data);
-		//im_out->write(orig.data);
+    writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
@@ -151,8 +126,8 @@ int* getCropCoords (int* inputCoords, int* outputCoords) {
     int cropped_height = outputCoords[3] - outputCoords[1] + 1;
     int left_crop   = outputCoords[0] - inputCoords[0];
     int top_crop    = outputCoords[1] - inputCoords[1];
-    int right_crop  = inputCoords[2]  - outputCoords[2];
-    int bottom_crop = inputCoords[3]  - outputCoords[3];
+    //int right_crop  = inputCoords[2]  - outputCoords[2];
+    //int bottom_crop = inputCoords[3]  - outputCoords[3];
     croppedCoords[0] = left_crop;
     croppedCoords[1] = top_crop;
     croppedCoords[2] = left_crop + cropped_width - 1;
@@ -219,8 +194,7 @@ void conv_layer::process()
     float* input;
 
     // Read the output from the previos layer
-    in->read(input);
-
+    input = readImageData(&in, l.w, l.h, l.c);
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
@@ -249,6 +223,9 @@ void conv_layer::process()
     free(dummyNetwork.workspace);
 
     float* outputImage = l.output;
+    int outputWidth    = l.out_w;
+    int outputHeight   = l.out_h;
+    int outputChans    = this->numFilters;
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
@@ -259,11 +236,16 @@ void conv_layer::process()
         //printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
         //        inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
         //        outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
+        outputImage  = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
+        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
+        outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
+
     // Send off the layer's output to the next layer!
-    out->write(outputImage);
+    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
+
 }
+
 
 max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
     int _stride, bool _crop, int* _inputCoords, int* _outputCoords)
@@ -292,9 +274,10 @@ max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _
 
 void max_layer::process()
 {
-    float* data;
 
-    in->read(data);
+    float* data;
+    data = readImageData(&in, l.w, l.h, l.c);
+
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
     //printf("inputs of layer %d, are", layerIndex);
@@ -310,6 +293,9 @@ void max_layer::process()
     forward_maxpool_layer(l, dummyNetwork);
 
     float* outputImage = l.output;
+    int outputWidth  = l.out_w;
+    int outputHeight = l.out_h;
+    int outputChans  = l.c;
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
@@ -324,17 +310,20 @@ void max_layer::process()
         //printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
         //    preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
         //    outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-        outputImage = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+        outputImage  = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
+        outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
     // Send off the layer's output to the next layer!
-    out->write(outputImage);	
+    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
+
 }
 
 
 region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h) 
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c) 
 :	kahn_process(name),
     anchors(_anchors),
     biasMatch(_biasMatch),
@@ -350,7 +339,8 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
     coordScale(_coordScale),
     absolute(_absolute),
     thresh(_thresh),
-    random(_random)
+    random(_random),
+    chans(_c)
 {
     cout << "instantiating region layer" << endl;
     l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
@@ -385,7 +375,8 @@ void region_layer::process()
 	string image_name; 
 	image im; 
 	
-	in->read(data);
+  data = readImageData(&in, l.w, l.h, this->chans);
+
 	im_name_in->read(image_name);
 	im_w_in->read(im.w);
 	im_h_in->read(im.h); 
@@ -394,7 +385,7 @@ void region_layer::process()
 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
-  	network dummyNetwork;
+  network dummyNetwork;
 	dummyNetwork.input = data;
 	forward_region_layer(l, dummyNetwork);
 
@@ -408,7 +399,7 @@ void region_layer::process()
 	// This comes from the -thresh flag specified when running darknet's
 	// detector example. The layer's threshold (l.thresh) comes from the 
 	// cfg file.
-    float det_thresh = 0.5;
+  float det_thresh = 0.5;
 	int nboxes = 0; 
 		
     list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
@@ -447,9 +438,12 @@ void region_layer::process()
 	// dump to file
 	char outFN[100];
 	sprintf(outFN,"%s_testOut",image_name.c_str()); 
-    save_image(im,outFN);
+  save_image(im,outFN);
+
 	free_image(im); 
-	cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
+  free(data);
+
+	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
 	//free(alphabets);  Now part of the constructor and I don't free it here? 
 }
 
@@ -508,8 +502,8 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
     }
     merge = new merge_layer("merge", widths, heights, numFilters);
     for(int i = 0; i < 9; i++){
-        scatter_to_conv[i] = new sc_fifo<float*>(1);
-        conv_to_merge[i] = new sc_fifo<float*>(1);
+        scatter_to_conv[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv_to_merge[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
         conv[i]->in(*scatter_to_conv[i]);
         conv[i]->out(*conv_to_merge[i]);
         scatter->out[i](*scatter_to_conv[i]);
@@ -567,8 +561,8 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
     merge = new merge_layer("merge", widths, heights, c);
 
     for(int i = 0; i < 9; i++){
-        scatter_to_max[i] = new sc_fifo<float*>(1);
-        max_to_merge[i] = new sc_fifo<float*>(1);
+        scatter_to_max[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max_to_merge[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
         maxl[i]->in(*scatter_to_max[i]);
         maxl[i]->out(*max_to_merge[i]);
         scatter->out[i](*scatter_to_max[i]);
@@ -584,7 +578,7 @@ class	kpn_neuralnet : public sc_module
 	
   // Declare all queues between our layers here
   // I think the data type for all of them will be image
-	sc_fifo<float*>	*reader_to_conv0, 
+	sc_fifo<float>	*reader_to_conv0, 
 			*conv0_to_max1, 
 			*max1_to_conv2,
 			*conv2_to_max3,
@@ -629,23 +623,22 @@ class	kpn_neuralnet : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 	= new sc_fifo<float*>(1);
-		conv0_to_max1   	= new sc_fifo<float*>(1);
-		max1_to_conv2   	= new sc_fifo<float*>(1);
-		conv2_to_max3   	= new sc_fifo<float*>(1);
-        max3_to_conv4   	= new sc_fifo<float*>(1);
-		conv4_to_max5   	= new sc_fifo<float*>(1);
-        max5_to_conv6   	= new sc_fifo<float*>(1);
-		conv6_to_max7   	= new sc_fifo<float*>(1);
-        max7_to_conv8   	= new sc_fifo<float*>(1);
-		conv8_to_max9   	= new sc_fifo<float*>(1);
-        max9_to_conv10   	= new sc_fifo<float*>(1);
-		conv10_to_max11   	= new sc_fifo<float*>(1);
-        max11_to_conv12   	= new sc_fifo<float*>(1);
-		conv12_to_conv13   	= new sc_fifo<float*>(1);
-        conv13_to_conv14   	= new sc_fifo<float*>(1);
-		conv14_to_region   	= new sc_fifo<float*>(1);
-//		region_to_writer 	= new sc_fifo<float*>(1);
+		reader_to_conv0 	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv0_to_max1   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		max1_to_conv2   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv2_to_max3   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max3_to_conv4   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv4_to_max5   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max5_to_conv6   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv6_to_max7   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max7_to_conv8   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv8_to_max9   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max9_to_conv10   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv10_to_max11   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max11_to_conv12   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv12_to_conv13   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv13_to_conv14   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		conv14_to_region   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 
 		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
 		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
@@ -739,7 +732,7 @@ class	kpn_neuralnet : public sc_module
     conv14->merge->out(*conv14_to_region);
 
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                               true, 1, 1, true, 0.6, true, 13, 13);
+                               true, 1, 1, true, 0.6, true, 13, 13, 425);
 		region->in(*conv14_to_region);
 		region->im_in(*reader_to_writer);
 		region->im_w_in(*int_reader_to_writer); 

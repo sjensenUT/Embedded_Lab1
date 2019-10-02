@@ -4,6 +4,7 @@
 #include <string>
 #include "../kahn_process.h"
 #include "darknet.h"
+#include "image_data.h"
 
 merge_layer::merge_layer(sc_module_name name, int *_tileWidths, int *_tileHeights,  int _numChannels)
 :   kahn_process(name),
@@ -22,9 +23,13 @@ float get_pixel2(image m, int x, int y, int c)
  
 void merge_layer::process()
 {
+        int totalWidth = tileWidths[0] + tileWidths[1] + tileWidths[2];
+        int totalHeight = tileHeights[0] + tileHeights[1] + tileHeights[2];
+
         float **data = new float*[9];
         for(int i = 0; i < 9; i++){
-            in[i]->read(data[i]);   
+            //in[i]->read(data[i]);  
+            data[i] = readImageData(&in[i], tileWidths[i%3], tileHeights[i/3], numChannels); 
         }        
         //cout << "merging tiles @ iter " << iter << endl;
         //cout << "data[0][0] = " << data[0][0] << endl; 
@@ -53,7 +58,8 @@ void merge_layer::process()
         }
 */
 
-        out->write(output);
+        //out->write(output);
+        writeImageData(&out, output, totalWidth, totalHeight, numChannels);
 }
 
 scatter_layer::scatter_layer(sc_module_name name, int _coords[][4], int _width, int _height, int _numChannels)
@@ -74,16 +80,18 @@ scatter_layer::scatter_layer(sc_module_name name, int _coords[][4], int _width, 
 void scatter_layer::process()
 {
     float *data;
-    in->read(data);
+    data = readImageData(&in, width, height, numChannels);
+
 //    cout << "scattering tiles @ iter " << iter << endl;
-//    cout << "coords[3] = " << this->coords[3][0] << "," << coords[3][1] << " " << coords[3][2] << "," << coords[3][3] << endl;
     float **output = new float*[9];
     for(int i = 0; i < 9; i++){
-//        cout << "in for loop i = " << i << endl;
         output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
     }
     for(int i = 0; i < 9; i++){
-        out[i]->write(output[i]);
+        //out[i]->write(output[i]);
+        int tileWidth  = this->coords[i][2] - this->coords[i][0] + 1;
+        int tileHeight = this->coords[i][3] - this->coords[i][1] + 1;
+        writeImageData(&out[i], output[i], tileWidth, tileHeight, this->numChannels);
     }
          
 }
