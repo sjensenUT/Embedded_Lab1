@@ -87,19 +87,32 @@ void forward_maxpool_layer(const maxpool_layer l, network net)
     int c = l.c;
 
     for(b = 0; b < l.batch; ++b){
+        //printf("in first loop b = %d\n", b);
         for(k = 0; k < c; ++k){
+            //printf("in second loop k = %d\n", k);
             for(i = 0; i < h; ++i){
+                //printf("in third loop i = %d\n", i);
                 for(j = 0; j < w; ++j){
+                    //printf("in fourth loop j = %d\n", j);
                     int out_index = j + w*(i + h*(k + c*b));
                     float max = -FLT_MAX;
                     int max_i = -1;
                     for(n = 0; n < l.size; ++n){
+                        //printf("in fifth loop n = %d\n", n);
                         for(m = 0; m < l.size; ++m){
+                            //printf("in sixth loop m = %d\n", m);
+                            //printf("setting cur_h\n");
                             int cur_h = h_offset + i*l.stride + n;
+                            //printf("setting cur_w\n");
                             int cur_w = w_offset + j*l.stride + m;
+                            //printf("setting index\n");
                             int index = cur_w + l.w*(cur_h + l.h*(k + b*l.c));
+                            //printf("setting valid\n");
                             int valid = (cur_h >= 0 && cur_h < l.h &&
                                          cur_w >= 0 && cur_w < l.w);
+                            //printf("setting val\n");
+                            //printf("index = %d\n", index);
+                            //printf("net.input[%d] = %f\n", index, net.input[index]);
                             float val = (valid != 0) ? net.input[index] : -FLT_MAX;
                             max_i = (val > max) ? index : max_i;
                             max   = (val > max) ? val   : max;

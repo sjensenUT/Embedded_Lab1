@@ -52,6 +52,7 @@ void scatter_layer::process()
         output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
     }
     for(int i = 0; i < 9; i++){
+        //cout << "output[]"
         out[i]->write(output[i]);
     }
          

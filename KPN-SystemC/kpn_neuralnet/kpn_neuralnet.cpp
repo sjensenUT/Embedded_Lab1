@@ -247,25 +247,25 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-    printf("inputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", data[j]);
-    }
-    printf("\n");
+        printf("inputs of layer %d, are", layerIndex);
+        for(int j = 0; j < 10; j++){
+            printf(" %f", data[j]);
+        }
+        printf("\n");
 
-   	// Call forward_maxpool_layer() here, read from layer.output and write to out
-   	// Create a dummy network object. The function only uses network.input
-   	network dummyNetwork;
-  	dummyNetwork.input = data;
-   	forward_maxpool_layer(l, dummyNetwork);
+   	    // Call forward_maxpool_layer() here, read from layer.output and write to out
+   	    // Create a dummy network object. The function only uses network.input
+   	    network dummyNetwork;
+  	    dummyNetwork.input = data;
+   	    forward_maxpool_layer(l, dummyNetwork);
 
-	printf("outputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", l.output[j]);
-    }
-    printf("\n");
+	    printf("outputs of layer %d, are", layerIndex);
+        for(int j = 0; j < 10; j++){
+            printf(" %f", l.output[j]);
+        }
+        printf("\n");
   
-  	out->write(l.output);	
+  	    out->write(l.output);	
 	}
 };
 
@@ -439,35 +439,35 @@ class   conv_layer_unfused : public sc_module
     {
         cout << "instantiating fused conv layer" << endl;
         for(int i = 0; i < 9; i++){
-            cout << "in conv_layer instantiation loop i = " << i << endl;
+            //cout << "in conv_layer instantiation loop i = " << i << endl;
             int w = coords[i][2] - coords[i][0] + 1;
             int h = coords[i][3] - coords[i][1] + 1;
             conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
         }
-        cout << "instantiating width and height arrays " << endl;
+        //cout << "instantiating width and height arrays " << endl;
         int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
         int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
         int totalWidth = widths[0] + widths[1] + widths[2];
         int totalHeight = heights[0] + heights[1] + heights[2];
-        cout << "beginning merge and scatter instantiation" << endl;
-        merge = new merge_layer("merge", widths, heights, c);
+        //cout << "beginning merge and scatter instantiation" << endl;
+        merge = new merge_layer("merge", widths, heights, numFilters);
         scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
-        cout << "finished instantiating merge and scatter layers" << endl;
+        //cout << "finished instantiating merge and scatter layers" << endl;
         //scatter_to_conv = new sc_fifo<float*>[9];
         //conv_to_merge = new sc_fifo<float*>[9];
         for(int i = 0; i < 9; i++){
-            cout << "in fifo assignment loop i = " << i << endl;
-            cout << "assigning scatter_to_conv" << endl;
+            //cout << "in fifo assignment loop i = " << i << endl;
+            //cout << "assigning scatter_to_conv" << endl;
             scatter_to_conv[i] = new sc_fifo<float*>(1);
-            cout << "assigning conv_to_merge" << endl;
+            //cout << "assigning conv_to_merge" << endl;
             conv_to_merge[i] = new sc_fifo<float*>(1);
-            cout << "assigning conv.in" << endl;
+            //cout << "assigning conv.in" << endl;
             conv[i]->in(*scatter_to_conv[i]);
-            cout << "assigning conv.out" << endl;
+            //cout << "assigning conv.out" << endl;
             conv[i]->out(*conv_to_merge[i]);
-            cout << "assigning scatter.out" << endl;
+            //cout << "assigning scatter.out" << endl;
             scatter->out[i](*scatter_to_conv[i]);
-            cout << "assigning merge.in" << endl;
+            //cout << "assigning merge.in" << endl;
             merge->in[i](*conv_to_merge[i]);
         }
     }
@@ -528,17 +528,17 @@ class	kpn_neuralnet : public sc_module
 		conv0_to_max1   	= new sc_fifo<float*>(1);
 		max1_to_conv2   	= new sc_fifo<float*>(1);
 		conv2_to_max3   	= new sc_fifo<float*>(1);
-                max3_to_conv4   	= new sc_fifo<float*>(1);
+        max3_to_conv4   	= new sc_fifo<float*>(1);
 		conv4_to_max5   	= new sc_fifo<float*>(1);
-                max5_to_conv6   	= new sc_fifo<float*>(1);
+        max5_to_conv6   	= new sc_fifo<float*>(1);
 		conv6_to_max7   	= new sc_fifo<float*>(1);
-                max7_to_conv8   	= new sc_fifo<float*>(1);
+        max7_to_conv8   	= new sc_fifo<float*>(1);
 		conv8_to_max9   	= new sc_fifo<float*>(1);
-                max9_to_conv10   	= new sc_fifo<float*>(1);
+        max9_to_conv10   	= new sc_fifo<float*>(1);
 		conv10_to_max11   	= new sc_fifo<float*>(1);
-                max11_to_conv12   	= new sc_fifo<float*>(1);
+        max11_to_conv12   	= new sc_fifo<float*>(1);
 		conv12_to_conv13   	= new sc_fifo<float*>(1);
-                conv13_to_conv14   	= new sc_fifo<float*>(1);
+        conv13_to_conv14   	= new sc_fifo<float*>(1);
 		conv14_to_region   	= new sc_fifo<float*>(1);
 //		region_to_writer 	= new sc_fifo<float*>(1);
 
