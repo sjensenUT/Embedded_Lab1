@@ -108,6 +108,7 @@ class	image_reader : public kahn_process
 
 }; 
 
+
 class	conv_layer : public kahn_process
 {
 	public:
@@ -119,15 +120,26 @@ class	conv_layer : public kahn_process
 	const	int pad;
 	const	ACTIVATION activation;
 	const	bool batchNormalize;
-	
-  	sc_fifo_in<float*> in;
+  const bool crop;
+	int* inputCoords;
+  int* outputCoords;
+
+  sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
-  	convolutional_layer l;
+  convolutional_layer l;
+
+  void printCoords() {
+      printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
+          this->inputCoords[0],
+          this->inputCoords[1],
+          this->inputCoords[2],
+          this->inputCoords[3]);  
+  }
 
 	conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, const char* _weightsFileName)
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords)
 	:	kahn_process(name),
 		stride(_stride),
 		numFilters(_numFilters),
@@ -135,21 +147,23 @@ class	conv_layer : public kahn_process
 		filterSize(_filterSize),
 		pad(_pad),
 		activation(_activation),
-		batchNormalize(_batchNormalize)
+		batchNormalize(_batchNormalize),
+    crop(_crop)
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
-		int groups  = 1;
-    		// Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
-    		// filter size rounding down (see parse_convolutional() in darknet's parser.c)
-    		int padding = 0;
-    		if (this->pad != 0) {
-      			padding = this->filterSize / 2;
-    		}
 
-    		// Call make_convolutional_layer() to create the layer object
-    		l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
-          		this->filterSize, this->stride, padding, activation, (int) batchNormalize,
-          		0, 0, 0);  
+		int groups  = 1;
+    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
+    int padding = 0;
+    if (this->pad != 0) {
+        padding = this->filterSize / 2;
+    }
+
+    // Call make_convolutional_layer() to create the layer object
+    l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
+            this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+            0, 0, 0);  
  
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
@@ -168,7 +182,19 @@ class	conv_layer : public kahn_process
 //		printf("loaded parameters of layer %i\n", layerIndex);
 //   	printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
 //    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
-  	}
+
+    // Copy the input and output coordinates.
+    if (crop) {
+        inputCoords = new int[4];
+        outputCoords = new int[4];
+        for (int j = 0; j < 4; j++) {
+            inputCoords[j] = _inputCoords[j];
+            outputCoords[j] = _outputCoords[j];
+        }
+        printCoords();
+    }
+
+  }
 
 	void	process() override
 	{
@@ -203,13 +229,33 @@ class	conv_layer : public kahn_process
 //    printf("\n");
 	
 		free(dummyNetwork.workspace);
+
+    float* outputImage = l.output;
+
+    // Now it's time to crop the data if this layer is configured to do cropping.
+    if (crop) {
+        // Calculate the relative coordinates for cropping
+        int cropped_width = outputCoords[2] - outputCoords[0];
+        int cropped_height = outputCoords[3] - outputCoords[1];
+        int left_crop   = outputCoords[0] - inputCoords[0];
+        int top_crop    = outputCoords[1] - inputCoords[1];
+//        int right_crop  = inputCoords[2]  - outputCoords[2];
+//        int bottom_crop = inputCoords[3]  - outputCoords[3];
+        int cropCoords[4] = { left_crop, top_crop,
+                              left_crop + cropped_width,
+                              left_crop + cropped_height };
+
+        printf("Cropping tile %d\n", layerIndex);
+        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+               inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
+               outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
+                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
+        outputImage = getSubArray(l.output, cropCoords, l.w, l.h, l.c);
+    }
+
     // Send off the layer's output to the next layer!
-		out->write(l.output);
-
-    // Now we're done with the workspace - deallocate it or else memory leaks.
-		//free(dummyNetwork.input);
-		//free(input); 
-
+		out->write(outputImage);
 	}
 };
 
@@ -424,6 +470,12 @@ class	region_layer : public kahn_process
 	}
 };
 
+int coerce (int val, int min, int max) {
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+}
+
 class   conv_layer_unfused : public sc_module
 {
     public:
@@ -433,25 +485,54 @@ class   conv_layer_unfused : public sc_module
     scatter_layer *scatter;
     conv_layer *conv[9];
     merge_layer *merge;
-    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4], int c,  int filterSize,
-             int stride, int numFilters, int pad, ACTIVATION activation,
-             bool batchNormalize) : sc_module(name)
+    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+                       int totalWidth, int totalHeight, int c,
+                       int filterSize, int stride, int numFilters, int pad,
+                       ACTIVATION activation, bool batchNormalize) : sc_module(name)
     {
         cout << "instantiating fused conv layer" << endl;
+       
+        // Determine how much padding we should use for each tile.
+        int padding = 0;
+        if (pad) padding = filterSize / 2;
+        
+        // Create the padded coordinates
+        int paddedCoords[9][4];
+        for (int j = 0; j < 9; j++) {
+            // Top-left X coordinate
+            paddedCoords[j][0] = coerce(coords[j][0] - padding, 0, totalWidth); 
+            // Top-left Y coordinate
+            paddedCoords[j][1] = coerce(coords[j][1] - padding, 0, totalHeight); 
+            // Bottom-right X coordinate
+            paddedCoords[j][2] = coerce(coords[j][2] + padding, 0, totalWidth); 
+            // Bottom-right Y coordinate
+            paddedCoords[j][3] = coerce(coords[j][3] + padding, 0, totalHeight); 
+            printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
+                   paddedCoords[j][0], paddedCoords[j][1],
+                   paddedCoords[j][2], paddedCoords[j][3]);
+        }
+
         for(int i = 0; i < 9; i++){
             //cout << "in conv_layer instantiation loop i = " << i << endl;
-            int w = coords[i][2] - coords[i][0] + 1;
-            int h = coords[i][3] - coords[i][1] + 1;
-            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
+            int w = paddedCoords[i][2] - paddedCoords[i][0] + 1;
+            int h = paddedCoords[i][3] - paddedCoords[i][1] + 1;
+            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+                                      true, paddedCoords[i], coords[i]);
         }
+
         //cout << "instantiating width and height arrays " << endl;
-        int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
-        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
-        int totalWidth = widths[0] + widths[1] + widths[2];
-        int totalHeight = heights[0] + heights[1] + heights[2];
+        // These are the un-padded widths and heights for the merge layer.
+        int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
+                                    coords[1][2] - coords[1][0] + 1,
+                                    coords[2][2] - coords[2][0] + 1 };
+        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
+                                    coords[3][3] - coords[3][1] + 1,
+                                    coords[6][3] - coords[6][1] + 1 };
+
         //cout << "beginning merge and scatter instantiation" << endl;
         merge = new merge_layer("merge", widths, heights, numFilters);
-        scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
+        scatter = new scatter_layer("scatter", paddedCoords, totalWidth, totalHeight, c);
+
         //cout << "finished instantiating merge and scatter layers" << endl;
         //scatter_to_conv = new sc_fifo<float*>[9];
         //conv_to_merge = new sc_fifo<float*>[9];
@@ -565,7 +646,7 @@ class	kpn_neuralnet : public sc_module
         //int testCoords[][] = new int[][2];
         //testCoords[0] = new int[2] {1, 2};
         //testCoords[1] = new int[2] {3, 4};
-        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 3, 3, 1, 16, 1,  LEAKY, true);
+        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
         conv0->scatter->in(*reader_to_conv0);
         conv0->merge->out(*conv0_to_max1);
         //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
@@ -576,7 +657,7 @@ class	kpn_neuralnet : public sc_module
 		max1->in(*conv0_to_max1);
 		max1->out(*max1_to_conv2);
 
-		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, "conv2.weights");
+		conv2 = new conv_layer("conv2",2, 208, 208, 16, 3,1,32, 1, LEAKY, true, false, NULL, NULL);
 		conv2->in(*max1_to_conv2);
 		conv2->out(*conv2_to_max3);
 
@@ -585,7 +666,7 @@ class	kpn_neuralnet : public sc_module
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, "conv4.weights");
+		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
                 conv4->in(*max3_to_conv4);
                 conv4->out(*conv4_to_max5);
 		
@@ -593,7 +674,7 @@ class	kpn_neuralnet : public sc_module
                 max5->in(*conv4_to_max5);
                 max5->out(*max5_to_conv6);
 		
-		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, "conv6.weights");
+		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL);
                 conv6->in(*max5_to_conv6);
                 conv6->out(*conv6_to_max7);
 	
@@ -601,7 +682,7 @@ class	kpn_neuralnet : public sc_module
                 max7->in(*conv6_to_max7);
                 max7->out(*max7_to_conv8);
 		
-		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, "conv8.weights");
+		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL);
                 conv8->in(*max7_to_conv8);
                 conv8->out(*conv8_to_max9);
 		
@@ -609,7 +690,7 @@ class	kpn_neuralnet : public sc_module
                 max9->in(*conv8_to_max9);
                 max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, "conv10.weights");
+		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL);
                 conv10->in(*max9_to_conv10);
                 conv10->out(*conv10_to_max11);
 		
@@ -617,15 +698,15 @@ class	kpn_neuralnet : public sc_module
                 max11->in(*conv10_to_max11);
                 max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, "conv12.weights");
+		conv12 = new conv_layer("conv12",12, 13, 13, 512, 3,1,1024,1,LEAKY,true, false, NULL, NULL);
                 conv12->in(*max11_to_conv12);
                 conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true,"conv13.weights");
+		conv13 = new conv_layer("conv13",13, 13, 13, 1024, 3,1,512,1,LEAKY,true, false, NULL, NULL);
                 conv13->in(*conv12_to_conv13);
                 conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, "conv14.weights");
+		conv14 = new conv_layer("conv14",14, 13, 13, 512, 1,1,425,1, LINEAR, false, false, NULL, NULL);
                 conv14->in(*conv13_to_conv14);
                 conv14->out(*conv14_to_region);
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
