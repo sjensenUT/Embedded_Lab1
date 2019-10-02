@@ -74,9 +74,11 @@ void scatter_layer::process()
 {
     float *data;
     in->read(data);
-    cout << "scattering tiles @ iter " << iter << endl;
+//    cout << "scattering tiles @ iter " << iter << endl;
+//    cout << "coords[3] = " << this->coords[3][0] << "," << coords[3][1] << " " << coords[3][2] << "," << coords[3][3] << endl;
     float **output = new float*[9];
     for(int i = 0; i < 9; i++){
+//        cout << "in for loop i = " << i << endl;
         output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
     }
     for(int i = 0; i < 9; i++){

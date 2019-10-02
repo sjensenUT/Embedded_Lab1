@@ -2,27 +2,29 @@
 #include <stdio.h>
 using namespace std;
 
-int* calcPrevCoords(int coords[], int stride, int filterSize, int prevWidth, int prevHeight, std::string prevLayerType){
-        int x1 = coords[0];
-	int y1 = coords[1];
-	int x2 = coords[2];
-	int y2 = coords[3];
-	int *result = new int[4];
-	if(prevLayerType.compare("convolutional") == 0){
-		result[0] = max(0, stride*x1 - filterSize/2);
-		result[1] = max(0, stride*y1 - filterSize/2);
-		result[2] = min(stride*x2 + filterSize/2, prevWidth - 1);
-		result[3] = min(stride*y2 + filterSize/2, prevHeight - 1);
-	}else{
-		result[0] = stride*x1;
-                result[1] = stride*y1;
-                result[2] = min(stride*x2 + stride - 1, prevWidth - 1);
-                result[3] = min(stride*y2 + stride - 1, prevHeight - 1);
-		//cout << "hello2" << endl;
-	}	
-	//cout << result[0] << ", " << result[1] << ", " << result[2] << ", " << result[3] << endl;
-	return result;
-	
+void calcPrevCoords(int coords[9][4], int prevCoords[9][4], int stride, int filterSize, int prevWidth, int prevHeight, std::string layerType){
+//    cout << "stride = " << stride << ", filterSize = " << filterSize << ", prevWidth = " << prevWidth << ", prevHeight = " << prevHeight << endl;
+    for(int i = 0; i < 9; i++){
+       // cout << "i = " << i << endl;
+      int x1 = coords[i][0];
+	    int y1 = coords[i][1];
+	    int x2 = coords[i][2];
+	    int y2 = coords[i][3];
+      //cout << "x1 = " << x1 << ", y1 = " << y1 << ", x2 = " << x2 << ", y2 = " << y2 << endl;
+	    if(layerType.compare("convolutional") == 0){
+		    prevCoords[i][0] = max(0, stride*x1 - filterSize/2);
+		    prevCoords[i][1] = max(0, stride*y1 - filterSize/2);
+		    prevCoords[i][2] = min(stride*x2 + filterSize/2, prevWidth - 1);
+		    prevCoords[i][3] = min(stride*y2 + filterSize/2, prevHeight - 1);
+        //cout << "prevX1 = " << prevCoords[i][0] << ", prevY1 = " << prevCoords[i][1] << ", prevX2 = " << prevCoords[i][2] << ", prevY2 = " << prevCoords[i][3] << endl;
+	    }else{
+		    prevCoords[i][0] = stride*x1;
+            prevCoords[i][1] = stride*y1;
+            prevCoords[i][2] = min(stride*x2 + stride - 1, prevWidth - 1);
+            prevCoords[i][3] = min(stride*y2 + stride - 1, prevHeight - 1);
+	    }	
+	    //cout << result[0] << ", " << result[1] << ", " << result[2] << ", " << result[3] << endl;
+	}
 }
 
 float* getSubArray(float arr[], const int coords[], int width, int height, int numChannels){
