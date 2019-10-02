@@ -31,14 +31,14 @@ void merge_layer::process()
         float *output = mergeTiles(data, this->tileWidths, this->tileHeights, this->numChannels);
         //cout << "finished merging tiles" << endl;
 
-/*
-        image outputImage;
-        outputImage.w = 416;
-        outputImage.h = 416;
-        outputImage.c = 16; // hard code for layer 0 output
+/*        image outputImage;
+        outputImage.w = 208;
+        outputImage.h = 208;
+        outputImage.c = 16; // hard code for layer 1 output
         outputImage.data = output;
 
         int x, y, c;
+        if(this->tileWidths[0] < 100) {
           for (c = 0; c < outputImage.c; c++) {
             printf("Channel %d:\n", c);
             for (y = 0; y < outputImage.h; y++) {
@@ -50,6 +50,7 @@ void merge_layer::process()
             printf("\n");
           }
           printf("\n");
+        }
 */
 
         out->write(output);
