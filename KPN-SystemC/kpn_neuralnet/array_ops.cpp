@@ -94,14 +94,14 @@ float* vertCat(float arr1[], float arr2[], int width, int height1, int height2, 
         return result;
 }
 */
-float* mergeTiles(float **tiles, const int widths[], const int heights[], int numChannels){
-    cout << "in mergeTiles" << endl;
+float* mergeTiles(float **tiles, const int widths[], const int heights[], int numChannels){  
+    //cout << "in mergeTiles" << endl;
     //cout << "tiles[0][0] = " << tiles[0][0] << endl;
     //cout << "calculating total width and height" << endl;
     int totalWidth = widths[0] + widths[1] + widths[2];
     int totalHeight = heights[0] + heights[1] + heights[2];
-    cout << "totalWidth = " << totalWidth << endl;
-    cout << "totalHeight = " << totalHeight << endl;
+    //cout << "totalWidth = " << totalWidth << endl;
+    //cout << "totalHeight = " << totalHeight << endl;
     float *result = new float[totalWidth*totalHeight*numChannels];
     int p = 0;
     //cout << "beginning tile merge" << endl;
