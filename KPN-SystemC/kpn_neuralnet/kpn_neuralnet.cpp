@@ -153,7 +153,7 @@ class	conv_layer : public kahn_process
  
 		//new code for loading weights, copied from kamyar
 		int num = l.c/l.groups*l.n*l.size*l.size;
-		cout << "l.size = " << l.size << endl;
+		//cout << "l.size = " << l.size << endl;
 		load(layerIndex, "biases", l.biases, l.n);
 
 		if(l.batch_normalize)
@@ -247,11 +247,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-//    printf("inputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", data[j]);
-//    }
-//    printf("\n");
+    printf("inputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", data[j]);
+    }
+    printf("\n");
 
    	// Call forward_maxpool_layer() here, read from layer.output and write to out
    	// Create a dummy network object. The function only uses network.input
@@ -259,11 +259,11 @@ class	max_layer : public kahn_process
   	dummyNetwork.input = data;
    	forward_maxpool_layer(l, dummyNetwork);
 
-//	  printf("outputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", l.output[j]);
-//    }
-//    printf("\n");
+	printf("outputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n");
   
   	out->write(l.output);	
 	}
@@ -427,36 +427,47 @@ class	region_layer : public kahn_process
 class   conv_layer_unfused : public sc_module
 {
     public:
-    sc_fifo<float*> **scatter_to_conv,
-        **conv_to_merge;
+    sc_fifo<float*> *scatter_to_conv[9],
+        *conv_to_merge[9];
 
     scatter_layer *scatter;
-    conv_layer **conv;
+    conv_layer *conv[9];
     merge_layer *merge;
     conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4], int c,  int filterSize,
              int stride, int numFilters, int pad, ACTIVATION activation,
              bool batchNormalize) : sc_module(name)
     {
+        cout << "instantiating fused conv layer" << endl;
         for(int i = 0; i < 9; i++){
+            cout << "in conv_layer instantiation loop i = " << i << endl;
             int w = coords[i][2] - coords[i][0] + 1;
             int h = coords[i][3] - coords[i][1] + 1;
             conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
         }
+        cout << "instantiating width and height arrays " << endl;
         int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
         int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
         int totalWidth = widths[0] + widths[1] + widths[2];
         int totalHeight = heights[0] + heights[1] + heights[2];
+        cout << "beginning merge and scatter instantiation" << endl;
         merge = new merge_layer("merge", widths, heights, c);
-
         scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
+        cout << "finished instantiating merge and scatter layers" << endl;
         //scatter_to_conv = new sc_fifo<float*>[9];
         //conv_to_merge = new sc_fifo<float*>[9];
         for(int i = 0; i < 9; i++){
+            cout << "in fifo assignment loop i = " << i << endl;
+            cout << "assigning scatter_to_conv" << endl;
             scatter_to_conv[i] = new sc_fifo<float*>(1);
+            cout << "assigning conv_to_merge" << endl;
             conv_to_merge[i] = new sc_fifo<float*>(1);
+            cout << "assigning conv.in" << endl;
             conv[i]->in(*scatter_to_conv[i]);
+            cout << "assigning conv.out" << endl;
             conv[i]->out(*conv_to_merge[i]);
+            cout << "assigning scatter.out" << endl;
             scatter->out[i](*scatter_to_conv[i]);
+            cout << "assigning merge.in" << endl;
             merge->in[i](*conv_to_merge[i]);
         }
     }
@@ -571,8 +582,8 @@ class	kpn_neuralnet : public sc_module
 
 		
 		max3 = new max_layer("max3",3, 208, 208, 32, 2,2);
-                max3->in(*conv2_to_max3);
-                max3->out(*max3_to_conv4);
+        max3->in(*conv2_to_max3);
+        max3->out(*max3_to_conv4);
 		
 		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, "conv4.weights");
                 conv4->in(*max3_to_conv4);

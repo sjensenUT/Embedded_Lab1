@@ -19,9 +19,11 @@ void merge_layer::process()
         float **data = new float*[9];
         for(int i = 0; i < 9; i++){
             in[i]->read(data[i]);   
-        }
+        }        
         cout << "merging tiles @ iter " << iter << endl;
+        cout << "data[0][0] = " << data[0][0] << endl; 
         float *output = mergeTiles(data, this->tileWidths, this->tileHeights, this->numChannels);
+        cout << "finished merging tiles" << endl;
         out->write(output);
 }
 
