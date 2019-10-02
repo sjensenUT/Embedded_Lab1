@@ -237,97 +237,71 @@ void conv_layer::process()
     out->write(outputImage);
 }
 
-class	max_layer : public kahn_process
-{
-	public:
-
-	const	int stride;
-	const	int layerIndex;
-	const	int filterSize;	
-	
-	sc_fifo_in<float*> in;
-	sc_fifo_out<float*> out;
-
-  layer l; 
-  const bool crop;
-	int* inputCoords;
-  int* outputCoords;
-
-	max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-            int _stride, bool _crop, int* _inputCoords, int* _outputCoords)
-	:	kahn_process(name),
-		stride(_stride),
-		layerIndex(_layerIndex),
-		filterSize(_filterSize),
+max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
+    int _stride, bool _crop, int* _inputCoords, int* _outputCoords)
+:	kahn_process(name),
+    stride(_stride),
+    layerIndex(_layerIndex),
+    filterSize(_filterSize),
     crop(_crop)
-	{
-		  cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
+{
+    cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
 
-    	// Create the underlying darknet layer
-    	l = make_maxpool_layer(BATCH, _h, _w, _c, this->filterSize, 
-                           this->stride, filterSize-1);
+    // Create the underlying darknet layer
+    l = make_maxpool_layer(BATCH, _h, _w, _c, this->filterSize, 
+                       this->stride, filterSize-1);
 
-      // Copy the input and output coordinates.
-      if (crop) {
-          inputCoords = new int[4];
-          outputCoords = new int[4];
-          for (int j = 0; j < 4; j++) {
-              inputCoords[j] = _inputCoords[j];
-              outputCoords[j] = _outputCoords[j];
-          }
-      }
-   
-	}
-
-	void	process() override
-	{
-      float* data;
-
-      in->read(data);
-      cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
-
-//        printf("inputs of layer %d, are", layerIndex);
-//        for(int j = 0; j < 10; j++){
-//            printf(" %f", data[j]);
-//        }
-//        printf("\n");
-
-   	  // Call forward_maxpool_layer() here, read from layer.output and write to out
-   	  // Create a dummy network object. The function only uses network.input
-   	  network dummyNetwork;
-  	  dummyNetwork.input = data;
-   	  forward_maxpool_layer(l, dummyNetwork);
-
-      float* outputImage = l.output;
-
-      // Now it's time to crop the data if this layer is configured to do cropping.
-      if (crop) {
-        
-          int preCropCoords[4] = { inputCoords[0] / this->stride,
-                                   inputCoords[1] / this->stride,
-                                   inputCoords[0] / this->stride + l.out_w - 1,
-                                   inputCoords[1] / this->stride + l.out_h - 1 };
-
-          // Calculate the relative coordinates for cropping
-          int* cropCoords = getCropCoords(preCropCoords, outputCoords);
-          printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
-                preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
-                outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-          outputImage = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+    // Copy the input and output coordinates.
+    if (crop) {
+        inputCoords = new int[4];
+        outputCoords = new int[4];
+        for (int j = 0; j < 4; j++) {
+            inputCoords[j] = _inputCoords[j];
+            outputCoords[j] = _outputCoords[j];
+        }
     }
 
-    // Send off the layer's output to the next layer!
-		out->write(outputImage);
+}
 
-	    /*printf("outputs of layer %d, are", layerIndex);
-        for(int j = 0; j < 10; j++){
-            printf(" %f", l.output[j]);
-        }
-        printf("\n");*/
-  
-  	  out->write(l.output);	
-	}
-};
+void max_layer::process()
+{
+    float* data;
+
+    in->read(data);
+    cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
+
+    //printf("inputs of layer %d, are", layerIndex);
+    //for(int j = 0; j < 10; j++){
+    //  printf(" %f", data[j]);
+    //}
+    //printf("\n");
+
+    // Call forward_maxpool_layer() here, read from layer.output and write to out
+    // Create a dummy network object. The function only uses network.input
+    network dummyNetwork;
+    dummyNetwork.input = data;
+    forward_maxpool_layer(l, dummyNetwork);
+
+    float* outputImage = l.output;
+
+    // Now it's time to crop the data if this layer is configured to do cropping.
+    if (crop) {
+    
+        int preCropCoords[4] = { inputCoords[0] / this->stride,
+                               inputCoords[1] / this->stride,
+                               inputCoords[0] / this->stride + l.out_w - 1,
+                               inputCoords[1] / this->stride + l.out_h - 1 };
+
+        // Calculate the relative coordinates for cropping
+        int* cropCoords = getCropCoords(preCropCoords, outputCoords);
+        printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+            preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
+            outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        outputImage = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
+    }
+    // Send off the layer's output to the next layer!
+    out->write(outputImage);	
+}
 
 region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
@@ -512,76 +486,65 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
 
 }
 
-
-
-class max_layer_unfused : public sc_module
+max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+                   int inputWidth, int inputHeight, int c, int size, int stride,
+                   int pad ) : sc_module(name)
 {
-    public:
-    sc_fifo<float*> *scatter_to_max[9],
-        *max_to_merge[9];
-
-    scatter_layer *scatter;
-    max_layer *maxl[9];
-    merge_layer *merge;
-    max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
-                       int inputWidth, int inputHeight, int c, int size, int stride,
-                       int pad ) : sc_module(name)
-    {
-        cout << "instantiating fused max layer" << endl;
-        cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
-        for(int i = 0; i < 9; i++){
-            for(int j = 0; j < 4; j++){
-                cout << "(max) coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
-            }
-        } 
-        int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
-                                    coords[1][2] - coords[1][0] + 1,
-                                    coords[2][2] - coords[2][0] + 1 };
-        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
-                                    coords[3][3] - coords[3][1] + 1,
-                                    coords[6][3] - coords[6][1] + 1 };
-
-        // Create the padded coordinates
-        if(pad){
-            int paddedCoords[9][4];
-            calcPrevCoords(coords, paddedCoords, stride, size, inputWidth, inputHeight, "maxpool");
-            for (int j = 0; j < 9; j++) {
-                printf("Tile %d padded coordinates (max): (%d, %d) (%d, %d)\n", j,
-                    paddedCoords[j][0], paddedCoords[j][1],
-                    paddedCoords[j][2], paddedCoords[j][3]);
-                //cout << "in conv_layer instantiation loop i = " << i << endl;
-                int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
-                int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
-
-                string name = "max";
-                name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
-                maxl[j] = new max_layer(name.c_str(), layerIndex, w, h, c, size, stride,
-                                        true, paddedCoords[j], coords[j]);
-            }
-            scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
-
-        }else{
-            for(int j = 0; j < 9; j++){
-                //cout << "in conv_layer instantiation loop i = " << i << endl;
-                int w = coords[j][2] - coords[j][0] + 1;
-                int h = coords[j][3] - coords[j][1] + 1;
-                maxl[j] = new max_layer("max", layerIndex, w, h, c, size, stride,
-                                    false, NULL, NULL);
-            }
-            scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
-
+    cout << "instantiating fused max layer" << endl;
+    cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
+    for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 4; j++){
+            cout << "(max) coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
         }
-        merge = new merge_layer("merge", widths, heights, c);
-        for(int i = 0; i < 9; i++){
-            scatter_to_max[i] = new sc_fifo<float*>(1);
-            max_to_merge[i] = new sc_fifo<float*>(1);
-            maxl[i]->in(*scatter_to_max[i]);
-            maxl[i]->out(*max_to_merge[i]);
-            scatter->out[i](*scatter_to_max[i]);
-            merge->in[i](*max_to_merge[i]);
+    } 
+    int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
+                                coords[1][2] - coords[1][0] + 1,
+                                coords[2][2] - coords[2][0] + 1 };
+    int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
+                                coords[3][3] - coords[3][1] + 1,
+                                coords[6][3] - coords[6][1] + 1 };
+
+    // Create the padded coordinates
+    if(pad){
+        int paddedCoords[9][4];
+        calcPrevCoords(coords, paddedCoords, stride, size, inputWidth, inputHeight, "maxpool");
+        for (int j = 0; j < 9; j++) {
+            printf("Tile %d padded coordinates (max): (%d, %d) (%d, %d)\n", j,
+                paddedCoords[j][0], paddedCoords[j][1],
+                paddedCoords[j][2], paddedCoords[j][3]);
+            //cout << "in conv_layer instantiation loop i = " << i << endl;
+            int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
+            int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
+
+            string name = "max";
+            name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
+            maxl[j] = new max_layer(name.c_str(), layerIndex, w, h, c, size, stride,
+                                    true, paddedCoords[j], coords[j]);
         }
+        scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
+
+    }else{
+        for(int j = 0; j < 9; j++){
+            //cout << "in conv_layer instantiation loop i = " << i << endl;
+            int w = coords[j][2] - coords[j][0] + 1;
+            int h = coords[j][3] - coords[j][1] + 1;
+            maxl[j] = new max_layer("max", layerIndex, w, h, c, size, stride,
+                                false, NULL, NULL);
+        }
+        scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
+
     }
-};
+    merge = new merge_layer("merge", widths, heights, c);
+    for(int i = 0; i < 9; i++){
+        scatter_to_max[i] = new sc_fifo<float*>(1);
+        max_to_merge[i] = new sc_fifo<float*>(1);
+        maxl[i]->in(*scatter_to_max[i]);
+        maxl[i]->out(*max_to_merge[i]);
+        scatter->out[i](*scatter_to_max[i]);
+        merge->in[i](*max_to_merge[i]);
+    }
+}
+
 
 
 class	kpn_neuralnet : public sc_module
@@ -619,7 +582,7 @@ class	kpn_neuralnet : public sc_module
 	max_layer	*max3, *max5, *max7, *max9, *max11;
 	conv_layer	*conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
 	conv_layer_unfused *conv0;
-  max_layer_unfused *max1;
+    max_layer_unfused *max1;
     region_layer	*region;
 	image_reader	*reader0;
 //	image_writer	*writer0;
@@ -663,8 +626,8 @@ class	kpn_neuralnet : public sc_module
 //		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
 //		layer_region_to_writer 	= new sc_fifo<int>(1);
 		
-    // Here is where we will indicate the parameters for each layer. These can
-    // be found in the cfg file for yolov2-tiny in the darknet folder.
+        // Here is where we will indicate the parameters for each layer. These can
+        // be found in the cfg file for yolov2-tiny in the darknet folder.
 	    reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
@@ -673,23 +636,23 @@ class	kpn_neuralnet : public sc_module
 		reader0->im_name_out(*char_reader_to_writer);
 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-    int tileCoords[9][4];
-    getTileCoords(416, 416, tileCoords);
-    conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
-    conv0->scatter->in(*reader_to_conv0);
-    conv0->merge->out(*conv0_to_max1);
-    //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
+        int tileCoords[9][4];
+        getTileCoords(416, 416, tileCoords);
+        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
+        conv0->scatter->in(*reader_to_conv0);
+        conv0->merge->out(*conv0_to_max1);
+        //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
 		//conv0->in(*reader_to_conv0);
 		//conv0->out(*conv0_to_max1);
 
-//    max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+//      max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
 //                       int inputWidth, int inputHeight, int c, int size, int stride,
 //                       int pad ) 
 
-    getTileCoords(208, 208, tileCoords); // These are the output coordinates
-    max1 = new max_layer_unfused("max1", 1, tileCoords, 416, 416, 16, 2, 2, true); 
-    max1->scatter->in(*conv0_to_max1);
-    max1->merge->out(*max1_to_conv2);
+        getTileCoords(208, 208, tileCoords); // These are the output coordinates
+        max1 = new max_layer_unfused("max1", 1, tileCoords, 416, 416, 16, 2, 2, true); 
+        max1->scatter->in(*conv0_to_max1);
+        max1->merge->out(*max1_to_conv2);
 
 //		max1 = new max_layer("max1",1, 416, 416, 16, 2,2);
 //		max1->in(*conv0_to_max1);
@@ -704,7 +667,7 @@ class	kpn_neuralnet : public sc_module
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
 		
-    conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
+        conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
         conv4->in(*max3_to_conv4);
         conv4->out(*conv4_to_max5);
 

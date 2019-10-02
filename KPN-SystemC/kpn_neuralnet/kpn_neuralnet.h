@@ -46,6 +46,29 @@ class   conv_layer : public kahn_process
     void process() override;
 };
 
+
+class   max_layer : public kahn_process
+{
+    public:
+
+    const   int stride;
+    const   int layerIndex;
+    const   int filterSize;
+
+    sc_fifo_in<float*> in;
+    sc_fifo_out<float*> out;
+
+    layer l;
+    const bool crop;
+    int* inputCoords;
+    int* outputCoords;
+
+    max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
+            int _stride, bool _crop, int* _inputCoords, int* _outputCoords);
+    void process() override;
+
+};
+
 class   region_layer : public kahn_process
 {
     public:
@@ -96,4 +119,18 @@ class   conv_layer_unfused : public sc_module
     conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
                        int inputWidth, int inputHeight, int c, int filterSize, int stride, int numFilters, int pad,
                        ACTIVATION activation, bool batchNormalize);
+};
+
+class max_layer_unfused : public sc_module
+{
+    public:
+    sc_fifo<float*> *scatter_to_max[9],
+        *max_to_merge[9];
+
+    scatter_layer *scatter;
+    max_layer *maxl[9];
+    merge_layer *merge;
+    max_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+                       int inputWidth, int inputHeight, int c, int size, int stride,
+                       int pad );
 };
