@@ -39,13 +39,13 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
 
 
 void getTileCoords(int width, int height, int coords[9][4]){
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
+    for(int i = 0; i < 3; i++){ // TILE ROW
+        for(int j = 0; j < 3; j++){ // TILE COL
             //coords[i*3 + j] = new int[4] {j*width/3, i*height/3, (j+1)*width/3 - 1, (i+1)*height/3 - 1};
             coords[i*3 + j][0] = j*width/3;
             coords[i*3 + j][1] = i*height/3;
-            coords[i*3 + j][2] = (j+1)*width/3 - 1;
-            coords[i*3 + j][3] = (i+1)*height/3 - 1;
+            coords[i*3 + j][2] = (j == 2) ? width-1  : (j+1)*width/3 - 1;
+            coords[i*3 + j][3] = (i == 2) ? height-1 : (i+1)*height/3 - 1;
         }
     }
 }
@@ -124,10 +124,12 @@ class	conv_layer : public kahn_process
 	int* inputCoords;
     int* outputCoords;
 
+
     sc_fifo_in<float*> in;
 	sc_fifo_out<float*> out;
 
     convolutional_layer l;
+
 
     void printCoords() {
         printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
@@ -136,6 +138,7 @@ class	conv_layer : public kahn_process
             this->inputCoords[2],
             this->inputCoords[3]);  
     }
+
 
 	conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
@@ -149,6 +152,7 @@ class	conv_layer : public kahn_process
 		activation(_activation),
 		batchNormalize(_batchNormalize),
         crop(_crop)
+
 	{
 		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
@@ -212,7 +216,7 @@ class	conv_layer : public kahn_process
         network dummyNetwork;
         dummyNetwork.input = input;
 
-//		printf("inputs of layer %d, are", layerIndex);
+//  	printf("inputs of layer %d, are", layerIndex);
 //    for(int j = 0; j < 10; j++){
 //        printf(" %f", input[j]);
 //    }
@@ -229,7 +233,6 @@ class	conv_layer : public kahn_process
 //    printf("\n");
 	
 		free(dummyNetwork.workspace);
-
         float* outputImage = l.output;
 
         // Now it's time to crop the data if this layer is configured to do cropping.
@@ -268,7 +271,6 @@ class	conv_layer : public kahn_process
                 outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
             outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
         }
-
     // Send off the layer's output to the next layer!
 		out->write(outputImage);
 	}
@@ -308,11 +310,11 @@ class	max_layer : public kahn_process
 		in->read(data);
 		cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-        /*printf("inputs of layer %d, are", layerIndex);
+        printf("inputs of layer %d, are", layerIndex);
         for(int j = 0; j < 10; j++){
             printf(" %f", data[j]);
         }
-        printf("\n");*/
+        printf("\n");
 
    	    // Call forward_maxpool_layer() here, read from layer.output and write to out
    	    // Create a dummy network object. The function only uses network.input
@@ -692,9 +694,10 @@ class	kpn_neuralnet : public sc_module
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
 		
-		conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
+    	conv4 = new conv_layer("conv4",4, 104, 104, 32, 3,1,64,1, LEAKY, true, false, NULL, NULL);
         conv4->in(*max3_to_conv4);
         conv4->out(*conv4_to_max5);
+
 		
 		max5 = new max_layer("max5",5, 104, 104, 64, 2, 2);
         max5->in(*conv4_to_max5);
@@ -703,14 +706,17 @@ class	kpn_neuralnet : public sc_module
 		conv6 = new conv_layer("conv6",6, 52, 52, 64, 3,1,128,1, LEAKY, true, false, NULL, NULL);
         conv6->in(*max5_to_conv6);
         conv6->out(*conv6_to_max7);
+
 	
 		max7 = new max_layer("max7",7, 52, 52, 128, 2,2);
         max7->in(*conv6_to_max7);
         max7->out(*max7_to_conv8);
 		
+
 		conv8 = new conv_layer("conv8",8, 26, 26, 128, 3,1,256,1, LEAKY ,true, false, NULL, NULL);
         conv8->in(*max7_to_conv8);
         conv8->out(*conv8_to_max9);
+
 		
 		max9 = new max_layer("max9",9, 26, 26, 256, 2,2);
         max9->in(*conv8_to_max9);
@@ -719,7 +725,7 @@ class	kpn_neuralnet : public sc_module
 		conv10 = new conv_layer("conv10",10, 13, 13, 256, 3,1,512,1, LEAKY, true, false, NULL, NULL);
         conv10->in(*max9_to_conv10);
         conv10->out(*conv10_to_max11);
-		
+	
 		max11 = new max_layer("max11",11, 13, 13, 512, 2,1);
         max11->in(*conv10_to_max11);
         max11->out(*max11_to_conv12);
