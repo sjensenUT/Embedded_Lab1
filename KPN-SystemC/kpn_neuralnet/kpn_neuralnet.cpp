@@ -20,7 +20,7 @@
 #include "../../darknet/src/parser.h"
 #include "../../darknet/src/activations.h"
 #include "../../darknet/src/image.h"
-
+#include "kpn_neuralnet.h" 
 using	std::cout;
 using	std::endl;
 using std::string;
@@ -61,52 +61,37 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 	fclose(fh);
 }
 
-class	image_reader : public kahn_process
+
+image_reader::image_reader(sc_module_name name, strs _images)
+:	kahn_process(name),
+	images(_images)
 {
-	public:
+	cout << "instantiated image_reader" << endl;
+}
 
-	strs	images;
-
-  // Queue data type should be changed to image
-	sc_fifo_out<float*> out;
-	sc_fifo_out<float*> im_out; 
-	sc_fifo_out<int> im_w_out; 
-	sc_fifo_out<int> im_h_out; 
-	sc_fifo_out<string> im_name_out; 
-  	layer l;
-
-	image_reader(sc_module_name name, strs _images)
-	:	kahn_process(name),
-		images(_images)
+void image_reader::process()
+{
+	for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "instantiated image_reader" << endl;
+		cout << "reading image " << images[i] << " @ iter " << iter++ << endl;
+
+		// read images[i] from file
+		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
+ 		image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+		// sized.data is now the float* that points to the float array that will
+		// be the output/input of each layer. The image writer will call free on 
+        // this float* to deallocate the data.
+		out->write(sized.data);
+		im_out->write(orig.data);
+		im_w_out->write(orig.w);
+		im_h_out->write(orig.h); //give both width in height in queue of length 2
+		char name[10];
+        sprintf(name,"image%zu",i);
+        string name_str(name);			
+        im_name_out->write(name_str);
 	}
-
-	void	process() override
-	{
-		for(size_t i=0; i<images.size(); i++)
-		{
-			cout << "reading image " << images[i] << " @ iter " << iter++ << endl;
-
-			// read images[i] from file
-			image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
- 			image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
-
-			// sized.data is now the float* that points to the float array that will
-			// be the output/input of each layer. The image writer will call free on 
-			// this float* to deallocate the data.
-			out->write(sized.data);
-			im_out->write(orig.data);
-			im_w_out->write(orig.w);
-			im_h_out->write(orig.h); //give both width in height in queue of length 2
-			char name[10];
-			sprintf(name,"image%zu",i);
-      string name_str(name);			
-      im_name_out->write(name_str);
-		}
-	}
-
-}; 
+}
 
 
 float get_pixel(image m, int x, int y, int c)
@@ -123,177 +108,134 @@ void printChannels(image m, int x, int y)
   cout << endl;
 }
 
+void conv_layer::printCoords() {
+    printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
+        this->inputCoords[0],
+        this->inputCoords[1],
+        this->inputCoords[2],
+        this->inputCoords[3]);  
+}
 
 int* getCropCoords (int* inputCoords, int* outputCoords) {
-  int* croppedCoords = new int[4];
-  int cropped_width = outputCoords[2] - outputCoords[0] + 1;
-  int cropped_height = outputCoords[3] - outputCoords[1] + 1;
-  int left_crop   = outputCoords[0] - inputCoords[0];
-  int top_crop    = outputCoords[1] - inputCoords[1];
-  int right_crop  = inputCoords[2]  - outputCoords[2];
-  int bottom_crop = inputCoords[3]  - outputCoords[3];
-  croppedCoords[0] = left_crop;
-  croppedCoords[1] = top_crop;
-  croppedCoords[2] = left_crop + cropped_width - 1;
-  croppedCoords[3] = top_crop + cropped_height - 1;
-  return croppedCoords;
+    int* croppedCoords = new int[4];
+    int cropped_width = outputCoords[2] - outputCoords[0] + 1;
+    int cropped_height = outputCoords[3] - outputCoords[1] + 1;
+    int left_crop   = outputCoords[0] - inputCoords[0];
+    int top_crop    = outputCoords[1] - inputCoords[1];
+    int right_crop  = inputCoords[2]  - outputCoords[2];
+    int bottom_crop = inputCoords[3]  - outputCoords[3];
+    croppedCoords[0] = left_crop;
+    croppedCoords[1] = top_crop;
+    croppedCoords[2] = left_crop + cropped_width - 1;
+    croppedCoords[3] = top_crop + cropped_height - 1;
+    return croppedCoords;
 }
 
 
-class	conv_layer : public kahn_process
-{
-	public:
-	
-	const	int stride;
-	const	int numFilters;
-	const	int layerIndex;
-	const	int filterSize;	
-	const	int pad;
-	const	ACTIVATION activation;
-	const	bool batchNormalize;
-  const bool crop;
-	int* inputCoords;
-  int* outputCoords;
-
-
-    sc_fifo_in<float*> in;
-	sc_fifo_out<float*> out;
-
-    convolutional_layer l;
-
-
-    void printCoords() {
-        printf("Layer %d input coords: %d %d %d %d\n", layerIndex,
-            this->inputCoords[0],
-            this->inputCoords[1],
-            this->inputCoords[2],
-            this->inputCoords[3]);  
-    }
-
-
-	conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-             int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords)
-	:	kahn_process(name),
-		stride(_stride),
-		numFilters(_numFilters),
-		layerIndex(_layerIndex),
-		filterSize(_filterSize),
-		pad(_pad),
-		activation(_activation),
-		batchNormalize(_batchNormalize),
+conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
+         int _stride, int _numFilters, int _pad, ACTIVATION _activation,
+         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords)
+:	kahn_process(name),
+    stride(_stride),
+    numFilters(_numFilters),
+    layerIndex(_layerIndex),
+    filterSize(_filterSize),
+    pad(_pad),
+    activation(_activation),
+    batchNormalize(_batchNormalize),
     crop(_crop)
 
-	{
-		cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
+{
+    cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
-		int groups  = 1;
-        // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
-        // filter size rounding down (see parse_convolutional() in darknet's parser.c)
-        int padding = 0;
-        if (this->pad != 0) {
-            padding = this->filterSize / 2;
-        }
-
-        // Call make_convolutional_layer() to create the layer object
-        l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
-            this->filterSize, this->stride, padding, activation, (int) batchNormalize,
-            0, 0, 0);  
- 
-		//new code for loading weights, copied from kamyar
-		int num = l.c/l.groups*l.n*l.size*l.size;
-		//cout << "l.size = " << l.size << endl;
-		load(layerIndex, "biases", l.biases, l.n);
-
-		if(l.batch_normalize)
-		{
-			load(layerIndex, "scales", l.scales, l.n);
-			load(layerIndex, "mean",   l.rolling_mean, l.n);
-			load(layerIndex, "variance", l.rolling_variance, l.n);
-		}
-
-		load(layerIndex, "weights", l.weights, num);
-
-//		printf("loaded parameters of layer %i\n", layerIndex);
-//   	printf("Biases : %f %f %f ...\n", l.biases[0], l.biases[1], l.biases[2]);
-//    printf("Weights: %f %f %f ...\n", l.weights[0], l.weights[1], l.weights[2]);
-
-    // Copy the input and output coordinates.
-        if (crop) {
-            inputCoords = new int[4];
-            outputCoords = new int[4];
-            for (int j = 0; j < 4; j++) {
-                inputCoords[j] = _inputCoords[j];
-                outputCoords[j] = _outputCoords[j];
-            }
-            printCoords();
-        }
-
+    int groups  = 1;
+    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
+    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
+    int padding = 0;
+    if (this->pad != 0) {
+        padding = this->filterSize / 2;
     }
 
-	void	process() override
-	{
-		float* input;
+    // Call make_convolutional_layer() to create the layer object
+    l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
+        this->filterSize, this->stride, padding, activation, (int) batchNormalize,
+        0, 0, 0);  
 
-        // Read the output from the previos layer
-		in->read(input);
- 
-		cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
+    //new code for loading weights, copied from kamyar
+    int num = l.c/l.groups*l.n*l.size*l.size;
+    //cout << "l.size = " << l.size << endl;
+    load(layerIndex, "biases", l.biases, l.n);
 
-   	    // Create a dummy network object. forward_convolutional_layer only uses the "input"
-        // and "workspace" elements of the network struct. "input" is simply the output of
-        // the previous layer, while "workspace" points to an array of floats that we will
-        // create just before calling. The size can be determined by layer.get_workspace_size().
-        network dummyNetwork;
-        dummyNetwork.input = input;
+    if(l.batch_normalize)
+    {
+        load(layerIndex, "scales", l.scales, l.n);
+        load(layerIndex, "mean",   l.rolling_mean, l.n);
+        load(layerIndex, "variance", l.rolling_variance, l.n);
+    }
 
-//  	printf("inputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", input[j]);
-//    }
-//    printf("\n");
-	
-        size_t workspace_size = get_convolutional_workspace_size(l);
-        dummyNetwork.workspace = (float*) calloc(1, workspace_size);
-        forward_convolutional_layer(l, dummyNetwork);
-	
-//	  printf("outputs of layer %d, are", layerIndex);
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", l.output[j]);
-//    }
-//    printf("\n");
-	
-		free(dummyNetwork.workspace);
+    load(layerIndex, "weights", l.weights, num);
+    if (crop) {
+        inputCoords = new int[4];
+        outputCoords = new int[4];
+        for (int j = 0; j < 4; j++) {
+            inputCoords[j] = _inputCoords[j];
+            outputCoords[j] = _outputCoords[j];
+        }
+        printCoords();
+    }
+
+}
+
+void conv_layer::process()
+{
+    float* input;
+
+    // Read the output from the previos layer
+    in->read(input);
+
+    cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
+
+    // Create a dummy network object. forward_convolutional_layer only uses the "input"
+    // and "workspace" elements of the network struct. "input" is simply the output of
+    // the previous layer, while "workspace" points to an array of floats that we will
+    // create just before calling. The size can be determined by layer.get_workspace_size().
+    network dummyNetwork;
+    dummyNetwork.input = input;
+
+    //printf("inputs of layer %d, are", layerIndex);
+    //for(int j = 0; j < 10; j++){
+    //    printf(" %f", input[j]);
+    //}
+    //printf("\n");
+
+    size_t workspace_size = get_convolutional_workspace_size(l);
+    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    forward_convolutional_layer(l, dummyNetwork);
+
+    //printf("outputs of layer %d, are", layerIndex);
+    //for(int j = 0; j < 10; j++){
+    //    printf(" %f", l.output[j]);
+    //}
+    //printf("\n");
+
+    free(dummyNetwork.workspace);
 
     float* outputImage = l.output;
 
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
-        
+    
         // Calculate the relative coordinates for cropping
         int* cropCoords = getCropCoords(inputCoords, outputCoords);
-
-//        printf("Cropping tile %d in layer %d\n", tileNumber, layerIndex);
-//        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
-//               inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
-//               outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
-//        printf("Crop amounts (left, top, right, bottom): (%d, %d, %d, %d)\n", 
-//               left_crop, top_crop, right_crop, bottom_crop);
-//        printf("Relative crop coordinates are (%d, %d) (%d, %d)\n",
-//                cropCoords[0], cropCoords[1], cropCoords[2], cropCoords[3]);
-
-        //printf("Relative crop coordinates 2 are (%d, %d) (%d, %d)\n",
-        //    cropCoords2[0], cropCoords2[1], cropCoords2[2], cropCoords2[3]);
                          
-        printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
-                inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
-                outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
+        //printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
+        //        inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
+        //        outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
         outputImage = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
     }
     // Send off the layer's output to the next layer!
-		out->write(outputImage);
-	}
-};
+    out->write(outputImage);
+}
 
 class	max_layer : public kahn_process
 {
@@ -387,61 +329,29 @@ class	max_layer : public kahn_process
 	}
 };
 
-class	region_layer : public kahn_process
+region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
+           int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
+           int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
+           bool _absolute, float _thresh, bool _random, int _w, int _h) 
+:	kahn_process(name),
+    anchors(_anchors),
+    biasMatch(_biasMatch),
+    classes(_classes),
+    coords(_coords),
+    num(_num),
+    softMax(_softMax),
+    jitter(_jitter),
+    rescore(_rescore),
+    objScale(_objScale),
+    noObjectScale(_noObjectScale),
+    classScale(_classScale),
+    coordScale(_coordScale),
+    absolute(_absolute),
+    thresh(_thresh),
+    random(_random)
 {
-	public:
-	
-	const float* anchors;
-	const bool biasMatch;
-	const int classes;
-	const int coords;
-	const int num;
-	const bool softMax;
-	const float jitter;
-	const bool rescore;
-	const int objScale;
-	const bool noObjectScale;
-	const int classScale;
-	const int coordScale;
-	const bool absolute;
-	const float thresh;
-	const bool random;
-	
-	sc_fifo_in<float*> in;
-//	sc_fifo_out<float*> out;
-//	sc_fifo_out<int>  l_out; // this is to pass the l.classes parameter for draw_detections
-	
-	sc_fifo_in<float*> im_in; 
-	sc_fifo_in<int> im_w_in; // for width and height of image
-	sc_fifo_in<int> im_h_in; 
-	sc_fifo_in<string> im_name_in; 
-
-	image ** alphabets; 
-	layer l;	
-
-	region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
-               int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
-               int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-               bool _absolute, float _thresh, bool _random, int _w, int _h) 
-	:	kahn_process(name),
-		anchors(_anchors),
-		biasMatch(_biasMatch),
-		classes(_classes),
-		coords(_coords),
-		num(_num),
-		softMax(_softMax),
-		jitter(_jitter),
-		rescore(_rescore),
-		objScale(_objScale),
-		noObjectScale(_noObjectScale),
-		classScale(_classScale),
-		coordScale(_coordScale),
-		absolute(_absolute),
-		thresh(_thresh),
-		random(_random)
-	{
-		cout << "instantiating region layer" << endl;
-		l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
+    cout << "instantiating region layer" << endl;
+    l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
     l.log        = 0;
     l.sqrt       = 0;
     l.softmax    = softMax;
@@ -463,27 +373,27 @@ class	region_layer : public kahn_process
     for (int i = 0; i < 10; i++) {
         l.biases[i] = ANCHORS[i];   
     }
-		alphabets = load_alphabet(); 
-	}
+        alphabets = load_alphabet(); 
+}
 
-	void	process() override
-	{
-		float* data;
-		string image_name; 
-		image im; 
+void region_layer::process()
+{
+	float* data;
+	string image_name; 
+	image im; 
 	
-		in->read(data);
-		im_name_in->read(image_name);
-		im_in->read(im.data);
-		im_w_in->read(im.w);
-		im_h_in->read(im.h); 
-	  im.c = 3;
+	in->read(data);
+	im_name_in->read(image_name);
+	im_in->read(im.data);
+	im_w_in->read(im.w);
+	im_h_in->read(im.h); 
+	im.c = 3;
 
-		cout << "forwarding detection layer @ iter " << iter << endl;
+	cout << "forwarding detection layer @ iter " << iter << endl;
  
   	network dummyNetwork;
-	 	dummyNetwork.input = data;
-		forward_region_layer(l, dummyNetwork);
+	dummyNetwork.input = data;
+	forward_region_layer(l, dummyNetwork);
 
 //	  printf("outputs of region layer, are");
 //    for(int j = 0; j < 10; j++){
@@ -491,128 +401,116 @@ class	region_layer : public kahn_process
 //    }
 //    printf("\n");
 
-		// NOTE: this threshold value is NOT the same thing as l.thresh
-		// This comes from the -thresh flag specified when running darknet's
-		// detector example. The layer's threshold (l.thresh) comes from the 
-		// cfg file.
+	// NOTE: this threshold value is NOT the same thing as l.thresh
+	// This comes from the -thresh flag specified when running darknet's
+	// detector example. The layer's threshold (l.thresh) comes from the 
+	// cfg file.
     float det_thresh = 0.5;
-		int nboxes = 0; 
+	int nboxes = 0; 
 		
     list *options = read_data_cfg("../../darknet/cfg/yolov2-tiny.cfg");
     char *name_list = option_find_str(options, "names", "../../darknet/data/coco.names");
     char **names = get_labels(name_list);
-		int i;
-		int w = im.w;
-		int h = im.h; 	
+	int i;
+	int w = im.w;
+	int h = im.h; 	
     //get_network_boxes -> make network boxes
-		int * map = nullptr; 
-		int relative = 1; 
-
-		// get network boxes -> make network boxes -> num detections
+	int * map = nullptr; 
+	int relative = 1; 
+	// get network boxes -> make network boxes -> num detections
 				
 
-		if(l.type == DETECTION || l.type == REGION){
-			nboxes += l.w*l.h*l.n;
-		}
+	if(l.type == DETECTION || l.type == REGION){
+		nboxes += l.w*l.h*l.n;
+	}
 
-   		detection *dets = (detection *) calloc(nboxes, sizeof(detection));
-   		for(i = 0; i < nboxes; ++i){
-     			dets[i].prob = (float *) calloc(l.classes, sizeof(float));
-      			if(l.coords > 4){
-		    		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
-      			}
-  		}
+   	detection *dets = (detection *) calloc(nboxes, sizeof(detection));
+   	for(i = 0; i < nboxes; ++i){
+     		dets[i].prob = (float *) calloc(l.classes, sizeof(float));
+      		if(l.coords > 4){
+		   		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
+      		}
+  	}
 						
-		get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, det_thresh, map, 0.5, relative, dets);
+	get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, det_thresh, map, 0.5, relative, dets);
 		
   	// draw detections
     float nms = 0.45;
     if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
 		draw_detections(im, dets, nboxes, det_thresh, names, alphabets, l.classes);
 
-		free_detections(dets, nboxes); 
+	free_detections(dets, nboxes); 
 				
-		// dump to file
-		char outFN[100];
-		sprintf(outFN,"%s_testOut",image_name.c_str()); 
-        save_image(im,outFN);
-		free_image(im); 
-		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
-		//free(alphabets);  Now part of the constructor and I don't free it here? 
-	}
-};
+	// dump to file
+	char outFN[100];
+	sprintf(outFN,"%s_testOut",image_name.c_str()); 
+    save_image(im,outFN);
+	free_image(im); 
+	cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
+	//free(alphabets);  Now part of the constructor and I don't free it here? 
+}
 
 int coerce (int val, int min, int max) {
   if (val < min) return min;
   if (val > max) return max;
   return val;
 }
-
-class   conv_layer_unfused : public sc_module
+conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
+                   int inputWidth, int inputHeight, int c, int filterSize, int stride, int numFilters, int pad,
+                   ACTIVATION activation, bool batchNormalize) : sc_module(name)
 {
-    public:
-    sc_fifo<float*> *scatter_to_conv[9],
-        *conv_to_merge[9];
-
-    scatter_layer *scatter;
-    conv_layer *conv[9];
-    merge_layer *merge;
-    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4],
-                       int inputWidth, int inputHeight, int c, int filterSize, int stride, int numFilters, int pad,
-                       ACTIVATION activation, bool batchNormalize) : sc_module(name)
-    {
-        cout << "instantiating fused conv layer" << endl;
-        cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
-        for(int i = 0; i < 9; i++){
-            for(int j = 0; j < 4; j++){
-                cout << "coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
-            }
-        } 
-        int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
-                                    coords[1][2] - coords[1][0] + 1,
-                                    coords[2][2] - coords[2][0] + 1 };
-        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
-                                    coords[3][3] - coords[3][1] + 1,
-                                    coords[6][3] - coords[6][1] + 1 };
-
-        // Create the padded coordinates
-        if(pad){
-            int paddedCoords[9][4];
-            calcPrevCoords(coords, paddedCoords, stride, filterSize, inputWidth, inputHeight, "convolutional");
-            for (int j = 0; j < 9; j++) {
-                printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
-                    paddedCoords[j][0], paddedCoords[j][1],
-                    paddedCoords[j][2], paddedCoords[j][3]);
-                //cout << "in conv_layer instantiation loop i = " << i << endl;
-                int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
-                int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
-                conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
-                    true, paddedCoords[j], coords[j]);
-            }
-            scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
-
-        }else{
-            for(int j = 0; j < 9; j++){
-                //cout << "in conv_layer instantiation loop i = " << i << endl;
-                int w = coords[j][2] - coords[j][0] + 1;
-                int h = coords[j][3] - coords[j][1] + 1;
-                conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
-                                      false, NULL, NULL);
-            }
-            scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
-
+    cout << "instantiating fused conv layer" << endl;
+    cout << "inputWidth = " << inputWidth << ", inputHeight = " << inputHeight << ", c = " << c << endl; 
+    for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 4; j++){
+            cout << "coords[" << i << "][" << j << "] = " << coords[i][j]  << endl;
         }
-        merge = new merge_layer("merge", widths, heights, numFilters);
-        for(int i = 0; i < 9; i++){
-            scatter_to_conv[i] = new sc_fifo<float*>(1);
-            conv_to_merge[i] = new sc_fifo<float*>(1);
-            conv[i]->in(*scatter_to_conv[i]);
-            conv[i]->out(*conv_to_merge[i]);
-            scatter->out[i](*scatter_to_conv[i]);
-            merge->in[i](*conv_to_merge[i]);
+    } 
+    int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
+                                coords[1][2] - coords[1][0] + 1,
+                                coords[2][2] - coords[2][0] + 1 };
+    int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
+                                coords[3][3] - coords[3][1] + 1,
+                                coords[6][3] - coords[6][1] + 1 };
+
+    // Create the padded coordinates
+    if(pad){
+        int paddedCoords[9][4];
+        calcPrevCoords(coords, paddedCoords, stride, filterSize, inputWidth, inputHeight, "convolutional");
+        for (int j = 0; j < 9; j++) {
+            printf("Tile %d padded coordinates: (%d, %d) (%d, %d)\n", j,
+                paddedCoords[j][0], paddedCoords[j][1],
+                paddedCoords[j][2], paddedCoords[j][3]);
+            //cout << "in conv_layer instantiation loop i = " << i << endl;
+            int w = paddedCoords[j][2] - paddedCoords[j][0] + 1;
+            int h = paddedCoords[j][3] - paddedCoords[j][1] + 1;
+            conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+                true, paddedCoords[j], coords[j]);
         }
+        scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
+
+    }else{
+        for(int j = 0; j < 9; j++){
+            //cout << "in conv_layer instantiation loop i = " << i << endl;
+            int w = coords[j][2] - coords[j][0] + 1;
+            int h = coords[j][3] - coords[j][1] + 1;
+            conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
+                                  false, NULL, NULL);
+        }
+        scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
+
     }
-};
+    merge = new merge_layer("merge", widths, heights, numFilters);
+    for(int i = 0; i < 9; i++){
+        scatter_to_conv[i] = new sc_fifo<float*>(1);
+        conv_to_merge[i] = new sc_fifo<float*>(1);
+        conv[i]->in(*scatter_to_conv[i]);
+        conv[i]->out(*conv_to_merge[i]);
+        scatter->out[i](*scatter_to_conv[i]);
+        merge->in[i](*conv_to_merge[i]);
+    }
+
+}
 
 
 
