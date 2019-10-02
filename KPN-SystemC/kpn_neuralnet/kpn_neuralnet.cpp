@@ -62,6 +62,34 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 }
 
 
+// Writes image data to a float fifo
+// Also frees the data once this is done.
+void writeImageData ( sc_fifo_out<float> *out, float* data,
+                      int w, int h, int c )
+{
+    for (int ii = 0; ii < c; ii++) {
+        for (int jj = 0; jj < h; jj++) {
+            for (int kk = 0; kk < w; kk++) {
+                out->write(data[ii*h*w + jj*w + kk]);
+            }
+        }
+    }
+    free(data);
+}
+
+float* readImageData ( sc_fifo_in<float> *in,
+                     int w, int h, int c ) {
+    float* data = (float*) calloc(c*h*w, sizeof(float));
+    for (int ii = 0; ii < c; ii++) {
+        for (int jj = 0; jj < h; jj++) {
+            for (int kk = 0; kk < w; kk++) {
+                in->read(data[ii*h*w + jj*w + kk]);
+            }
+         }
+    }
+    return data;
+}
+
 image_reader::image_reader(sc_module_name name, strs _images)
 :	kahn_process(name),
 	images(_images)
@@ -83,7 +111,8 @@ void image_reader::process()
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
 		out->write(sized.data);
-		im_out->write(orig.data);
+		//im_out->write(orig.data);
+		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
 		char name[10];
@@ -349,6 +378,7 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
         alphabets = load_alphabet(); 
 }
 
+
 void region_layer::process()
 {
 	float* data;
@@ -357,10 +387,10 @@ void region_layer::process()
 	
 	in->read(data);
 	im_name_in->read(image_name);
-	im_in->read(im.data);
 	im_w_in->read(im.w);
 	im_h_in->read(im.h); 
 	im.c = 3;
+  im.data = readImageData(&im_in, im.w, im.h, im.c);
 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
@@ -572,7 +602,7 @@ class	kpn_neuralnet : public sc_module
 			*conv14_to_region;
 //			*region_to_writer;
 
-	sc_fifo<float*>  *reader_to_writer; 
+	sc_fifo<float>  *reader_to_writer; 
 //	sc_fifo<int>    *layer_region_to_writer; 
 	sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
 	sc_fifo<string>  *char_reader_to_writer; 
@@ -617,14 +647,10 @@ class	kpn_neuralnet : public sc_module
 		conv14_to_region   	= new sc_fifo<float*>(1);
 //		region_to_writer 	= new sc_fifo<float*>(1);
 
-		reader_to_writer 	= new sc_fifo<float*>(1); 
+		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
 		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
 		int2_reader_to_writer 	= new sc_fifo<int>(1); 
 		char_reader_to_writer  	= new sc_fifo<string>(1);
-//		layer_region_to_writer 	= new sc_fifo<int>(1)
-//		reader_to_writer 	= new sc_fifo<float*>(1); 
-//		int_reader_to_writer	= new sc_fifo<int>(2); // needed to send im.w and im.h
-//		layer_region_to_writer 	= new sc_fifo<int>(1);
 		
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.

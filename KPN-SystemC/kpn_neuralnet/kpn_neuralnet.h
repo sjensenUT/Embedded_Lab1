@@ -8,7 +8,7 @@ class   image_reader : public kahn_process
     std::vector<std::string> images;
 
     sc_fifo_out<float*> out;
-    sc_fifo_out<float*> im_out;
+    sc_fifo_out<float> im_out;
     sc_fifo_out<int> im_w_out;
     sc_fifo_out<int> im_h_out;
     sc_fifo_out<std::string> im_name_out;
@@ -91,7 +91,7 @@ class   region_layer : public kahn_process
 
     sc_fifo_in<float*> in;
 
-    sc_fifo_in<float*> im_in;
+    sc_fifo_in<float> im_in;
     sc_fifo_in<int> im_w_in; // for width and height of image
     sc_fifo_in<int> im_h_in;
     sc_fifo_in<std::string> im_name_in;
