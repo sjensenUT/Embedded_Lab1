@@ -22,16 +22,20 @@ void merge_layer::process()
         }
         cout << "merging tiles @ iter " << iter << endl;
         float *output = mergeTiles(data, this->tileWidths, this->tileHeights, this->numChannels);
-        out.write(output);
+        out->write(output);
 }
 
-scatter_layer::scatter_layer(sc_module_name name, int **_coords, int _width, int _height, int _numChannels)
+scatter_layer::scatter_layer(sc_module_name name, int _coords[][4], int _width, int _height, int _numChannels)
 :   kahn_process(name),
-    coords(_coords),
     width(_width),
     height(_height),
     numChannels(_numChannels)
 {
+        for(int i = 0; i < 9; i++){
+            for(int j = 0; j < 4; j++){
+                this->coords[i][j] = _coords[i][j];
+            }
+        }
         cout << "instantiated scatter layer " << endl;
 
 }
@@ -46,7 +50,7 @@ void scatter_layer::process()
         output[i] = getSubArray(data, this->coords[i], this->width, this->height, this->numChannels);
     }
     for(int i = 0; i < 9; i++){
-        out[i].write(output[i]);
+        out[i]->write(output[i]);
     }
          
 }

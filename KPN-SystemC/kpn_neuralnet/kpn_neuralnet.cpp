@@ -37,6 +37,19 @@ const int BATCH        = 1;
 const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
+
+void getTileCoords(int width, int height, int coords[9][4]){
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+            //coords[i*3 + j] = new int[4] {j*width/3, i*height/3, (j+1)*width/3 - 1, (i+1)*height/3 - 1};
+            coords[i*3 + j][0] = j*width/3;
+            coords[i*3 + j][1] = i*height/3;
+            coords[i*3 + j][2] = (j+1)*width/3 - 1;
+            coords[i*3 + j][3] = (i+1)*height/3 - 1;
+        }
+    }
+}
+
 void	load(int lIdx, const char* attr, float* ptr, int size)
 {
 	char	fn[100];
@@ -404,12 +417,49 @@ class	region_layer : public kahn_process
 		// dump to file
 		char outFN[100];
 		sprintf(outFN,"%s_testOut",image_name.c_str()); 
-    save_image(im,outFN);
+        save_image(im,outFN);
 		free_image(im); 
 		cout << "writing predictions to " << outFN << "  @ iter " << iter++ << endl;
 		//free(alphabets);  Now part of the constructor and I don't free it here? 
 	}
+};
 
+class   conv_layer_unfused : public sc_module
+{
+    public:
+    sc_fifo<float*> **scatter_to_conv,
+        **conv_to_merge;
+
+    scatter_layer *scatter;
+    conv_layer **conv;
+    merge_layer *merge;
+    conv_layer_unfused(sc_module_name name, int layerIndex, int coords[][4], int c,  int filterSize,
+             int stride, int numFilters, int pad, ACTIVATION activation,
+             bool batchNormalize) : sc_module(name)
+    {
+        for(int i = 0; i < 9; i++){
+            int w = coords[i][2] - coords[i][0] + 1;
+            int h = coords[i][3] - coords[i][1] + 1;
+            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
+        }
+        int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
+        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
+        int totalWidth = widths[0] + widths[1] + widths[2];
+        int totalHeight = heights[0] + heights[1] + heights[2];
+        merge = new merge_layer("merge", widths, heights, c);
+
+        scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
+        //scatter_to_conv = new sc_fifo<float*>[9];
+        //conv_to_merge = new sc_fifo<float*>[9];
+        for(int i = 0; i < 9; i++){
+            scatter_to_conv[i] = new sc_fifo<float*>(1);
+            conv_to_merge[i] = new sc_fifo<float*>(1);
+            conv[i]->in(*scatter_to_conv[i]);
+            conv[i]->out(*conv_to_merge[i]);
+            scatter->out[i](*scatter_to_conv[i]);
+            merge->in[i](*conv_to_merge[i]);
+        }
+    }
 };
 
 class	kpn_neuralnet : public sc_module
@@ -445,8 +495,9 @@ class	kpn_neuralnet : public sc_module
 
   // Declare all layers here
 	max_layer	*max1, *max3, *max5, *max7, *max9, *max11;
-	conv_layer	*conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
-	region_layer	*region;
+	conv_layer	*conv2, *conv4, *conv6, *conv8, *conv10, *conv12, *conv13, *conv14;
+	conv_layer_unfused *conv0;
+    region_layer	*region;
 	image_reader	*reader0;
 //	image_writer	*writer0;
 
@@ -491,16 +542,24 @@ class	kpn_neuralnet : public sc_module
 		
     // Here is where we will indicate the parameters for each layer. These can
     // be found in the cfg file for yolov2-tiny in the darknet folder.
-		reader0 = new image_reader("image_reader",images);
+	    reader0 = new image_reader("image_reader",images);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->im_w_out(*int_reader_to_writer); 
 		reader0->im_h_out(*int2_reader_to_writer);
 		reader0->im_name_out(*char_reader_to_writer);
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-		conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
-		conv0->in(*reader_to_conv0);
-		conv0->out(*conv0_to_max1);
+        int tileCoords[9][4];
+        getTileCoords(416, 416, tileCoords);
+        //int testCoords[][] = new int[][2];
+        //testCoords[0] = new int[2] {1, 2};
+        //testCoords[1] = new int[2] {3, 4};
+        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 3, 3, 1, 16, 1,  LEAKY, true);
+        conv0->scatter->in(*reader_to_conv0);
+        conv0->merge->out(*conv0_to_max1);
+        //conv0 = new conv_layer("conv0",0, 416, 416, 3, 3,1,16, 1, LEAKY, true, "conv0.weights");
+		//conv0->in(*reader_to_conv0);
+		//conv0->out(*conv0_to_max1);
 
 		max1 = new max_layer("max1",1, 416, 416, 16, 2,2);
 		max1->in(*conv0_to_max1);
@@ -566,39 +625,6 @@ class	kpn_neuralnet : public sc_module
 		region->im_h_in(*int2_reader_to_writer);
 		region->im_name_in(*char_reader_to_writer); 
 	}
-};
-class   conv_layer_unfused : public sc_module
-{
-    public:
-    sc_fifo<float*> **scatter_to_conv,
-        **conv_to_merge;
-    
-    scatter_layer *scatter;
-    conv_layer **conv;
-    merge_layer *merge;
-    conv_layer_unfused(sc_module_name name, int layerIndex, int **coords, int c,  int filterSize,
-             int stride, int numFilters, int pad, ACTIVATION activation,
-             bool batchNormalize) : sc_module(name)
-    {   
-        for(int i = 0; i < 9; i++){
-            int w = coords[i][2] - coords[i][0] + 1;
-            int h = coords[i][3] - coords[i][1] + 1;
-            conv[i] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize, " ");
-        }
-        int *widths = new int[3] { coords[0][2] - coords[0][0] + 1, coords[1][2] - coords[1][0] + 1, coords[2][2] - coords[2][0] + 1};
-        int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,  coords[3][3] - coords[3][1] + 1,  coords[6][3] - coords[6][1] + 1};
-        int totalWidth = widths[0] + widths[1] + widths[2];
-        int totalHeight = heights[0] + heights[1] + heights[2];
-        merge = new merge_layer("merge", widths, heights, c);
- 
-        scatter = new scatter_layer("scatter", coords, totalWidth, totalHeight, c);
-        *scatter_to_conv = new sc_fifo<float*>[9];
-        *conv_to_merge = new sc_fifo<float*>[9];
-        for(int i = 0; i < 9; i++){
-            scatter_to_conv[0] = new sc_fifo<float*>(1);
-            conv_to_merge[0] = new sc_fifo<float*>(1);
-        } 
-    }
 };
 
 // This will probably remain as-is.
