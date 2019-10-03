@@ -225,13 +225,13 @@ void forward_network(network *netp)
 
 /*
         image outputImage;
-        outputImage.w = l.w;
-        outputImage.h = l.h;
-        outputImage.c = 16; // hard code for layer 0 output
+        outputImage.w = l.out_w;
+        outputImage.h = l.out_h;
+        outputImage.c = 16; // hard code for layer 1 output
         outputImage.data = l.output;
 
         int x, y, c;
-        if (i == 0) {
+        if (i == 1) {
           for (c = 0; c < outputImage.c; c++) {
             printf("Channel %d:\n", c);
             for (y = 0; y < outputImage.h; y++) {
