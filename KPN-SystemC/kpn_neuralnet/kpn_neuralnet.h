@@ -1,6 +1,8 @@
 #include <string>
 
 
+void getTileCoords(int width, int height, int coords[9][4]);
+
 class   image_reader : public kahn_process
 {
     public:
