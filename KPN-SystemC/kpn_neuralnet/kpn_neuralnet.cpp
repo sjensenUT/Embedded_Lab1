@@ -9,7 +9,10 @@
 #include <systemc.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <chrono>
 #include "../kahn_process.h"
+
+
 
 #include "darknet.h"
 #include "array_ops.h"
@@ -27,6 +30,8 @@ using	std::cout;
 using	std::endl;
 using std::string;
 using std::size_t;
+using std::chrono::system_clock; 
+using std::chrono::milliseconds; 
 typedef std::vector<std::string> strs;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
@@ -208,17 +213,22 @@ void conv_layer::process()
     //for(int j = 0; j < 10; j++){
     //    printf(" %f", input[j]);
     //}
-    //printf("\n");
+    //printf("\n");i
+    system_clock::time_point before = system_clock::now(); 
 
     size_t workspace_size = get_convolutional_workspace_size(l);
     dummyNetwork.workspace = (float*) calloc(1, workspace_size);
     forward_convolutional_layer(l, dummyNetwork);
 
+
     //printf("outputs of layer %d, are", layerIndex);
     //for(int j = 0; j < 10; j++){
     //    printf(" %f", l.output[j]);
     //}
-    //printf("\n");
+    //printf("\n"); 
+    unsigned long memoryFootprint = (l.nweights * sizeof(float) + l.inputs * sizeof(float) + workspace_size + l.outputs * sizeof(float))/1024; 
+    
+
 
     free(dummyNetwork.workspace);
 
@@ -241,6 +251,11 @@ void conv_layer::process()
         outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
 
+    system_clock::time_point after = system_clock::now(); 
+
+    milliseconds duration = std::chrono::duration_cast<milliseconds> (after - before); 
+    
+    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
 
@@ -288,10 +303,13 @@ void max_layer::process()
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
+    system_clock::time_point before = system_clock::now(); 
+     
     network dummyNetwork;
     dummyNetwork.input = data;
     forward_maxpool_layer(l, dummyNetwork);
-
+    
+    
     float* outputImage = l.output;
     int outputWidth  = l.out_w;
     int outputHeight = l.out_h;
@@ -314,6 +332,13 @@ void max_layer::process()
         outputWidth  = cropCoords[2] - cropCoords[0] + 1;
         outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
+    
+    
+    system_clock::time_point after = system_clock::now();
+    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
+
+    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
+    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
 
