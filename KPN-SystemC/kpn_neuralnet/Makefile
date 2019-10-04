@@ -13,3 +13,8 @@ OBJS    := $(SRCS:.cpp=.o) $(filter-out ../../darknet/obj/darknet.o, $(wildcard 
 INCDIR  := -I../../darknet/include/ 
 
 include ../Makefile.rules
+
+.PHONY: test
+
+test:
+	./kpn_neuralnet.x

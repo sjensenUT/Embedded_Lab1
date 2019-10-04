@@ -1,0 +1,30 @@
+This is the code for Lab 1 in EE382N-23 submitted by Steffen Jensen, Jackson
+Farley, and Daniel Rauch.
+
+The code is broken up into two main directories:
+darknet/ - contains all of the darknet code. It was copied from the original
+repo and slightly modified during development
+KPN-SystemC/ - contains all of our code, including the provided kahn_process.h
+
+Most of our code can be found in KPN-SystemC/kpn_neuralnet/
+
+array_ops.cpp contains functions used by the fused and unfused tiling solutions,
+particularly the merge and scatter layers.
+
+image_data.cpp contains functions for reading and writing float arrays to/from
+FIFOs. This is what the layers use to communicate images to each other.
+
+kpn_neuralnet.cpp contains the bulk of our application's code. It defines the
+class methods for the image reader/writer, and three layer types that are 
+essentially SystemC wrappers around darknet's layer structs. It also implements
+the sc_main method that instantiates each layer with their necessary parameters
+and connects them together using sc_fifos.
+
+kpn_neuralnet_fused.cpp implements a fused layer path for a single tile used in
+the fused-tile partitioning part of the lab.
+
+merge_scatter.cpp implements merge and scatter layers that are used between
+each layer in the unfused tiled approach and at the beginning and end of the 
+fused tile approach.
+
+To run our solution, run "make" and "make test" in KPN-SystemC/kpn_neuralnet.
