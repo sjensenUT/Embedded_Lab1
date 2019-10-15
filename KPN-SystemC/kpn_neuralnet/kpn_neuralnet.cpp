@@ -451,23 +451,23 @@ void region_layer::process()
 		   		dets[i].mask = (float *) calloc(l.coords-4, sizeof(float));
       		}
   	}
-						
+	cout << "getting detections" << endl;			
 	get_region_detections(l, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, det_thresh, map, 0.5, relative, dets);
-		
+    cout << "drawing detections" << endl;
   	// draw detections
     float nms = 0.45;
     if (nms) do_nms_sort(dets, nboxes, l.classes, nms); 
 		draw_detections(im, dets, nboxes, det_thresh, names, alphabets, l.classes);
-
+    
 	free_detections(dets, nboxes); 
 				
 	// dump to file
 	char outFN[100];
 	sprintf(outFN,"%s_testOut",image_name.c_str()); 
-  save_image(im,outFN);
+    save_image(im,outFN);
 
 	free_image(im); 
-  free(data);
+    free(data);
 
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
 	//free(alphabets);  Now part of the constructor and I don't free it here? 
