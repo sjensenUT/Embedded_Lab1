@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <array_ops.h>
 using namespace std;
-
+// adding a test comment to make sure I can puh to the new branch
 
 void calcPrevCoords(int coords[9][4], int prevCoords[9][4], int stride, int filterSize, int prevWidth, int prevHeight, std::string layerType){
     //cout << "stride = " << stride << ", filterSize = " << filterSize << ", prevWidth = " << prevWidth << ", prevHeight = " << prevHeight << endl;
