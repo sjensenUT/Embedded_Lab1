@@ -48,6 +48,8 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
 
+const int LATENCY_MS[17] = {30,178,12,218,7,147,2,118,106,1,119,1,464,448,20,4};
+
 void getTileCoords(int width, int height, int coords[9][4]){
     for(int i = 0; i < 3; i++){ // TILE ROW
         for(int j = 0; j < 3; j++){ // TILE COL
@@ -83,7 +85,8 @@ void image_reader::process()
 {
 	for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "reading image " << images[i] << " @ iter " << iter << endl;
+		
+        cout << "reading image " << images[i] << " @ iter " << iter << endl;
 
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
@@ -92,7 +95,7 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-    writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
+        writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
@@ -202,7 +205,7 @@ void conv_layer::process()
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
-
+    
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
     // and "workspace" elements of the network struct. "input" is simply the output of
     // the previous layer, while "workspace" points to an array of floats that we will
