@@ -209,26 +209,31 @@ void conv_layer::process()
     // create just before calling. The size can be determined by layer.get_workspace_size().
     network dummyNetwork;
     dummyNetwork.input = input;
-
+    //cout << "Hello1" << endl;
     //printf("inputs of layer %d, are", layerIndex);
     //for(int j = 0; j < 10; j++){
     //    printf(" %f", input[j]);
     //}
     //printf("\n");i
     system_clock::time_point before = system_clock::now(); 
-
+    //cout << "Hello2" << endl;
     size_t workspace_size = get_convolutional_workspace_size(l);
+    //cout << "calculating workspace size" << endl;
     dummyNetwork.workspace = (float*) calloc(1, workspace_size);
+    //cout << "performing forward convolution" << endl;
+    //cout << "l.outputs = " << l.outputs << endl;
+    //cout << "l.batch = " << l.batch << endl;
+    //cout << "l.output[0] = " << l.output[0] << endl;
     forward_convolutional_layer(l, dummyNetwork);
-
-
+    //cout << "l.output[0] = " << l.output[0] << endl; 
+    //cout << "Hello3" << endl;
     //printf("outputs of layer %d, are", layerIndex);
     //for(int j = 0; j < 10; j++){
     //    printf(" %f", l.output[j]);
     //}
     //printf("\n"); 
     unsigned long memoryFootprint = (l.nweights * sizeof(float) + l.inputs * sizeof(float) + workspace_size + l.outputs * sizeof(float))/1024; 
-    
+    //cout << "Hello4" << endl;
 
 
     free(dummyNetwork.workspace);
@@ -237,10 +242,10 @@ void conv_layer::process()
     int outputWidth    = l.out_w;
     int outputHeight   = l.out_h;
     int outputChans    = this->numFilters;
-
+    //cout << "Hello5" << endl;
     // Now it's time to crop the data if this layer is configured to do cropping.
     if (crop) {
-    
+        //cout << "Hello6" << endl;
         // Calculate the relative coordinates for cropping
         int* cropCoords = getCropCoords(inputCoords, outputCoords);
                          
@@ -251,9 +256,9 @@ void conv_layer::process()
         outputWidth  = cropCoords[2] - cropCoords[0] + 1;
         outputHeight = cropCoords[3] - cropCoords[1] + 1;
     }
-
+    
     system_clock::time_point after = system_clock::now(); 
-
+    //cout << "Hello7" << endl;
     milliseconds duration = std::chrono::duration_cast<milliseconds> (after - before); 
     
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
@@ -626,9 +631,9 @@ class	kpn_neuralnet : public sc_module
 	sc_fifo<string>  *char_reader_to_writer; 
 
     // Declare all layers here
-	conv_layer_unfused *conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12,
+	conv_layer *conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12,
                      *conv13, *conv14;
-    max_layer_unfused *max1, *max3, *max5, *max7, *max9, *max11;
+    max_layer *max1, *max3, *max5, *max7, *max9, *max11;
     region_layer	*region;
 	image_reader	*reader0;
 
@@ -676,81 +681,66 @@ class	kpn_neuralnet : public sc_module
 		reader0->im_name_out(*char_reader_to_writer);
 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-        int tileCoords[9][4];
-        getTileCoords(416, 416, tileCoords);
-        conv0 = new conv_layer_unfused("conv0", 0, tileCoords, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true);
-        conv0->scatter->in(*reader_to_conv0);
-        conv0->merge->out(*conv0_to_max1);
+        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL);
+        conv0->in(*reader_to_conv0);
+        conv0->out(*conv0_to_max1);
 
-        getTileCoords(208, 208, tileCoords); // These are the output coordinates
-        max1 = new max_layer_unfused("max1", 1, tileCoords, 416, 416, 16, 2, 2, true); 
-        max1->scatter->in(*conv0_to_max1);
-        max1->merge->out(*max1_to_conv2);
+        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL); 
+        max1->in(*conv0_to_max1);
+        max1->out(*max1_to_conv2);
 
-        conv2 = new conv_layer_unfused("conv2", 2, tileCoords, 208, 208, 16, 3, 1, 32,
-                1, LEAKY, true);
-        conv2->scatter->in(*max1_to_conv2);
-        conv2->merge->out(*conv2_to_max3);
+        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL);
+        conv2->in(*max1_to_conv2);
+        conv2->out(*conv2_to_max3);
 
-	    getTileCoords(104, 104, tileCoords); // These are the output coordinates
-        max3 = new max_layer_unfused("max3", 3, tileCoords, 208, 208, 32, 2, 2, true); 
-        max3->scatter->in(*conv2_to_max3);
-        max3->merge->out(*max3_to_conv4);
+        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL); 
+        max3->in(*conv2_to_max3);
+        max3->out(*max3_to_conv4);
 
-	    conv4 = new conv_layer_unfused("conv4", 4, tileCoords, 104, 104, 32, 3, 1, 64,
-                1, LEAKY, true);
-        conv4->scatter->in(*max3_to_conv4);
-        conv4->merge->out(*conv4_to_max5);
+	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL);
+        conv4->in(*max3_to_conv4);
+        conv4->out(*conv4_to_max5);
 		
-        getTileCoords(52, 52, tileCoords);
-		max5 = new max_layer_unfused("max5",5, tileCoords, 104, 104, 64, 2, 2, true);
-        max5->scatter->in(*conv4_to_max5);
-        max5->merge->out(*max5_to_conv6);
+		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL);
+        max5->in(*conv4_to_max5);
+        max5->out(*max5_to_conv6);
 		
-        conv6 = new conv_layer_unfused("conv6",6,tileCoords, 52, 52, 64,3,1,128,
-                1, LEAKY, true);
-        conv6->scatter->in(*max5_to_conv6);
-        conv6->merge->out(*conv6_to_max7);
+        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL);
+        conv6->in(*max5_to_conv6);
+        conv6->out(*conv6_to_max7);
 
-	    getTileCoords(26, 26, tileCoords);
-		max7 = new max_layer_unfused("max7",7, tileCoords, 52, 52, 128, 2, 2, true);
-        max7->scatter->in(*conv6_to_max7);
-        max7->merge->out(*max7_to_conv8);	
+		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL);
+        max7->in(*conv6_to_max7);
+        max7->out(*max7_to_conv8);	
 
-		conv8 = new conv_layer_unfused("conv8",8,tileCoords, 26, 26, 128, 3,1,256,
-               1, LEAKY ,true);
-        conv8->scatter->in(*max7_to_conv8);
-        conv8->merge->out(*conv8_to_max9);
+		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL);
+        conv8->in(*max7_to_conv8);
+        conv8->out(*conv8_to_max9);
 
-	    getTileCoords(13, 13, tileCoords);	
-		max9 = new max_layer_unfused("max9",9, tileCoords, 26, 26, 256, 2,2, true);
-        max9->scatter->in(*conv8_to_max9);
-        max9->merge->out(*max9_to_conv10);
+		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL);
+        max9->in(*conv8_to_max9);
+        max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer_unfused("conv10",10, tileCoords, 13, 13, 256, 3,1,512,
-                1, LEAKY, true);
-        conv10->scatter->in(*max9_to_conv10);
-        conv10->merge->out(*conv10_to_max11);
+		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL);
+        conv10->in(*max9_to_conv10);
+        conv10->out(*conv10_to_max11);
 	
         // !!! NOTE !!! this is the only max layer with stride=1
-		max11 = new max_layer_unfused("max11",11, tileCoords, 13, 13, 512, 2, 1, true);
-        max11->scatter->in(*conv10_to_max11);
-        max11->merge->out(*max11_to_conv12);
+		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL);
+        max11->in(*conv10_to_max11);
+        max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer_unfused("conv12",12, tileCoords, 13, 13, 512, 3,1,1024,
-                1, LEAKY, true);
-        conv12->scatter->in(*max11_to_conv12);
-        conv12->merge->out(*conv12_to_conv13);
+		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL);
+        conv12->in(*max11_to_conv12);
+        conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer_unfused("conv13",13,tileCoords, 13, 13, 1024, 3,1,512,
-                1, LEAKY, true);
-        conv13->scatter->in(*conv12_to_conv13);
-        conv13->merge->out(*conv13_to_conv14);
+		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL);
+        conv13->in(*conv12_to_conv13);
+        conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer_unfused("conv14",14,tileCoords, 13, 13, 512, 1,1, 425,
-                 1, LINEAR, false);
-        conv14->scatter->in(*conv13_to_conv14);
-        conv14->merge->out(*conv14_to_region);
+		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL);
+        conv14->in(*conv13_to_conv14);
+        conv14->out(*conv14_to_region);
 
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
                                true, 1, 1, true, 0.6, true, 13, 13, 425);
@@ -765,8 +755,8 @@ class	kpn_neuralnet : public sc_module
 // This will probably remain as-is.
 int sc_main(int argc, char * argv[]) 
 {
-    //kpn_neuralnet knn0("kpn_neuralnet");
-    kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
+    kpn_neuralnet knn0("kpn_neuralnet");
+    //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
     sc_start();
     return 0;
 }

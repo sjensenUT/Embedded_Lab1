@@ -448,8 +448,12 @@ void backward_bias(float *bias_updates, float *delta, int batch, int n, int size
 
 void forward_convolutional_layer(convolutional_layer l, network net)
 {
+    printf("in forward convolutional layer\n");
     int i, j;
+    printf("filling cpu\n");
+    printf("l.outputs = %d\n", l.outputs);
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
+    printf("executing if statement\n");
     if(l.xnor){
         binarize_weights(l.weights, l.n, l.c/l.groups*l.size*l.size, l.binary_weights);
         swap_binary(&l);
@@ -459,17 +463,17 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
-    //printf("l.groups    = %d\n", l.groups);
-    //printf("l.batch     = %d\n", l.batch);
-    //printf("l.nweights  = %d\n", l.nweights);
-    //printf("Workspace size: %zu\n", get_workspace_size(l));
-    //printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
+    printf("l.groups    = %d\n", l.groups);
+    printf("l.batch     = %d\n", l.batch);
+    printf("l.nweights  = %d\n", l.nweights);
+    printf("Workspace size: %zu\n", get_workspace_size(l));
+    printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
     for(i = 0; i < l.batch; ++i){
         for(j = 0; j < l.groups; ++j){
-	          //printf("in inner loop j = %d\n", j);
-	          //printf("trying to access net.input\n");
-	          //printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
-	          //printf("finished printing net input\n"); 
+	          printf("in inner loop j = %d\n", j);
+	          printf("trying to access net.input\n");
+	          printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
+	          printf("finished printing net input\n"); 
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;
