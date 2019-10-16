@@ -48,6 +48,13 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
 
+const int LATENCY_IR = 30;
+const int LATENCY_CV[9] = {178,218,147,118,106,119,464,448,20};
+const int LATENCY_MP[6] = {12,7,2,1,1,1};
+const int LATENCY_RG = 4; 
+
+
+
 void getTileCoords(int width, int height, int coords[9][4]){
     for(int i = 0; i < 3; i++){ // TILE ROW
         for(int j = 0; j < 3; j++){ // TILE COL
@@ -81,9 +88,12 @@ image_reader::image_reader(sc_module_name name, strs _images)
 
 void image_reader::process()
 {
-	for(size_t i=0; i<images.size(); i++)
+	wait(LATENCY_IR,SC_MS);
+    cout << "waited for " << LATENCY_IR << endl;
+    for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "reading image " << images[i] << " @ iter " << iter << endl;
+		
+        cout << "reading image " << images[i] << " @ iter " << iter << endl;
 
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
@@ -92,7 +102,7 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-    writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
+        writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
@@ -198,11 +208,13 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
 void conv_layer::process()
 {
     float* input;
-
+    
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
+	wait(LATENCY_CV[layerIndex],SC_MS);
+    cout << "waited for " << LATENCY_CV[layerIndex] << " at layer index " << layerIndex << endl;
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
-
+    
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
     // and "workspace" elements of the network struct. "input" is simply the output of
     // the previous layer, while "workspace" points to an array of floats that we will
@@ -298,6 +310,8 @@ void max_layer::process()
 
     float* data;
     data = readImageData(&in, l.w, l.h, l.c);
+    wait(LATENCY_MP[layerIndex],SC_MS);
+    cout << "waited for " << LATENCY_MP[layerIndex] << " at layer index " << layerIndex << endl;
 
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
@@ -406,14 +420,17 @@ void region_layer::process()
 	string image_name; 
 	image im; 
 	
-  data = readImageData(&in, l.w, l.h, this->chans);
+    data = readImageData(&in, l.w, l.h, this->chans);
 
 	im_name_in->read(image_name);
 	im_w_in->read(im.w);
 	im_h_in->read(im.h); 
 	im.c = 3;
-  im.data = readImageData(&im_in, im.w, im.h, im.c);
+    im.data = readImageData(&im_in, im.w, im.h, im.c);
 
+	wait(LATENCY_RG,SC_MS);
+    cout << "waited for " << LATENCY_RG << endl;
+    cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
   network dummyNetwork;
