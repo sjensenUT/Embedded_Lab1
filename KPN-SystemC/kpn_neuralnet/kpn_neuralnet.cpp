@@ -48,11 +48,10 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
 
-const int LATENCY_IR = 30;
-const int LATENCY_CV[9] = {178,218,147,118,106,119,464,448,20};
-const int LATENCY_MP[6] = {12,7,2,1,1,1};
-const int LATENCY_RG = 4; 
 
+const int LATENCY[17] = {30, 178, 12, 218, 7, 147, 2, 118, 1, 106, 1, 119, 1, 464, 448, 20, 4};
+
+int latencyIndex = 0; 
 
 
 void getTileCoords(int width, int height, int coords[9][4]){
@@ -88,8 +87,9 @@ image_reader::image_reader(sc_module_name name, strs _images)
 
 void image_reader::process()
 {
-	wait(LATENCY_IR,SC_MS);
-    cout << "waited for " << LATENCY_IR << endl;
+	wait(LATENCY[latencyIndex],SC_MS);
+    cout << "waited for " << LATENCY[latencyIndex] << endl;
+    latencyIndex++; 
     for(size_t i=0; i<images.size(); i++)
 	{
 		
@@ -211,8 +211,10 @@ void conv_layer::process()
     
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
-	wait(LATENCY_CV[layerIndex],SC_MS);
-    cout << "waited for " << LATENCY_CV[layerIndex] << " at layer index " << layerIndex << endl;
+	
+    wait(LATENCY[latencyIndex],SC_MS);
+    cout << "waited for " << LATENCY[latencyIndex] << endl;
+    latencyIndex++;
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
     
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
@@ -310,9 +312,10 @@ void max_layer::process()
 
     float* data;
     data = readImageData(&in, l.w, l.h, l.c);
-    wait(LATENCY_MP[layerIndex],SC_MS);
-    cout << "waited for " << LATENCY_MP[layerIndex] << " at layer index " << layerIndex << endl;
 
+    wait(LATENCY[latencyIndex],SC_MS);
+    cout << "waited for " << LATENCY[latencyIndex] << endl;
+    latencyIndex++;
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
     //printf("inputs of layer %d, are", layerIndex);
@@ -428,8 +431,9 @@ void region_layer::process()
 	im.c = 3;
     im.data = readImageData(&im_in, im.w, im.h, im.c);
 
-	wait(LATENCY_RG,SC_MS);
-    cout << "waited for " << LATENCY_RG << endl;
+    wait(LATENCY[latencyIndex],SC_MS);
+    cout << "waited for " << LATENCY[latencyIndex] << endl;
+    latencyIndex++;
     cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
