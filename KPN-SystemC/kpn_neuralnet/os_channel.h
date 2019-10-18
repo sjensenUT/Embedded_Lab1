@@ -35,7 +35,11 @@ class os_channel : public sc_channel,
                  // Tasks cannot have ID = 0
     std::queue<int> readyQueue; // Queue of tasks that are ready to run
 
-    std::vector<sc_event> taskEvents; // Vector of events for each task
+    std::vector<sc_event>    taskEvents; // Vector of events for each task
+    std::vector<std::string> taskNames;  // Vector of names, for debugging purposes only.
+
+    sc_event&   getTaskEvent(int taskId); // Returns the event associated with a task id
+    std::string& getTaskName(int taskId); // Returns the name associated with a task id
 
     int  schedule();
     void dispatch();
