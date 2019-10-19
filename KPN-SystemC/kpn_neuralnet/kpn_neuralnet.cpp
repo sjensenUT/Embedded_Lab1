@@ -27,6 +27,7 @@
 #include "image_data.h"
 #include "kpn_neuralnet_fused.h"
 #include "os_channel.h"
+#include "os_sc_fifo.h"
  
 using	std::cout;
 using	std::endl;
@@ -89,7 +90,9 @@ image_reader::image_reader(sc_module_name name, strs _images, os_channel *_os, i
 }
 
 void image_reader::init(){
+    cout << "initialziing image_reader" << endl;
     if(this->os){
+        cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
 }
@@ -663,7 +666,7 @@ class	kpn_neuralnet_os : public sc_module
 	
     //Declare all queues between our layers here
     //I think the data type for all of them will be image
-	sc_fifo<float>	*reader_to_conv0, 
+	os_sc_fifo<float>	*reader_to_conv0, 
 			*conv0_to_max1, 
 			*max1_to_conv2,
 			*conv2_to_max3,
@@ -680,9 +683,9 @@ class	kpn_neuralnet_os : public sc_module
 			*conv13_to_conv14,
 			*conv14_to_region;
 
-	sc_fifo<float>  *reader_to_writer;  
-	sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
-	sc_fifo<string>  *char_reader_to_writer; 
+	os_sc_fifo<float>  *reader_to_writer;  
+	os_sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
+	os_sc_fifo<string>  *char_reader_to_writer; 
 
     // Declare all layers here
 	conv_layer *conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12,
@@ -704,33 +707,32 @@ class	kpn_neuralnet_os : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		reader_to_conv0 	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv0_to_max1   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		max1_to_conv2   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv2_to_max3   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max3_to_conv4   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv4_to_max5   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max5_to_conv6   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv6_to_max7   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max7_to_conv8   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv8_to_max9   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max9_to_conv10   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv10_to_max11   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max11_to_conv12   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv12_to_conv13   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv13_to_conv14   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
-		conv14_to_region   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
+		os = new os_channel(100);
+		reader_to_conv0 	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv0_to_max1   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		max1_to_conv2   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv2_to_max3   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        max3_to_conv4   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv4_to_max5   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        max5_to_conv6   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv6_to_max7   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        max7_to_conv8   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv8_to_max9   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        max9_to_conv10   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv10_to_max11   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        max11_to_conv12   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv12_to_conv13   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+        conv13_to_conv14   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		conv14_to_region   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
 
-		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
-		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
-		int2_reader_to_writer 	= new sc_fifo<int>(1); 
-		char_reader_to_writer  	= new sc_fifo<string>(1);
-		
-        os = new os_channel(100);
+		reader_to_writer 	= new os_sc_fifo<float>(os, 800 * 600 * 3); 
+		int_reader_to_writer	= new os_sc_fifo<int>(os, 1); // needed to send im.w and im.h
+		int2_reader_to_writer 	= new os_sc_fifo<int>(os, 1); 
+		char_reader_to_writer  	= new os_sc_fifo<string>(os, 1);
         
         // Here is where we will indicate the parameters for each layer. These can
         // be found in the cfg file for yolov2-tiny in the darknet folder.
-	    reader0 = new image_reader("image_reader",images, os, 0);
+	    reader0 = new image_reader("image_reader", images, os, 0);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->im_w_out(*int_reader_to_writer); 
