@@ -24,7 +24,14 @@ class	kahn_process : public sc_module
 		SC_THREAD(main);
 	}
 
-	void	main()	{ while(true) {process(); iter++;} }
+	void	main()
+    {   
+        init(); 
+        while(true){
+            process(); 
+            iter++;
+        } 
+    }
     //void  main()  { process(); }
 	
 	protected:
@@ -32,5 +39,6 @@ class	kahn_process : public sc_module
 	int iter = 0;
 
 	virtual void process() = 0;
+    virtual void init() = 0;
 };
 #endif

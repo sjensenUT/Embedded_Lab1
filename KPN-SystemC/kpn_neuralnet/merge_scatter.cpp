@@ -21,6 +21,7 @@ float get_pixel2(image m, int x, int y, int c)
   return m.data[c*m.h*m.w + y*m.w + x];
 }
  
+void merge_layer::init(){}
 void merge_layer::process()
 {
         int totalWidth = tileWidths[0] + tileWidths[1] + tileWidths[2];
@@ -77,6 +78,7 @@ scatter_layer::scatter_layer(sc_module_name name, int _coords[][4], int _width, 
 
 }
 
+void scatter_layer::init(){}
 void scatter_layer::process()
 {
     float *data;

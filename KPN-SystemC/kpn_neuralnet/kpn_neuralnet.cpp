@@ -79,16 +79,19 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 }
 
 
-image_reader::image_reader(sc_module_name name, strs _images, os_channel *_os, float _waitTime)
+image_reader::image_reader(sc_module_name name, strs _images, os_channel *_os, int _waitTime)
 :	kahn_process(name),
 	images(_images),
-    os(_os),
-    waitTime(_waitTime)
+    waitTime(_waitTime),
+    os(_os)
 {
-    if(os){
-        (*os).reg_task(name);
-    }
 	cout << "instantiated image_reader" << endl;
+}
+
+void image_reader::init(){
+    if(this->os){
+        this->os->reg_task(this->name());
+    }
 }
 
 void image_reader::process()
@@ -108,6 +111,7 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
+        this->os->time_wait(waitTime);
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
@@ -160,7 +164,7 @@ int* getCropCoords (int* inputCoords, int* outputCoords) {
 
 conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
          int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime)
+         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime)
 :	kahn_process(name),
     stride(_stride),
     numFilters(_numFilters),
@@ -170,8 +174,8 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
     activation(_activation),
     batchNormalize(_batchNormalize),
     crop(_crop),
-    os(_os),
-    waitTime(_waitTime)
+    waitTime(_waitTime),
+    os(_os)
 {
     cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
@@ -210,6 +214,12 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
         }
     }
 
+}
+
+void conv_layer::init(){
+    if(this->os){
+        this->os->reg_task(this->name());
+    }
 }
 
 void conv_layer::process()
@@ -284,20 +294,23 @@ void conv_layer::process()
     
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
+    if(this->os){
+        this->os->time_wait(waitTime);
+    }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
 
 }
 
 
 max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-    int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime)
+    int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime)
 :	kahn_process(name),
     stride(_stride),
     layerIndex(_layerIndex),
     filterSize(_filterSize),
     crop(_crop),
-    os(_os),
-    waitTime(_waitTime)
+    waitTime(_waitTime),
+    os(_os)
 {
     cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
 
@@ -315,6 +328,11 @@ max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _
     }
 }
 
+void max_layer::init(){
+    if(this->os){
+        this->os->reg_task(this->name());
+    }
+}
 
 void max_layer::process()
 {
@@ -372,6 +390,9 @@ void max_layer::process()
     unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
+    if(this->os){
+        this->os->time_wait(waitTime);
+    }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
 
 }
@@ -380,7 +401,7 @@ void max_layer::process()
 region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, float _waitTime) 
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, int _waitTime) 
 :	kahn_process(name),
     anchors(_anchors),
     biasMatch(_biasMatch),
@@ -398,8 +419,8 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
     thresh(_thresh),
     random(_random),
     chans(_c),
-    os(_os),
-    waitTime(_waitTime)
+    waitTime(_waitTime),
+    os(_os)
 {
     cout << "instantiating region layer" << endl;
     l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
@@ -427,6 +448,11 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
         alphabets = load_alphabet(); 
 }
 
+void region_layer::init(){
+    if(this->os){
+        this->os->reg_task(this->name());
+    }
+}
 
 void region_layer::process()
 {
@@ -505,7 +531,9 @@ void region_layer::process()
 
 	free_image(im); 
     free(data);
-
+    if(this->os){
+        this->os->time_wait(waitTime);
+    }
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
 	//free(alphabets);  Now part of the constructor and I don't free it here? 
 }

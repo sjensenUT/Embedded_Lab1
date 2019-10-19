@@ -12,6 +12,7 @@ class   merge_layer : public kahn_process
     sc_fifo_out<float> out;
     merge_layer(sc_module_name name, int *_tileWidths, int *_tileHeights,  int _numChannels);
     void process() override;
+    void init() override;
 
 };
 
@@ -29,4 +30,5 @@ class   scatter_layer : public kahn_process
 
     scatter_layer(sc_module_name name, int _coords[][4], int _width, int _height, int _numChannels);
     void process() override;
+    void init() override;
 };

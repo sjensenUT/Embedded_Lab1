@@ -15,11 +15,12 @@ class   image_reader : public kahn_process
     sc_fifo_out<int> im_h_out;
     sc_fifo_out<std::string> im_name_out;
     layer l;
+    const int waitTime;
     os_channel *os;
-    float waitTime;
 
-    image_reader(sc_module_name name, std::vector<std::string> _images, os_channel *_os, float _waitTime);
+    image_reader(sc_module_name name, std::vector<std::string> _images, os_channel *_os, int _waitTime);
     void    process() override;
+    void    init() override;
 };
 
 class   conv_layer : public kahn_process
@@ -34,7 +35,7 @@ class   conv_layer : public kahn_process
     const   ACTIVATION activation;
     const   bool batchNormalize;
     const   bool crop;
-    const   float waitTime;
+    const   int waitTime;
     int* inputCoords;
     int* outputCoords;
 
@@ -48,8 +49,9 @@ class   conv_layer : public kahn_process
     void printCoords();
     conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime);
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime);
     void process() override;
+    void init() override;
 };
 
 
@@ -60,21 +62,21 @@ class   max_layer : public kahn_process
     const   int stride;
     const   int layerIndex;
     const   int filterSize;
-    const   float waitTime;
 
     sc_fifo_in<float> in;
     sc_fifo_out<float> out;
-    os_channel *os;
 
     layer l;
     const bool crop;
+    const int waitTime;
     int* inputCoords;
     int* outputCoords;
+    os_channel *os;
 
     max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime);
+            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime);
     void process() override;
-
+    void init() override;
 };
 
 class   region_layer : public kahn_process
@@ -97,7 +99,7 @@ class   region_layer : public kahn_process
     const float thresh;
     const bool random;
     const int chans;
-    const float waitTime;
+    const int waitTime;
 
     sc_fifo_in<float> in;
 
@@ -113,8 +115,9 @@ class   region_layer : public kahn_process
     region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore,
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, float _waitTime);
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, int _waitTime);
     void    process() override;
+    void    init() override;
 };
 
 
