@@ -1,5 +1,5 @@
 #include <string>
-
+#include "os_channel.h"
 
 void getTileCoords(int width, int height, int coords[9][4]);
 
@@ -15,8 +15,10 @@ class   image_reader : public kahn_process
     sc_fifo_out<int> im_h_out;
     sc_fifo_out<std::string> im_name_out;
     layer l;
-    
-    image_reader(sc_module_name name, std::vector<std::string> _images);
+    os_channel *os;
+    float waitTime;
+
+    image_reader(sc_module_name name, std::vector<std::string> _images, os_channel *_os, float _waitTime);
     void    process() override;
 };
 
@@ -31,20 +33,22 @@ class   conv_layer : public kahn_process
     const   int pad;
     const   ACTIVATION activation;
     const   bool batchNormalize;
-    const bool crop;
+    const   bool crop;
+    const   float waitTime;
     int* inputCoords;
     int* outputCoords;
 
 
     sc_fifo_in<float> in;
     sc_fifo_out<float> out;
+    os_channel *os;    
 
     convolutional_layer l;
     
     void printCoords();
     conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords);
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime);
     void process() override;
 };
 
@@ -56,9 +60,11 @@ class   max_layer : public kahn_process
     const   int stride;
     const   int layerIndex;
     const   int filterSize;
+    const   float waitTime;
 
     sc_fifo_in<float> in;
     sc_fifo_out<float> out;
+    os_channel *os;
 
     layer l;
     const bool crop;
@@ -66,7 +72,7 @@ class   max_layer : public kahn_process
     int* outputCoords;
 
     max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-            int _stride, bool _crop, int* _inputCoords, int* _outputCoords);
+            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, float _waitTime);
     void process() override;
 
 };
@@ -91,6 +97,7 @@ class   region_layer : public kahn_process
     const float thresh;
     const bool random;
     const int chans;
+    const float waitTime;
 
     sc_fifo_in<float> in;
 
@@ -98,14 +105,15 @@ class   region_layer : public kahn_process
     sc_fifo_in<int> im_w_in; // for width and height of image
     sc_fifo_in<int> im_h_in;
     sc_fifo_in<std::string> im_name_in;
-
+    os_channel *os;
+    
     image ** alphabets;
     layer l;
     
     region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore,
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c);
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, float _waitTime);
     void    process() override;
 };
 

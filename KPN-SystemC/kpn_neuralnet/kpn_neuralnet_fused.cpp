@@ -68,62 +68,62 @@ kpn_fused_thread::kpn_fused_thread(sc_module_name name, int coords[][9][4], int 
         h[i] = tileCoords[i][3] - tileCoords[i][1] + 1;
     }
 
-    conv14 = new conv_layer("conv14",14, w[14], h[14], 512, 1, 1, 425, 1, LINEAR, false, true, tileCoords[14], tileCoords[15]);
+    conv14 = new conv_layer("conv14",14, w[14], h[14], 512, 1, 1, 425, 1, LINEAR, false, true, tileCoords[14], tileCoords[15], NULL, -1);
     conv14->in(*conv13_to_conv14);
     
-    conv13 = new conv_layer("conv13",13, w[13], h[13], 1024, 3, 1, 512, 1, LEAKY, true, true, tileCoords[13], tileCoords[14]);
+    conv13 = new conv_layer("conv13",13, w[13], h[13], 1024, 3, 1, 512, 1, LEAKY, true, true, tileCoords[13], tileCoords[14], NULL, -1);
     conv13->in(*conv12_to_conv13);
     conv13->out(*conv13_to_conv14);
     
-    conv12 = new conv_layer("conv12",12, w[12], h[12], 512, 3, 1, 1024, 1, LEAKY, true, true, tileCoords[12], tileCoords[13]);
+    conv12 = new conv_layer("conv12",12, w[12], h[12], 512, 3, 1, 1024, 1, LEAKY, true, true, tileCoords[12], tileCoords[13], NULL, -1);
     conv12->in(*max11_to_conv12);
     conv12->out(*conv12_to_conv13);
     
-    max11 = new max_layer("max11",11, w[11], h[11], 512, 2, 1, true, tileCoords[11], tileCoords[12]);
+    max11 = new max_layer("max11",11, w[11], h[11], 512, 2, 1, true, tileCoords[11], tileCoords[12], NULL, -1);
     max11->in(*conv10_to_max11);
     max11->out(*max11_to_conv12);
     
-    conv10 = new conv_layer("conv10",10, w[10], h[10], 256, 3, 1, 512, 1, LEAKY, true, true, tileCoords[10], tileCoords[11]);
+    conv10 = new conv_layer("conv10",10, w[10], h[10], 256, 3, 1, 512, 1, LEAKY, true, true, tileCoords[10], tileCoords[11], NULL, -1);
     conv10->in(*max9_to_conv10);
     conv10->out(*conv10_to_max11);
     
-    max9 = new max_layer("max9",9, w[9], h[9], 256, 2, 2, true, tileCoords[9], tileCoords[10]);
+    max9 = new max_layer("max9",9, w[9], h[9], 256, 2, 2, true, tileCoords[9], tileCoords[10], NULL, -1);
     max9->in(*conv8_to_max9);
     max9->out(*max9_to_conv10);
 
-    conv8 = new conv_layer("conv8",8, w[8], h[8], 128, 3, 1, 256, 1, LEAKY ,true, true, tileCoords[8], tileCoords[9]);
+    conv8 = new conv_layer("conv8",8, w[8], h[8], 128, 3, 1, 256, 1, LEAKY ,true, true, tileCoords[8], tileCoords[9], NULL, -1);
     conv8->in(*max7_to_conv8);
     conv8->out(*conv8_to_max9);
     
-    max7 = new max_layer("max7",7, w[7], h[7], 128, 2, 2, true, tileCoords[7], tileCoords[8]);
+    max7 = new max_layer("max7",7, w[7], h[7], 128, 2, 2, true, tileCoords[7], tileCoords[8], NULL, -1);
     max7->in(*conv6_to_max7);
     max7->out(*max7_to_conv8);
     
-    conv6 = new conv_layer("conv6",6, w[6], h[6], 64, 3, 1, 128, 1, LEAKY, true, true, tileCoords[6], tileCoords[7]);
+    conv6 = new conv_layer("conv6",6, w[6], h[6], 64, 3, 1, 128, 1, LEAKY, true, true, tileCoords[6], tileCoords[7], NULL, -1);
     conv6->in(*max5_to_conv6);
     conv6->out(*conv6_to_max7);
 
-    max5 = new max_layer("max5",5, w[5], h[5], 64, 2, 2, true, tileCoords[5], tileCoords[6]);
+    max5 = new max_layer("max5",5, w[5], h[5], 64, 2, 2, true, tileCoords[5], tileCoords[6], NULL, -1);
     max5->in(*conv4_to_max5);
     max5->out(*max5_to_conv6);
 
-    conv4 = new conv_layer("conv4",4, w[4], h[4], 32, 3, 1, 64, 1, LEAKY, true, true, tileCoords[4], tileCoords[5]);
+    conv4 = new conv_layer("conv4",4, w[4], h[4], 32, 3, 1, 64, 1, LEAKY, true, true, tileCoords[4], tileCoords[5], NULL, -1);
     conv4->in(*max3_to_conv4);
     conv4->out(*conv4_to_max5);
     
-    max3 = new max_layer("max3",3, w[3], h[3], 32, 2, 2, true, tileCoords[3], tileCoords[4]);
+    max3 = new max_layer("max3",3, w[3], h[3], 32, 2, 2, true, tileCoords[3], tileCoords[4], NULL, -1);
     max3->in(*conv2_to_max3);
     max3->out(*max3_to_conv4);
     
-    conv2 = new conv_layer("conv2",2, w[2], h[2], 16, 3, 1, 32, 1, LEAKY, true, true, tileCoords[2], tileCoords[3]);
+    conv2 = new conv_layer("conv2",2, w[2], h[2], 16, 3, 1, 32, 1, LEAKY, true, true, tileCoords[2], tileCoords[3], NULL, -1);
     conv2->in(*max1_to_conv2);
     conv2->out(*conv2_to_max3);
     
-    max1 = new max_layer("max1",1, w[1], h[1], 16, 2, 2, true, tileCoords[1], tileCoords[2]);
+    max1 = new max_layer("max1",1, w[1], h[1], 16, 2, 2, true, tileCoords[1], tileCoords[2], NULL, -1);
     max1->in(*conv0_to_max1);
     max1->out(*max1_to_conv2);
     
-    conv0 = new conv_layer("conv0",0, w[0], h[0], 3, 3,1,16, 1, LEAKY, true, true, tileCoords[0], tileCoords[1]);
+    conv0 = new conv_layer("conv0",0, w[0], h[0], 3, 3,1,16, 1, LEAKY, true, true, tileCoords[0], tileCoords[1], NULL, -1);
     conv0->out(*conv0_to_max1);
 }
 
@@ -146,7 +146,7 @@ kpn_neuralnet_fused::kpn_neuralnet_fused(sc_module_name name) : sc_module(name)
         nn_to_merge[i] = new sc_fifo<float>(BIGGEST_FIFO_SIZE);
     }
 
-    reader0 = new image_reader("image_reader",images);
+    reader0 = new image_reader("image_reader",images, NULL, -1);
     reader0->out(*reader_to_scatter);
     reader0->im_out(*reader_to_writer);
     reader0->im_w_out(*int_reader_to_writer);
@@ -155,7 +155,7 @@ kpn_neuralnet_fused::kpn_neuralnet_fused(sc_module_name name) : sc_module(name)
 
     
     region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                   true, 1, 1, true, 0.6, true, 13, 13, 425);
+                   true, 1, 1, true, 0.6, true, 13, 13, 425, NULL, -1);
     region->in(*merge_to_region);
     region->im_in(*reader_to_writer);
     region->im_w_in(*int_reader_to_writer);

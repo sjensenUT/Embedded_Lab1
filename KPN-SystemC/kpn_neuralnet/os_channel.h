@@ -18,6 +18,7 @@ class os_channel : public sc_channel,
     public:
 
     os_channel(int);
+    os_channel();
     ~os_channel();
 
     int	pre_wait();

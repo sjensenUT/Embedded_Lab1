@@ -18,6 +18,8 @@ os_channel::os_channel(int maxTasks)
   std::cout << "[OS] taskEvents size = " << taskEvents.size() << std::endl;
 }
 
+os_channel::os_channel(){}
+
 
 sc_event& os_channel::getTaskEvent(int taskId)
 {
