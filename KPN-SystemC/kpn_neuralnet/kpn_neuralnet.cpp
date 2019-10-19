@@ -85,6 +85,9 @@ image_reader::image_reader(sc_module_name name, strs _images, os_channel *_os, f
     os(_os),
     waitTime(_waitTime)
 {
+    if(os){
+        (*os).reg_task(name);
+    }
 	cout << "instantiated image_reader" << endl;
 }
 
@@ -581,8 +584,12 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
     //for(int i = 0; i < 9; i++){
     //    for(int j = 0; j < 4; j++){
     //        cout << "(max) coords[" << nt *heights = new int[3] { coords[0][3] - coords[0][1] + 1,
+    int *widths = new int[3]  { coords[0][2] - coords[0][0] + 1,
+                                coords[1][2] - coords[1][0] + 1,
+                                coords[2][2] - coords[2][0] + 1 };
+    int *heights = new int[3] { coords[0][3] - coords[0][1] + 1,    
                                 coords[3][3] - coords[3][1] + 1,
-                                oords[6][3] - coords[6][1] + 1 };
+                                coords[6][3] - coords[6][1] + 1 };
 
     // Create the padded coordinates
     if(pad){
@@ -598,9 +605,8 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
             string name = "max";
             name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
             maxl[j] = new max_layer(name.c_str(), layerIndex, w, h, c, size, stride,
-                                    true, paddedCoords[j], onv10_to_max11,
-            *max11_to_conv12,
-catter", paddedCoords, inputWidth, inputHeight, c);
+                     true, paddedCoords[j], coords[j], NULL, -1);
+        }
     } else {
         for(int j = 0; j < 9; j++){
             int w = coords[j][2] - coords[j][0] + 1;
