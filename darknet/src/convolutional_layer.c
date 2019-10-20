@@ -450,10 +450,14 @@ void forward_convolutional_layer(convolutional_layer l, network net)
 {
     printf("in forward convolutional layer\n");
     int i, j;
-    printf("filling cpu\n");
-    printf("l.outputs = %d\n", l.outputs);
+    //printf("filling cpu\n");
+    printf("l.outputs = %d, l.batch = %d\n", l.outputs, l.batch);
+    printf("l.xnor = %d\n", l.xnor);
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
-    printf("executing if statement\n");
+    //printf("executing if statement\n");
+    //for(i = 0; i < 10; i++){
+    //    printf("weights[%d] = %f\n", i, l.weights[i]);
+    //}
     if(l.xnor){
         binarize_weights(l.weights, l.n, l.c/l.groups*l.size*l.size, l.binary_weights);
         swap_binary(&l);
@@ -463,17 +467,26 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
+    printf("m = %d, k =%d, n = %d\n", m, k, n);
     printf("l.groups    = %d\n", l.groups);
     printf("l.batch     = %d\n", l.batch);
     printf("l.nweights  = %d\n", l.nweights);
+    printf("l.h  = %d\n", l.h);
+    printf("l.w  = %d\n", l.w);
+    printf("l.size  = %d\n", l.size);
+    printf("l.stride  = %d\n", l.stride);
+    printf("l.c  = %d\n", l.c);
+    printf("l.pad  = %d\n", l.pad);
+    printf("l.binary  = %d\n", l.binary);
+    printf("l.xnor  = %d\n", l.xnor);
     printf("Workspace size: %zu\n", get_workspace_size(l));
     printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
     for(i = 0; i < l.batch; ++i){
         for(j = 0; j < l.groups; ++j){
-	          printf("in inner loop j = %d\n", j);
-	          printf("trying to access net.input\n");
-	          printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
-	          printf("finished printing net input\n"); 
+	          //printf("in inner loop j = %d\n", j);
+	          //printf("trying to access net.input\n");
+	          //printf("kpn_neuralnet input[0] = %f\n", net.input[0]);
+	          //printf("finished printing net input\n"); 
             float *a = l.weights + j*l.nweights/l.groups;
             float *b = net.workspace;
             float *c = l.output + (i*l.groups + j)*n*m;
@@ -489,11 +502,17 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     }
 
     if(l.batch_normalize){
+        //printf("batch_normalize = true\n");
         forward_batchnorm_layer(l, net);
     } else {
+        //printf("batch_normalize = false\n");
         add_bias(l.output, l.biases, l.batch, l.n, l.out_h*l.out_w);
     }
     activate_array(l.output, l.outputs*l.batch, l.activation);
+    //for(i = 0; i < 10; i++){
+    //    printf("l.output[%d] = %f\n", i, l.output[i]);
+    //}
+    
     if(l.binary || l.xnor) swap_binary(&l);
 }
 

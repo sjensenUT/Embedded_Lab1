@@ -235,9 +235,9 @@ void conv_layer::process()
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
 	
-    wait(LATENCY[latencyIndex],SC_MS);
-    cout << "waited for " << LATENCY[latencyIndex] << endl;
-    latencyIndex++;
+    //wait(LATENCY[latencyIndex],SC_MS);
+    //cout << "waited for " << LATENCY[latencyIndex] << endl;
+    //latencyIndex++;
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
     
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
@@ -246,16 +246,14 @@ void conv_layer::process()
     // create just before calling. The size can be determined by layer.get_workspace_size().
     network dummyNetwork;
     dummyNetwork.input = input;
-    //cout << "Hello1" << endl;
-    //printf("inputs of layer %d, are", layerIndex);
-    //for(int j = 0; j < 10; j++){
-    //    printf(" %f", input[j]);
-    //}
-    //printf("\n");i
+    cout << "Hello1" << endl;
+    printf("inputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", input[j]);
+    }
+    printf("\n");
     system_clock::time_point before = system_clock::now(); 
-    //cout << "Hello2" << endl;
     size_t workspace_size = get_convolutional_workspace_size(l);
-    //cout << "calculating workspace size" << endl;
     dummyNetwork.workspace = (float*) calloc(1, workspace_size);
     //cout << "performing forward convolution" << endl;
     //cout << "l.outputs = " << l.outputs << endl;
@@ -263,12 +261,11 @@ void conv_layer::process()
     //cout << "l.output[0] = " << l.output[0] << endl;
     forward_convolutional_layer(l, dummyNetwork);
     //cout << "l.output[0] = " << l.output[0] << endl; 
-    //cout << "Hello3" << endl;
-    //printf("outputs of layer %d, are", layerIndex);
-    //for(int j = 0; j < 10; j++){
-    //    printf(" %f", l.output[j]);
-    //}
-    //printf("\n"); 
+    printf("outputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n"); 
     unsigned long memoryFootprint = (l.nweights * sizeof(float) + l.inputs * sizeof(float) + workspace_size + l.outputs * sizeof(float))/1024; 
     //cout << "Hello4" << endl;
 
@@ -352,11 +349,11 @@ void max_layer::process()
     latencyIndex++;
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
-    //printf("inputs of layer %d, are", layerIndex);
-    //for(int j = 0; j < 10; j++){
-    //  printf(" %f", data[j]);
-    //}
-    //printf("\n");
+    printf("inputs of layer %d, are", layerIndex);
+    for(int j = 0; j < 10; j++){
+      printf(" %f", data[j]);
+    }
+    printf("\n");
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
