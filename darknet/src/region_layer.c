@@ -158,8 +158,9 @@ int entry_index(layer l, int batch, int location, int entry)
 void forward_region_layer(const layer l, network net)
 {
     int i,j,b,t,n;
+    printf("in forward_region_layer\n");
     memcpy(l.output, net.input, l.outputs*l.batch*sizeof(float));
-
+    printf("about to enter for loop\n");
 #ifndef GPU
     for (b = 0; b < l.batch; ++b){
         for(n = 0; n < l.n; ++n){
@@ -171,6 +172,7 @@ void forward_region_layer(const layer l, network net)
             if(!l.softmax && !l.softmax_tree) activate_array(l.output + index, l.classes*l.w*l.h, LOGISTIC);
         }
     }
+    printf("finished for loop\n");
     if (l.softmax_tree){
         int i;
         int count = l.coords + 1;
@@ -184,9 +186,11 @@ void forward_region_layer(const layer l, network net)
         softmax_cpu(net.input + index, l.classes + l.background, l.batch*l.n, l.inputs/l.n, l.w*l.h, 1, l.w*l.h, 1, l.output + index);
     }
 #endif
-
+    printf("about to do memset\n");
     memset(l.delta, 0, l.outputs * l.batch * sizeof(float));
+    printf("finished memset\n");
     if(!net.train) return;
+    printf("shouldnt get here\n");
     float avg_iou = 0;
     float recall = 0;
     float avg_cat = 0;

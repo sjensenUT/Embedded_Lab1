@@ -476,21 +476,24 @@ void region_layer::process()
 	im.c = 3;
     im.data = readImageData(&im_in, im.w, im.h, im.c);
 
-    wait(LATENCY[latencyIndex],SC_MS);
-    cout << "waited for " << LATENCY[latencyIndex] << endl;
-    latencyIndex++;
-    cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
+    //wait(LATENCY[latencyIndex],SC_MS);
+    //cout << "waited for " << LATENCY[latencyIndex] << endl;
+    //latencyIndex++;
+    //cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
-  network dummyNetwork;
+    network dummyNetwork;
 	dummyNetwork.input = data;
+    cout << "calling forward_region_layer" << endl;
+    dummyNetwork.train = 0;
+    cout << "dummyNetwork.train = " << dummyNetwork.train;
 	forward_region_layer(l, dummyNetwork);
-
-//	  printf("outputs of region layer, are");
-//    for(int j = 0; j < 10; j++){
-//        printf(" %f", l.output[j]);
-//    }
-//    printf("\n");
+    cout << "finished forward_region_layer" << endl;
+	printf("outputs of region layer, are");
+    for(int j = 0; j < 10; j++){
+        printf(" %f", l.output[j]);
+    }
+    printf("\n");
 
 	// NOTE: this threshold value is NOT the same thing as l.thresh
 	// This comes from the -thresh flag specified when running darknet's
@@ -713,7 +716,9 @@ class	kpn_neuralnet_os : public sc_module
 		//char *weightFileC = new char[weightFile.length() + 1];
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
-		os = new os_channel(100);
+		cout << "instantiating os" << endl;
+		os = new os_channel("os", 100);
+        cout << "instantiating channels" << endl;
 		reader_to_conv0 	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
         reader_to_conv0->os(*os);
 		conv0_to_max1   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);

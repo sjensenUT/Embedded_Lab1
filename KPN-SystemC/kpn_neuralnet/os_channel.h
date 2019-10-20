@@ -17,7 +17,7 @@ class os_channel : public sc_channel,
     // And constructor/destructor obviously
     public:
 
-    os_channel(int);
+    os_channel(sc_module_name, int);
     os_channel();
     ~os_channel();
 

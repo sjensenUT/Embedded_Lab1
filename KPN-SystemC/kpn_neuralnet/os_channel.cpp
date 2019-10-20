@@ -9,8 +9,10 @@
 #include <queue>
 
 
-os_channel::os_channel(int maxTasks)
+os_channel::os_channel(sc_module_name name, int maxTasks)
+:   sc_channel(name)
 {
+  cout << "in os_channel constructor" << endl; 
   this->current = 0;
   this->taskEvents = std::vector<sc_event>(maxTasks);
   this->taskNames  = std::vector<std::string>(maxTasks);
