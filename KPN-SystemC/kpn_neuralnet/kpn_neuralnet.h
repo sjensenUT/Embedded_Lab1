@@ -16,9 +16,9 @@ class   image_reader : public kahn_process
     sc_fifo_out<std::string> im_name_out;
     layer l;
     const int waitTime;
-    os_channel *os;
+    sc_port<os_channel> os;
 
-    image_reader(sc_module_name name, std::vector<std::string> _images, os_channel *_os, int _waitTime);
+    image_reader(sc_module_name name, std::vector<std::string> _images, int _waitTime);
     void    process() override;
     void    init() override;
 };
@@ -42,14 +42,14 @@ class   conv_layer : public kahn_process
 
     sc_fifo_in<float> in;
     sc_fifo_out<float> out;
-    os_channel *os;    
+    sc_port<os_channel> os;    
 
     convolutional_layer l;
     
     void printCoords();
     conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
              int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime);
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
 };
@@ -71,10 +71,10 @@ class   max_layer : public kahn_process
     const int waitTime;
     int* inputCoords;
     int* outputCoords;
-    os_channel *os;
+    sc_port<os_channel> os;
 
     max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime);
+            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
 };
@@ -107,7 +107,7 @@ class   region_layer : public kahn_process
     sc_fifo_in<int> im_w_in; // for width and height of image
     sc_fifo_in<int> im_h_in;
     sc_fifo_in<std::string> im_name_in;
-    os_channel *os;
+    sc_port<os_channel> os;
     
     image ** alphabets;
     layer l;
@@ -115,7 +115,7 @@ class   region_layer : public kahn_process
     region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore,
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, int _waitTime);
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, int _waitTime);
     void    process() override;
     void    init() override;
 };

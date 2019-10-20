@@ -27,9 +27,8 @@ class	os_sc_fifo: public sc_fifo<T>
 {
 	public:
     
-    os_channel *os; 
-    // should just run the sc_fifo constructors
-    explicit os_sc_fifo(os_channel *os, int _size);
+    sc_port<os_channel> os; 
+    explicit os_sc_fifo(int _size): sc_fifo<T>(_size){};
     
     //explicit os_sc_fifo( const char* _name, int _size);
 

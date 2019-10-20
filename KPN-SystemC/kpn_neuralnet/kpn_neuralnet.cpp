@@ -28,6 +28,7 @@
 #include "kpn_neuralnet_fused.h"
 #include "os_channel.h"
 #include "os_sc_fifo.h"
+#include "os_sc_fifo.cpp"
  
 using	std::cout;
 using	std::endl;
@@ -80,18 +81,17 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 }
 
 
-image_reader::image_reader(sc_module_name name, strs _images, os_channel *_os, int _waitTime)
+image_reader::image_reader(sc_module_name name, strs _images, int _waitTime)
 :	kahn_process(name),
 	images(_images),
-    waitTime(_waitTime),
-    os(_os)
+    waitTime(_waitTime)
 {
 	cout << "instantiated image_reader" << endl;
 }
 
 void image_reader::init(){
-    cout << "initialziing image_reader" << endl;
-    if(this->os){
+    cout << "in image_reader::init()" << endl;
+    if(this->waitTime > 0){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
@@ -99,8 +99,8 @@ void image_reader::init(){
 
 void image_reader::process()
 {
-	wait(LATENCY[latencyIndex],SC_MS);
-    cout << "waited for " << LATENCY[latencyIndex] << endl;
+	//wait(LATENCY[latencyIndex],SC_MS);
+    //cout << "waited for " << LATENCY[latencyIndex] << endl;
     latencyIndex++; 
     for(size_t i=0; i<images.size(); i++)
 	{
@@ -110,11 +110,13 @@ void image_reader::process()
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
  		image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
-
+        cout << "read image" << endl;
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-        this->os->time_wait(waitTime);
+        if(this->waitTime > 0){
+            this->os->time_wait(waitTime);
+        }
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
@@ -167,7 +169,7 @@ int* getCropCoords (int* inputCoords, int* outputCoords) {
 
 conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
          int _stride, int _numFilters, int _pad, ACTIVATION _activation,
-         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime)
+         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
 :	kahn_process(name),
     stride(_stride),
     numFilters(_numFilters),
@@ -177,8 +179,7 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
     activation(_activation),
     batchNormalize(_batchNormalize),
     crop(_crop),
-    waitTime(_waitTime),
-    os(_os)
+    waitTime(_waitTime)
 {
     cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
 
@@ -220,7 +221,9 @@ conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int
 }
 
 void conv_layer::init(){
-    if(this->os){
+    cout << "in conv_layer::init()" << endl;
+    if(this->waitTime > 0){
+        cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
 }
@@ -297,7 +300,7 @@ void conv_layer::process()
     
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
-    if(this->os){
+    if(this->waitTime > 0){
         this->os->time_wait(waitTime);
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
@@ -306,14 +309,13 @@ void conv_layer::process()
 
 
 max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
-    int _stride, bool _crop, int* _inputCoords, int* _outputCoords, os_channel *_os, int _waitTime)
+    int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
 :	kahn_process(name),
     stride(_stride),
     layerIndex(_layerIndex),
     filterSize(_filterSize),
     crop(_crop),
-    waitTime(_waitTime),
-    os(_os)
+    waitTime(_waitTime)
 {
     cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
 
@@ -332,7 +334,9 @@ max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _
 }
 
 void max_layer::init(){
-    if(this->os){
+    cout << "in max_layer::init()" << endl;
+    if(this->waitTime > 0){
+        cout << "detected os, registering task";
         this->os->reg_task(this->name());
     }
 }
@@ -393,7 +397,7 @@ void max_layer::process()
     unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
-    if(this->os){
+    if(this->waitTime > 0){
         this->os->time_wait(waitTime);
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
@@ -404,7 +408,7 @@ void max_layer::process()
 region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatch, int _classes,
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
-           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, os_channel *_os, int _waitTime) 
+           bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, int _waitTime) 
 :	kahn_process(name),
     anchors(_anchors),
     biasMatch(_biasMatch),
@@ -422,8 +426,7 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
     thresh(_thresh),
     random(_random),
     chans(_c),
-    waitTime(_waitTime),
-    os(_os)
+    waitTime(_waitTime)
 {
     cout << "instantiating region layer" << endl;
     l = make_region_layer(BATCH, _w, _h, this->num, this->classes, this->coords);
@@ -452,7 +455,9 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
 }
 
 void region_layer::init(){
-    if(this->os){
+    cout << "in region_layer::init()" << endl;
+    if(this->waitTime > 0){
+        cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
 }
@@ -534,7 +539,7 @@ void region_layer::process()
 
 	free_image(im); 
     free(data);
-    if(this->os){
+    if(this->waitTime > 0){
         this->os->time_wait(waitTime);
     }
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
@@ -579,7 +584,7 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
             string name = "conv";
             name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
             conv[j] = new conv_layer(name.c_str(), layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
-                true, paddedCoords[j], coords[j], NULL, -1);
+                true, paddedCoords[j], coords[j], -1);
         }
         scatter = new scatter_layer("scatter", paddedCoords, inputWidth, inputHeight, c);
 
@@ -589,7 +594,7 @@ conv_layer_unfused::conv_layer_unfused(sc_module_name name, int layerIndex, int 
             int w = coords[j][2] - coords[j][0] + 1;
             int h = coords[j][3] - coords[j][1] + 1;
             conv[j] = new conv_layer("conv", layerIndex, w, h, c, filterSize, stride, numFilters, pad, activation, batchNormalize,
-                                  false, NULL, NULL, NULL, -1);
+                                  false, NULL, NULL, -1);
         }
         scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
 
@@ -636,14 +641,14 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
             string name = "max";
             name += "_" + std::to_string(layerIndex) + "_" + std::to_string(j);
             maxl[j] = new max_layer(name.c_str(), layerIndex, w, h, c, size, stride,
-                     true, paddedCoords[j], coords[j], NULL, -1);
+                     true, paddedCoords[j], coords[j], -1);
         }
     } else {
         for(int j = 0; j < 9; j++){
             int w = coords[j][2] - coords[j][0] + 1;
             int h = coords[j][3] - coords[j][1] + 1;
             maxl[j] = new max_layer("max", layerIndex, w, h, c, size, stride,
-                                false, NULL, NULL, NULL, -1);
+                                false, NULL, NULL, -1);
         }
         scatter = new scatter_layer("scatter", coords, inputWidth, inputHeight, c);
     }
@@ -698,6 +703,7 @@ class	kpn_neuralnet_os : public sc_module
     // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet_os(sc_module_name name) : sc_module(name)
 	{
+        cout << "in kpn_neuralnet_os" << endl;
 	  	strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
 		//strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
@@ -708,107 +714,144 @@ class	kpn_neuralnet_os : public sc_module
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
 		os = new os_channel(100);
-		reader_to_conv0 	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv0_to_max1   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		max1_to_conv2   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv2_to_max3   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        max3_to_conv4   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv4_to_max5   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        max5_to_conv6   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv6_to_max7   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        max7_to_conv8   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv8_to_max9   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        max9_to_conv10   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv10_to_max11   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        max11_to_conv12   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv12_to_conv13   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-        conv13_to_conv14   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
-		conv14_to_region   	= new os_sc_fifo<float>(os, BIGGEST_FIFO_SIZE);
+		reader_to_conv0 	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        reader_to_conv0->os(*os);
+		conv0_to_max1   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv0_to_max1->os(*os);
+		max1_to_conv2   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max1_to_conv2->os(*os);
+		conv2_to_max3   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv2_to_max3->os(*os);
+        max3_to_conv4   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max3_to_conv4->os(*os);
+		conv4_to_max5   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv4_to_max5->os(*os);
+        max5_to_conv6   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max5_to_conv6->os(*os);
+		conv6_to_max7   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv6_to_max7->os(*os);
+        max7_to_conv8   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max7_to_conv8->os(*os);
+		conv8_to_max9   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv8_to_max9->os(*os);
+        max9_to_conv10   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max9_to_conv10->os(*os);
+		conv10_to_max11   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv10_to_max11->os(*os);
+        max11_to_conv12   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        max11_to_conv12->os(*os);
+		conv12_to_conv13   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv12_to_conv13->os(*os);
+        conv13_to_conv14   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv13_to_conv14->os(*os);
+		conv14_to_region   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
+        conv14_to_region->os(*os);
 
-		reader_to_writer 	= new os_sc_fifo<float>(os, 800 * 600 * 3); 
-		int_reader_to_writer	= new os_sc_fifo<int>(os, 1); // needed to send im.w and im.h
-		int2_reader_to_writer 	= new os_sc_fifo<int>(os, 1); 
-		char_reader_to_writer  	= new os_sc_fifo<string>(os, 1);
+		reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3);
+        reader_to_writer->os(*os);
+		int_reader_to_writer	= new os_sc_fifo<int>(1); // needed to send im.w and im.h
+        int_reader_to_writer->os(*os);
+		int2_reader_to_writer 	= new os_sc_fifo<int>(1);
+        int2_reader_to_writer->os(*os); 
+		char_reader_to_writer  	= new os_sc_fifo<string>(1);
+        char_reader_to_writer->os(*os);
         
         // Here is where we will indicate the parameters for each layer. These can
         // be found in the cfg file for yolov2-tiny in the darknet folder.
-	    reader0 = new image_reader("image_reader", images, os, 0);
+	    reader0 = new image_reader("image_reader", images, 1);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->im_w_out(*int_reader_to_writer); 
 		reader0->im_h_out(*int2_reader_to_writer);
 		reader0->im_name_out(*char_reader_to_writer);
+        reader0->os(*os);
 
 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL, os, 0);
+        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL, 1);
         conv0->in(*reader_to_conv0);
         conv0->out(*conv0_to_max1);
-
-        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL, os, 0); 
+        conv0->os(*os);
+        
+        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL, 1); 
         max1->in(*conv0_to_max1);
         max1->out(*max1_to_conv2);
+        max1->os(*os);
         
-        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL, os, 0);
+        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL, 1);
         conv2->in(*max1_to_conv2);
         conv2->out(*conv2_to_max3);
- 
-        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL, os, 0); 
+        conv2->os(*os);        
+
+        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL, 1); 
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
-
-	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL, os, 0);
+        max3->os(*os);
+        
+	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL, 1);
         conv4->in(*max3_to_conv4);
         conv4->out(*conv4_to_max5);
-		
-		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL, os, 0);
+		conv4->os(*os);
+
+		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL, 1);
         max5->in(*conv4_to_max5);
         max5->out(*max5_to_conv6);
+        max5->os(*os);        
 		
-        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL, os, 0);
+        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL, 1);
         conv6->in(*max5_to_conv6);
         conv6->out(*conv6_to_max7);
-        
-		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL, os, 0);
+        conv6->os(*os);    
+    
+		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL, 1);
         max7->in(*conv6_to_max7);
         max7->out(*max7_to_conv8);	
+        max7->os(*os);        
 
-		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL, os, 0);
+		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL, 1);
         conv8->in(*max7_to_conv8);
         conv8->out(*conv8_to_max9);
+        conv8->os(*os);        
 
-		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL, os, 0);
+		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL, 1);
         max9->in(*conv8_to_max9);
         max9->out(*max9_to_conv10);
+        max9->os(*os);        
 
-		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, os, 0);
+		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, 1);
         conv10->in(*max9_to_conv10);
         conv10->out(*conv10_to_max11);
+        conv10->os(*os);
 
         // !!! NOTE !!! this is the only max layer with stride=1
-		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, os, 0);
+		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, 1);
         max11->in(*conv10_to_max11);
         max11->out(*max11_to_conv12);
+        max11->os(*os);
 
-		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL, os, 0);
+		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL, 1);
         conv12->in(*max11_to_conv12);
         conv12->out(*conv12_to_conv13);
+        conv12->os(*os);
 
-		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, os, 0);
+		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, 1);
         conv13->in(*conv12_to_conv13);
         conv13->out(*conv13_to_conv14);
+        conv13->os(*os);
 
-		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, os, 0);
+		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, 1);
         conv14->in(*conv13_to_conv14);
         conv14->out(*conv14_to_region);
-    
+        conv14->os(*os);
+
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                               true, 1, 1, true, 0.6, true, 13, 13, 425, os, 0);
+                               true, 1, 1, true, 0.6, true, 13, 13, 425, 1);
 		region->in(*conv14_to_region);
 		region->im_in(*reader_to_writer);
 		region->im_w_in(*int_reader_to_writer); 
 		region->im_h_in(*int2_reader_to_writer);
 		region->im_name_in(*char_reader_to_writer);
+        region->os(*os);
 	}
 };
 
@@ -882,7 +925,7 @@ class	kpn_neuralnet : public sc_module
 		
         // Here is where we will indicate the parameters for each layer. These can
         // be found in the cfg file for yolov2-tiny in the darknet folder.
-	    reader0 = new image_reader("image_reader", images, NULL, -1);
+	    reader0 = new image_reader("image_reader", images, -1);
 		reader0->out(*reader_to_conv0);
 		reader0->im_out(*reader_to_writer);
 		reader0->im_w_out(*int_reader_to_writer); 
@@ -890,69 +933,69 @@ class	kpn_neuralnet : public sc_module
 		reader0->im_name_out(*char_reader_to_writer);
 
 		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL, NULL, -1);
+        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL, -1);
         conv0->in(*reader_to_conv0);
         conv0->out(*conv0_to_max1);
 
-        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL, NULL, -1); 
+        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL, -1); 
         max1->in(*conv0_to_max1);
         max1->out(*max1_to_conv2);
 
-        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL, -1);
         conv2->in(*max1_to_conv2);
         conv2->out(*conv2_to_max3);
 
-        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL, NULL, -1); 
+        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL, -1); 
         max3->in(*conv2_to_max3);
         max3->out(*max3_to_conv4);
 
-	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL, -1);
         conv4->in(*max3_to_conv4);
         conv4->out(*conv4_to_max5);
 		
-		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL, NULL, -1);
+		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL, -1);
         max5->in(*conv4_to_max5);
         max5->out(*max5_to_conv6);
 		
-        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL, -1);
         conv6->in(*max5_to_conv6);
         conv6->out(*conv6_to_max7);
 
-		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL, NULL, -1);
+		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL, -1);
         max7->in(*conv6_to_max7);
         max7->out(*max7_to_conv8);	
 
-		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL, -1);
         conv8->in(*max7_to_conv8);
         conv8->out(*conv8_to_max9);
 
-		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL, NULL, -1);
+		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL, -1);
         max9->in(*conv8_to_max9);
         max9->out(*max9_to_conv10);
 		
-		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, -1);
         conv10->in(*max9_to_conv10);
         conv10->out(*conv10_to_max11);
 	
         // !!! NOTE !!! this is the only max layer with stride=1
-		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, NULL, -1);
+		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, -1);
         max11->in(*conv10_to_max11);
         max11->out(*max11_to_conv12);
 
-		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL, -1);
         conv12->in(*max11_to_conv12);
         conv12->out(*conv12_to_conv13);
 		
-		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, NULL, -1);
+		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, -1);
         conv13->in(*conv12_to_conv13);
         conv13->out(*conv13_to_conv14);
 
-		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, NULL, -1);
+		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, -1);
         conv14->in(*conv13_to_conv14);
         conv14->out(*conv14_to_region);
 
 		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                               true, 1, 1, true, 0.6, true, 13, 13, 425, NULL, -1);
+                               true, 1, 1, true, 0.6, true, 13, 13, 425, -1);
 		region->in(*conv14_to_region);
 		region->im_in(*reader_to_writer);
 		region->im_w_in(*int_reader_to_writer); 
@@ -964,8 +1007,9 @@ class	kpn_neuralnet : public sc_module
 // This will probably remain as-is.
 int sc_main(int argc, char * argv[]) 
 {
-    kpn_neuralnet knn0("kpn_neuralnet");
+    //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
+    kpn_neuralnet_os knn0("kpn_neuralnet_os");
     sc_start();
     return 0;
 }

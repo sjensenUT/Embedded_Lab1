@@ -7,12 +7,12 @@
 
 
 
-template<class T>
+/*template<class T>
 os_sc_fifo<T>::os_sc_fifo(os_channel *_os, int _size):
     sc_fifo<T>(_size),
     os(_os)
 {
-}
+}*/
 
 template <class T>
 inline

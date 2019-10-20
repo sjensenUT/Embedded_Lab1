@@ -88,6 +88,7 @@ void os_channel::yield()
 // n is in milliseconds
 void os_channel::time_wait(int n)
 {
+    cout << "in time_wait" << endl;
     printf("[OS] Task %d (%s) called time_wait for %d ms at time %f ms\n",
             current, getTaskName(current).c_str(), n, nowMs());
     wait(n, SC_MS);
