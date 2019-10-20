@@ -246,6 +246,7 @@ void conv_layer::process()
     // create just before calling. The size can be determined by layer.get_workspace_size().
     network dummyNetwork;
     dummyNetwork.input = input;
+    dummyNetwork.train = 0; 
     //cout << "Hello1" << endl;
     //printf("inputs of layer %d, are", layerIndex);
     //for(int j = 0; j < 10; j++){
