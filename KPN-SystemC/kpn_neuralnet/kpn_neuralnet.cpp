@@ -13,7 +13,6 @@
 #include "../kahn_process.h"
 
 
-
 #include "darknet.h"
 #include "array_ops.h"
 #include "merge_scatter.h"
@@ -29,6 +28,7 @@
 #include "os_channel.h"
 #include "os_sc_fifo.h"
 #include "os_sc_fifo.cpp"
+#include "kpn_BusSlave.h"
  
 using	std::cout;
 using	std::endl;
