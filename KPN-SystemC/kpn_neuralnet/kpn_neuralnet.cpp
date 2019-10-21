@@ -101,7 +101,7 @@ void image_reader::process()
 {
 	//wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
-    latencyIndex++; 
+    //latencyIndex++; 
     for(size_t i=0; i<images.size(); i++)
 	{
 		
@@ -114,8 +114,10 @@ void image_reader::process()
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
+        int layer_waitTime = LATENCY[latencyIndex];
+        latencyIndex++; latencyIndex %= 17;
         if(this->waitTime > 0){
-            this->os->time_wait(waitTime);
+            this->os->time_wait(layer_waitTime);
         }
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
@@ -125,7 +127,17 @@ void image_reader::process()
         sprintf(name,"image%zu",i);
         string name_str(name);			
         im_name_out->write(name_str);
+        
+        
 	}
+    cout << "finished reading" << endl; 
+    if(this->waitTime > 0)
+    {
+        //yielding so other tasks can run
+    //    this->os->time_wait(0);
+        cout << "terminating" << endl; 
+        this->os->task_terminate();
+    }
 }
 
 
@@ -225,7 +237,8 @@ void conv_layer::init(){
     if(this->waitTime > 0){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
-    }
+    } 
+    cout << "asd wait time is:" << this->waitTime << endl; 
 }
 
 void conv_layer::process()
@@ -235,9 +248,9 @@ void conv_layer::process()
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
 	
-    wait(LATENCY[latencyIndex],SC_MS);
-    cout << "waited for " << LATENCY[latencyIndex] << endl;
-    latencyIndex++;
+    //wait(LATENCY[latencyIndex],SC_MS);
+    //cout << "waited for " << LATENCY[latencyIndex] << endl;
+    //latencyIndex++;
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
     
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
@@ -301,11 +314,20 @@ void conv_layer::process()
     
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
+    
+    int layer_waitTime = LATENCY[latencyIndex];
+    latencyIndex++; latencyIndex %= 17;
     if(this->waitTime > 0){
-        this->os->time_wait(waitTime);
+        this->os->time_wait(layer_waitTime);
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
-
+    
+    if(this->waitTime > 0)
+    {
+        //yielding so other tasks can run
+        //this->os->time_wait(0);
+        this->os->task_terminate(); 
+    }
 }
 
 
@@ -348,9 +370,9 @@ void max_layer::process()
     float* data;
     data = readImageData(&in, l.w, l.h, l.c);
 
-    wait(LATENCY[latencyIndex],SC_MS);
-    cout << "waited for " << LATENCY[latencyIndex] << endl;
-    latencyIndex++;
+    //wait(LATENCY[latencyIndex],SC_MS);
+    //cout << "waited for " << LATENCY[latencyIndex] << endl;
+    //latencyIndex++;
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
     //printf("inputs of layer %d, are", layerIndex);
@@ -398,11 +420,20 @@ void max_layer::process()
     unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
+
+    int layer_waitTime = LATENCY[latencyIndex];
+    latencyIndex++; latencyIndex %= 17;
     if(this->waitTime > 0){
-        this->os->time_wait(waitTime);
+        this->os->time_wait(layer_waitTime);
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
 
+    if(this->waitTime > 0)
+    {
+        //yielding so other tasks can run
+        //this->os->time_wait(0);
+        this->os->task_terminate(); 
+    }
 }
 
 
@@ -480,7 +511,6 @@ void region_layer::process()
     //wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++;
-    //cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
     network dummyNetwork;
@@ -543,12 +573,49 @@ void region_layer::process()
 
 	free_image(im); 
     free(data);
+    int layer_waitTime = LATENCY[latencyIndex];
+    latencyIndex++; latencyIndex %= 17;
     if(this->waitTime > 0){
-        this->os->time_wait(waitTime);
+        this->os->time_wait(layer_waitTime);
     }
-	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;
-	//free(alphabets);  Now part of the constructor and I don't free it here? 
+	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;	
+    cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
+    
+    if(this->waitTime >0){
+        this->os->task_terminate(); 
+    }
+    //free(alphabets);  Now part of the constructor and I don't free it here? 
 }
+
+
+idle_task::idle_task(sc_module_name name,int _waitTime)
+    : kahn_process(name), waitTime(_waitTime)
+{
+    cout << "instantiating idle task" << endl;
+}
+void idle_task::init()
+{
+    cout << "in idle_task::init()" << endl;
+    if(this->waitTime > 0){
+        char name[] = "idle task"; 
+        cout << "detected os, registering task" << endl;
+        this->os->reg_task(name);
+    }
+}
+
+void idle_task::process()
+{
+    while(1)
+    {
+        if(this->waitTime > 0)    
+        {
+            cout << "in idle task\n";  
+            this->os->time_wait(this->waitTime);
+        }
+    }
+}
+
+
 
 int coerce (int val, int min, int max) {
   if (val < min) return min;
@@ -702,14 +769,15 @@ class	kpn_neuralnet_os : public sc_module
     max_layer *max1, *max3, *max5, *max7, *max9, *max11;
     region_layer	*region;
 	image_reader	*reader0;
+    idle_task       *idletask; 
     os_channel *os;    
 
     // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet_os(sc_module_name name) : sc_module(name)
 	{
         cout << "in kpn_neuralnet_os" << endl;
-	  	strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		//strs images = {"../../darknet/data/dog.jpg"};
+	  	//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
@@ -858,7 +926,10 @@ class	kpn_neuralnet_os : public sc_module
 		region->im_h_in(*int2_reader_to_writer);
 		region->im_name_in(*char_reader_to_writer);
         region->os(*os);
-	}
+	
+        idletask = new idle_task("idle",1);   
+        idletask->os(*os);
+    }
 };
 
 class	kpn_neuralnet : public sc_module

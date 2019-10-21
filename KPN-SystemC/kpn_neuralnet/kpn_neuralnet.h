@@ -148,3 +148,15 @@ class max_layer_unfused : public sc_module
                        int inputWidth, int inputHeight, int c, int size, int stride,
                        int pad );
 };
+
+class idle_task : public kahn_process
+{
+    public:
+    const int waitTime;
+    sc_port<os_channel> os;
+    
+    idle_task(sc_module_name name, int _waitTime); 
+    void    process() override;
+    void    init() override;
+
+};
