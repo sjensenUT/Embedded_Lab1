@@ -43,7 +43,7 @@ const int IMAGE_WIDTH  = 416;
 const int IMAGE_HEIGHT = 416;
 const int BATCH        = 1;
 
-const int BIGGEST_FIFO_SIZE = 416 * 416 * 16;
+const int BIGGEST_FIFO_SIZE = 1;
 
 // Constant float array to hold the anchors for the region layer
 // whatever that means
@@ -783,7 +783,8 @@ class	kpn_neuralnet_os : public sc_module
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
 		cout << "instantiating os" << endl;
-		os = new os_channel("os", 100);
+        bool verbose = false;
+		os = new os_channel("os", 100, verbose);
         cout << "instantiating channels" << endl;
 		reader_to_conv0 	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
         reader_to_conv0->os(*os);

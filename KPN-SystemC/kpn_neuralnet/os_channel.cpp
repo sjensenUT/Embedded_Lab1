@@ -9,8 +9,9 @@
 #include <queue>
 
 
-os_channel::os_channel(sc_module_name name, int maxTasks)
-:   sc_channel(name)
+os_channel::os_channel(sc_module_name name, int maxTasks, bool _verbose)
+:   sc_channel(name),
+    verbose(_verbose)
 {
   //cout << "in os_channel constructor" << endl; 
   this->current = 0;
@@ -55,7 +56,10 @@ int os_channel::schedule()
     // If the queue is empty, return 0.
     if (this->readyQueue.empty()) 
     { 
-       printf("[OS] Schedule: Currently ready queue empty\n"); 
+       if(verbose)
+       {
+          printf("[OS] Schedule: Currently ready queue empty\n");
+       } 
        return 0;
     }
     int t = this->readyQueue.front();
@@ -69,14 +73,20 @@ void os_channel::dispatch()
     current = this->schedule(); // Schedule a new task
     if (current)
     {
-        printf("[OS] Dispatch: Scheduling task %d (%s) at time %f ms\n",
-               current, getTaskName(current).c_str(), nowMs());
+        if(verbose)
+        {
+            printf("[OS] Dispatch: Scheduling task %d (%s) at time %f ms\n",
+                current, getTaskName(current).c_str(), nowMs());
+        }
         // If we found a task to schedule, notify its event so that it starts running.
         // If there was nothing to schedule, schedule() returns 0.
         this->getTaskEvent(current).notify(SC_ZERO_TIME);
     } else {
-        printf("[OS] Dispatch: No tasks were in the ready queue at time %f ms\n", nowMs());
-    }
+        if(verbose)
+        {
+            printf("[OS] Dispatch: No tasks were in the ready queue at time %f ms\n", nowMs());
+        }
+    }   
 }
 
 
@@ -106,8 +116,11 @@ void os_channel::time_wait(int n)
 
 int os_channel::pre_wait()
 {
-    printf("[OS] Task %d (%s) called pre_wait at time %f ms\n",
-            current, getTaskName(current).c_str(), nowMs());
+    if(verbose)
+    {
+        printf("[OS] Task %d (%s) called pre_wait at time %f ms\n",
+                current, getTaskName(current).c_str(), nowMs());
+    }
     int temp = current; // Remember which task called pre_wait
     this->dispatch();   // Let a new task run, as this task is about to start waiting
     return temp;        // Return the task ID to the caller so it can tell us when it's done waiting.
@@ -116,13 +129,19 @@ int os_channel::pre_wait()
 
 void os_channel::post_wait(int task)
 {
-    printf("[OS] Task %d (%s) called post_wait at time %f ms\n",
+    if(verbose)
+    {
+        printf("[OS] Task %d (%s) called post_wait at time %f ms\n",
             task, getTaskName(task).c_str(), nowMs());
+    }
     this->readyQueue.push(task);    // Once I'm done waiting, put me back into the ready queue
     if (!current) dispatch();       // If nobody's currently running, let me run now.
     wait(this->getTaskEvent(task)); // Now wait to be woken up.
-    printf("[OS] Task %d (%s) woken up at time %f ms\n",
+    if(verbose)
+    {
+        printf("[OS] Task %d (%s) woken up at time %f ms\n",
             current, getTaskName(current).c_str(), nowMs());
+    }
 }
 
 

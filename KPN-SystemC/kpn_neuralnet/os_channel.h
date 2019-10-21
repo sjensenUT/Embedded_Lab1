@@ -17,7 +17,7 @@ class os_channel : public sc_channel,
     // And constructor/destructor obviously
     public:
 
-    os_channel(sc_module_name, int);
+    os_channel(sc_module_name, int, bool);
     os_channel();
     ~os_channel();
 
@@ -26,6 +26,7 @@ class os_channel : public sc_channel,
     void time_wait(int); // time in ms
     void task_terminate();
     void reg_task(const char*);
+    bool verbose;
  
     private:
 
