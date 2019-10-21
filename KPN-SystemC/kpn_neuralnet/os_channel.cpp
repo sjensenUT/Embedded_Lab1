@@ -12,7 +12,7 @@
 os_channel::os_channel(sc_module_name name, int maxTasks)
 :   sc_channel(name)
 {
-  cout << "in os_channel constructor" << endl; 
+  //cout << "in os_channel constructor" << endl; 
   this->current = 0;
   this->taskEvents = std::vector<sc_event>(maxTasks);
   this->taskNames  = std::vector<std::string>(maxTasks);
@@ -20,7 +20,9 @@ os_channel::os_channel(sc_module_name name, int maxTasks)
   std::cout << "[OS] taskEvents size = " << taskEvents.size() << std::endl;
 }
 
-os_channel::os_channel(){}
+os_channel::os_channel(){
+    std::cout << "[OS] Default constructor called." << std::endl;
+}
 
 
 sc_event& os_channel::getTaskEvent(int taskId)
@@ -94,7 +96,7 @@ void os_channel::yield()
 // n is in milliseconds
 void os_channel::time_wait(int n)
 {
-    cout << "in time_wait" << endl;
+    //cout << "in time_wait" << endl;
     printf("[OS] Task %d (%s) called time_wait for %d ms at time %f ms\n",
             current, getTaskName(current).c_str(), n, nowMs());
     wait(n, SC_MS);
@@ -115,7 +117,7 @@ int os_channel::pre_wait()
 void os_channel::post_wait(int task)
 {
     printf("[OS] Task %d (%s) called post_wait at time %f ms\n",
-            current, getTaskName(current).c_str(), nowMs());
+            task, getTaskName(task).c_str(), nowMs());
     this->readyQueue.push(task);    // Once I'm done waiting, put me back into the ready queue
     if (!current) dispatch();       // If nobody's currently running, let me run now.
     wait(this->getTaskEvent(task)); // Now wait to be woken up.
@@ -129,6 +131,7 @@ void os_channel::task_terminate()
     // Let a new task run
     // I don't think there's any sort of de-allocation we need to do... not yet at least.
     printf("[OS] Terminating task %d (%s)\n", current, getTaskName(current).c_str());
+    current = 0;
     this->dispatch();
 }
 

@@ -1,4 +1,5 @@
 #include <systemc.h>
+#include "os_sc_fifo.h"
 
 // Writes image data to a float fifo
 // Also frees the data once this is done.

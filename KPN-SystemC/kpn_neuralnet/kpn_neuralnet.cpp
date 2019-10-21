@@ -924,8 +924,8 @@ class	kpn_neuralnet_os : public sc_module
 		region->im_name_in(*char_reader_to_writer);
         region->os(*os);
 	
-        idletask = new idle_task("idle",1);   
-        idletask->os(*os);
+        //idletask = new idle_task("idle",1);   
+        //idletask->os(*os);
     }
 };
 

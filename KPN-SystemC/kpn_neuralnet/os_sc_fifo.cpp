@@ -15,7 +15,7 @@ os_sc_fifo<T>::os_sc_fifo(os_channel *_os, int _size):
 }*/
 
 template <class T>
-inline
+//inline
 void
 os_sc_fifo<T>::read( T& val_ )
 {
@@ -31,7 +31,7 @@ os_sc_fifo<T>::read( T& val_ )
 }
 
 template <class T>
-inline
+//inline
 void
 os_sc_fifo<T>::write( const T& val_ )
 {
