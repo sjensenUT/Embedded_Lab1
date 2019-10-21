@@ -246,12 +246,13 @@ void conv_layer::process()
     // create just before calling. The size can be determined by layer.get_workspace_size().
     network dummyNetwork;
     dummyNetwork.input = input;
-    cout << "Hello1" << endl;
-    printf("inputs of layer %d, are", layerIndex);
-    for(int j = 0; j < 10; j++){
-        printf(" %f", input[j]);
-    }
-    printf("\n");
+    dummyNetwork.train = 0; 
+    //cout << "Hello1" << endl;
+    //printf("inputs of layer %d, are", layerIndex);
+    //for(int j = 0; j < 10; j++){
+    //    printf(" %f", input[j]);
+    //}
+    //printf("\n");i
     system_clock::time_point before = system_clock::now(); 
     size_t workspace_size = get_convolutional_workspace_size(l);
     dummyNetwork.workspace = (float*) calloc(1, workspace_size);
