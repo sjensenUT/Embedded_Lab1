@@ -204,12 +204,12 @@ void forward_network(network *netp)
         net.index = i;
         layer l = net.layers[i];
 
-//	int j;
-//      	printf("inputs of layer %d, are", i);
-//	    	for(j = 0; j < 10; j++){
-//		    	printf(" %f", net.input[j]);
-//	    	}
-//	      printf("\n");
+	    int j;
+      	printf("inputs of layer %d, are", i);
+	    	for(j = 0; j < 10; j++){
+		    	printf(" %f", net.input[j]);
+	    	}
+	      printf("\n");
 
         if(l.delta){
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
@@ -217,11 +217,11 @@ void forward_network(network *netp)
         l.forward(l, net);
         net.input = l.output;
 
-//	printf("outputs of layer %d, are", i);
-//        for(j = 0; j < 10; j++){
-//                printf(" %f", l.output[j]);
-//        }
-//	printf("\n");
+	    printf("outputs of layer %d, are", i);
+        for(j = 0; j < 10; j++){
+                printf(" %f", l.output[j]);
+        }
+	    printf("\n");
 
 /*
         image outputImage;
