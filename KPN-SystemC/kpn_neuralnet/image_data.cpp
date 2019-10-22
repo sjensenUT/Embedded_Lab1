@@ -13,7 +13,7 @@ void writeImageData ( sc_fifo_out<float> *out, float* data,
             }
         }
     }
-    free(data);
+    //free(data);
 }
 
 // Reads image data from a float fifo

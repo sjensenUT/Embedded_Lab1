@@ -27,4 +27,4 @@ merge_scatter.cpp implements merge and scatter layers that are used between
 each layer in the unfused tiled approach and at the beginning and end of the 
 fused tile approach.
 
-To run our solution, run "make" and "make test" in KPN-SystemC/kpn_neuralnet.
+To run our solution, run "make" and "make part1", "make part2a", and "make part2b" in KPN-SystemC/kpn_neuralnet to run part 1, part 2a, and part 2b of the lab respectively.

@@ -14,7 +14,20 @@ INCDIR  := -I../../darknet/include/
 
 include ../Makefile.rules
 
-.PHONY: test
+.PHONY: part1
 
-test:
-	./kpn_neuralnet.x
+part1:
+	./kpn_neuralnet.x part1
+
+
+.PHONY: part2a
+
+part2a:
+	./kpn_neuralnet.x part2a
+
+.PHONY: part2b
+
+part2b:
+	./kpn_neuralnet.x part2b
+
+
