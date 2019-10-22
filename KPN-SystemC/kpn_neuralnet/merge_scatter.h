@@ -1,3 +1,6 @@
+#ifndef MERGE_SCATTER_H
+#define MERGE_SCATTER_H
+
 #include "../kahn_process.h"
 
 class   merge_layer : public kahn_process
@@ -32,3 +35,5 @@ class   scatter_layer : public kahn_process
     void process() override;
     void init() override;
 };
+
+#endif //MERGE_SCATTER_H

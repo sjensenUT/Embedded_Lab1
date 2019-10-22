@@ -81,6 +81,7 @@ void os_channel::dispatch()
         // If we found a task to schedule, notify its event so that it starts running.
         // If there was nothing to schedule, schedule() returns 0.
         this->getTaskEvent(current).notify(SC_ZERO_TIME);
+        //this->getTaskEvent(current).notify();
     } else {
         if(verbose)
         {

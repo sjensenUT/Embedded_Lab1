@@ -1,7 +1,36 @@
+#ifndef KPN_NEURALNET_H
+#define KPN_NEURALNET_H
+
+#include <vector>
 #include <string>
+#include <iostream>
+#include <systemc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <chrono>
+#include "../kahn_process.h"
+
+
+
+#include "darknet.h"
+#include "array_ops.h"
+#include "merge_scatter.h"
+#include "../../darknet/src/convolutional_layer.h"
+#include "../../darknet/src/maxpool_layer.h"
+#include "../../darknet/src/region_layer.h"
+#include "../../darknet/src/parser.h"
+#include "../../darknet/src/activations.h"
+#include "../../darknet/src/image.h"
+#include "kpn_neuralnet.h"
+#include "image_data.h"
 #include "os_channel.h"
+#include "os_sc_fifo.h"
+#include "os_sc_fifo.cpp"
+
 
 void getTileCoords(int width, int height, int coords[9][4]);
+void load(int lIdx, const char* attr, float* ptr, int size);
+
 
 class   image_reader : public kahn_process
 {
@@ -160,3 +189,5 @@ class idle_task : public kahn_process
     void    init() override;
 
 };
+
+#endif //KPN_NEURALNET_H

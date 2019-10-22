@@ -1,4 +1,8 @@
+#ifndef KPN_NEURALNET_FUSED_H
+#define KPN_NEURALNET_FUSED_H
+
 #include<string>
+#include "kpn_neuralnet.h"
 using std::string;
 
 class   kpn_fused_thread : public sc_module
@@ -51,3 +55,4 @@ class   kpn_neuralnet_fused : public sc_module
     kpn_neuralnet_fused(sc_module_name name);
 };
 
+#endif //KPN_NEURALNET_FUSED

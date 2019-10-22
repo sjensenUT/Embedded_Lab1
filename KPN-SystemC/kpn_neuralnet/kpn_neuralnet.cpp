@@ -10,25 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <chrono>
-#include "../kahn_process.h"
-
-
-
-#include "darknet.h"
-#include "array_ops.h"
-#include "merge_scatter.h"
-#include "../../darknet/src/convolutional_layer.h"
-#include "../../darknet/src/maxpool_layer.h"
-#include "../../darknet/src/region_layer.h"
-#include "../../darknet/src/parser.h"
-#include "../../darknet/src/activations.h"
-#include "../../darknet/src/image.h"
-#include "kpn_neuralnet.h" 
-#include "image_data.h"
-#include "kpn_neuralnet_fused.h"
-#include "os_channel.h"
-#include "os_sc_fifo.h"
-#include "os_sc_fifo.cpp"
+#include "kpn_neuralnet.h"
+#include "kpn_neuralnet_os.h"
  
 using	std::cout;
 using	std::endl;
@@ -119,8 +102,8 @@ void image_reader::process()
         if(this->waitTime > 0){
             this->os->time_wait(layer_waitTime);
         }
-        writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
-		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
+        writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3 );
+		writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
 		char name[10];
@@ -365,7 +348,7 @@ void max_layer::process()
 {
 
     float* data;
-    data = readImageData(&in, l.w, l.h, l.c);
+    data = readImageData(&in, l.w, l.h, l.c );
 
     //wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
@@ -423,7 +406,7 @@ void max_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
-    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);	
+    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
 
     if(this->waitTime > 0)
     {
@@ -497,13 +480,13 @@ void region_layer::process()
 	string image_name; 
 	image im; 
 	
-    data = readImageData(&in, l.w, l.h, this->chans);
+    data = readImageData(&in, l.w, l.h, this->chans );
 
 	im_name_in->read(image_name);
 	im_w_in->read(im.w);
 	im_h_in->read(im.h); 
 	im.c = 3;
-    im.data = readImageData(&im_in, im.w, im.h, im.c);
+    im.data = readImageData(&im_in, im.w, im.h, im.c );
 
     //wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
@@ -733,202 +716,6 @@ max_layer_unfused::max_layer_unfused(sc_module_name name, int layerIndex, int co
     }
 }
 
-class	kpn_neuralnet_os : public sc_module
-{
-	public:
-	
-    //Declare all queues between our layers here
-    //I think the data type for all of them will be image
-	os_sc_fifo<float>	*reader_to_conv0, 
-			*conv0_to_max1, 
-			*max1_to_conv2,
-			*conv2_to_max3,
-			*max3_to_conv4,
-			*conv4_to_max5,
-			*max5_to_conv6,
-			*conv6_to_max7,
-			*max7_to_conv8,
-			*conv8_to_max9,
-			*max9_to_conv10,
-			*conv10_to_max11,
-			*max11_to_conv12,
-			*conv12_to_conv13,
-			*conv13_to_conv14,
-			*conv14_to_region;
-
-	os_sc_fifo<float>  *reader_to_writer;  
-	os_sc_fifo<int>    *int_reader_to_writer, *int2_reader_to_writer; 
-	os_sc_fifo<string>  *char_reader_to_writer; 
-
-    // Declare all layers here
-	conv_layer *conv0, *conv2, *conv4, *conv6, *conv8, *conv10, *conv12,
-                     *conv13, *conv14;
-    max_layer *max1, *max3, *max5, *max7, *max9, *max11;
-    region_layer	*region;
-	image_reader	*reader0;
-    idle_task       *idletask; 
-    os_channel *os;    
-
-    // Constructor of the overall network. Initialize all queues and layers
-	kpn_neuralnet_os(sc_module_name name) : sc_module(name)
-	{
-        cout << "in kpn_neuralnet_os" << endl;
-	  	//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		strs images = {"../../darknet/data/dog.jpg"};
-		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
-		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
-		//char *cfgFileC = new char[cfgFile.length() + 1];
-		//strcpy(cfgFileC, cfgFile.c_str());
-		//char *weightFileC = new char[weightFile.length() + 1];
-		//strcpy(weightFileC, weightFile.c_str());
-		//network *net = load_network(cfgFileC, weightFileC, 0);
-		cout << "instantiating os" << endl;
-        bool verbose = false;
-		os = new os_channel("os", 100, verbose);
-        cout << "instantiating channels" << endl;
-		reader_to_conv0 	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        reader_to_conv0->os(*os);
-		conv0_to_max1   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv0_to_max1->os(*os);
-		max1_to_conv2   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max1_to_conv2->os(*os);
-		conv2_to_max3   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv2_to_max3->os(*os);
-        max3_to_conv4   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max3_to_conv4->os(*os);
-		conv4_to_max5   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv4_to_max5->os(*os);
-        max5_to_conv6   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max5_to_conv6->os(*os);
-		conv6_to_max7   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv6_to_max7->os(*os);
-        max7_to_conv8   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max7_to_conv8->os(*os);
-		conv8_to_max9   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv8_to_max9->os(*os);
-        max9_to_conv10   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max9_to_conv10->os(*os);
-		conv10_to_max11   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv10_to_max11->os(*os);
-        max11_to_conv12   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        max11_to_conv12->os(*os);
-		conv12_to_conv13   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv12_to_conv13->os(*os);
-        conv13_to_conv14   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv13_to_conv14->os(*os);
-		conv14_to_region   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
-        conv14_to_region->os(*os);
-
-		reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3);
-        reader_to_writer->os(*os);
-		int_reader_to_writer	= new os_sc_fifo<int>(1); // needed to send im.w and im.h
-        int_reader_to_writer->os(*os);
-		int2_reader_to_writer 	= new os_sc_fifo<int>(1);
-        int2_reader_to_writer->os(*os); 
-		char_reader_to_writer  	= new os_sc_fifo<string>(1);
-        char_reader_to_writer->os(*os);
-        
-        // Here is where we will indicate the parameters for each layer. These can
-        // be found in the cfg file for yolov2-tiny in the darknet folder.
-	    reader0 = new image_reader("image_reader", images, 1);
-		reader0->out(*reader_to_conv0);
-		reader0->im_out(*reader_to_writer);
-		reader0->im_w_out(*int_reader_to_writer); 
-		reader0->im_h_out(*int2_reader_to_writer);
-		reader0->im_name_out(*char_reader_to_writer);
-        reader0->os(*os);
-
-
-		//name, layerIndex, filterSize, stride, numFilters, pad, activation, batchNormalize
-        conv0 = new conv_layer("conv0", 0, 416, 416, 3, 3, 1, 16, 1,  LEAKY, true, false, NULL, NULL, 1);
-        conv0->in(*reader_to_conv0);
-        conv0->out(*conv0_to_max1);
-        conv0->os(*os);
-        
-        max1 = new max_layer("max1", 1, 416, 416, 16, 2, 2, false, NULL, NULL, 1); 
-        max1->in(*conv0_to_max1);
-        max1->out(*max1_to_conv2);
-        max1->os(*os);
-        
-        conv2 = new conv_layer("conv2", 2, 208, 208, 16, 3, 1, 32, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv2->in(*max1_to_conv2);
-        conv2->out(*conv2_to_max3);
-        conv2->os(*os);        
-
-        max3 = new max_layer("max3", 3, 208, 208, 32, 2, 2, false, NULL, NULL, 1); 
-        max3->in(*conv2_to_max3);
-        max3->out(*max3_to_conv4);
-        max3->os(*os);
-        
-	    conv4 = new conv_layer("conv4", 4, 104, 104, 32, 3, 1, 64, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv4->in(*max3_to_conv4);
-        conv4->out(*conv4_to_max5);
-		conv4->os(*os);
-
-		max5 = new max_layer("max5", 5, 104, 104, 64, 2, 2, false, NULL, NULL, 1);
-        max5->in(*conv4_to_max5);
-        max5->out(*max5_to_conv6);
-        max5->os(*os);        
-		
-        conv6 = new conv_layer("conv6", 6, 52, 52, 64, 3, 1, 128, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv6->in(*max5_to_conv6);
-        conv6->out(*conv6_to_max7);
-        conv6->os(*os);    
-    
-		max7 = new max_layer("max7", 7, 52, 52, 128, 2, 2, false, NULL, NULL, 1);
-        max7->in(*conv6_to_max7);
-        max7->out(*max7_to_conv8);	
-        max7->os(*os);        
-
-		conv8 = new conv_layer("conv8", 8, 26, 26, 128, 3, 1, 256, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv8->in(*max7_to_conv8);
-        conv8->out(*conv8_to_max9);
-        conv8->os(*os);        
-
-		max9 = new max_layer("max9", 9, 26, 26, 256, 2,2, false, NULL, NULL, 1);
-        max9->in(*conv8_to_max9);
-        max9->out(*max9_to_conv10);
-        max9->os(*os);        
-
-		conv10 = new conv_layer("conv10", 10, 13, 13, 256, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv10->in(*max9_to_conv10);
-        conv10->out(*conv10_to_max11);
-        conv10->os(*os);
-
-        // !!! NOTE !!! this is the only max layer with stride=1
-		max11 = new max_layer("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, 1);
-        max11->in(*conv10_to_max11);
-        max11->out(*max11_to_conv12);
-        max11->os(*os);
-
-		conv12 = new conv_layer("conv12", 12, 13, 13, 512, 3, 1, 1024, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv12->in(*max11_to_conv12);
-        conv12->out(*conv12_to_conv13);
-        conv12->os(*os);
-
-		conv13 = new conv_layer("conv13", 13, 13, 13, 1024, 3, 1, 512, 1, LEAKY, true, false, NULL, NULL, 1);
-        conv13->in(*conv12_to_conv13);
-        conv13->out(*conv13_to_conv14);
-        conv13->os(*os);
-
-		conv14 = new conv_layer("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, 1);
-        conv14->in(*conv13_to_conv14);
-        conv14->out(*conv14_to_region);
-        conv14->os(*os);
-
-		region = new region_layer("region", (float*)ANCHORS, true, 80, 4, 5, true, 0.2, false, 5,
-                               true, 1, 1, true, 0.6, true, 13, 13, 425, 1);
-		region->in(*conv14_to_region);
-		region->im_in(*reader_to_writer);
-		region->im_w_in(*int_reader_to_writer); 
-		region->im_h_in(*int2_reader_to_writer);
-		region->im_name_in(*char_reader_to_writer);
-        region->os(*os);
-	
-        //idletask = new idle_task("idle",1);   
-        //idletask->os(*os);
-    }
-};
 
 class	kpn_neuralnet : public sc_module
 {
@@ -1084,7 +871,8 @@ int sc_main(int argc, char * argv[])
 {
     //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    //kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
     sc_start();
     return 0;
 }
