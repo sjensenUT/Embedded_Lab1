@@ -12,6 +12,7 @@
 #include <chrono>
 #include "kpn_neuralnet.h"
 #include "kpn_neuralnet_os.h"
+
  
 using	std::cout;
 using	std::endl;
