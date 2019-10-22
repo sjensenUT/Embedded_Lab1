@@ -509,9 +509,9 @@ void forward_convolutional_layer(convolutional_layer l, network net)
         add_bias(l.output, l.biases, l.batch, l.n, l.out_h*l.out_w);
     }
     activate_array(l.output, l.outputs*l.batch, l.activation);
-    //for(i = 0; i < 10; i++){
-    //    printf("l.output[%d] = %f\n", i, l.output[i]);
-    //}
+    for(i = 0; i < 10; i++){
+        printf("l.output[%d] = %f\n", i, l.output[i]);
+    }
     
     if(l.binary || l.xnor) swap_binary(&l);
 }

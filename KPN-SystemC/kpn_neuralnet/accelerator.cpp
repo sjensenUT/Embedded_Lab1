@@ -75,27 +75,28 @@ accelerator::accelerator(sc_module_name name)
 void accelerator::init(){}
 
 void accelerator::process(){
-    
+    cout << "in accelerator::process" << endl;    
     float* input;
     input = readImageData(&in, l1.w, l1.h, l1.c);
     
     network dummyNetwork1, dummyNetwork2;
-    
+    cout << "allocating network and workspace 1" << endl;
     dummyNetwork1.input = input;
     dummyNetwork1.train = 0;
     size_t workspace_size1 = get_convolutional_workspace_size(l1);
     dummyNetwork1.workspace = (float*) calloc(1, workspace_size1);
-    
+    cout << "performing forward convolution 1" << endl;
     forward_convolutional_layer(l1, dummyNetwork1);
-
+    
+    cout << "allocating network and workspace 2" << endl;
     dummyNetwork2.train = 0;
     size_t workspace_size2 = get_convolutional_workspace_size(l2);
-    //memcpy(dummyNetwork2.input, dummyNetwork1.output, workspace_size2)
-    dummyNetwork2.input = dummyNetwork2.output;
+    //memcpy(dummyNetwork2.input, dummyNetwork1.output, workspace_size2);
+    dummyNetwork2.input = l1.output;
     dummyNetwork2.workspace = (float*) calloc(1, workspace_size2);
-    
+    cout << "performing forward convolution 2" << endl; 
     forward_convolutional_layer(l2, dummyNetwork2);
-    
+    cout << "freeing workspaces" << endl; 
     free(dummyNetwork1.workspace);
     free(dummyNetwork2.workspace);
     
@@ -103,6 +104,6 @@ void accelerator::process(){
     int outputWidth    = l2.out_w;
     int outputHeight   = l2.out_h;
     int outputChans    = 512;
-    
+    cout << "writing image data" << endl;
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
 }
