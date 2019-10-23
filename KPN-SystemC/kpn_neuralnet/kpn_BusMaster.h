@@ -34,12 +34,16 @@ class kpn_MasterInterruptThread : public kahn_process
     {
         while(true)
         {
+    
+            cout << "[BUS M]: waiting for slave to assert signal" << endl;
             // Wait for the slave to assert the IRQ
             irq->receive();
             // Assert the flag
             irqFlag = true;
             // Wait for the master driver to clear the IRQ,
             // clear the flag, and repeat.
+            cout << "[BUS M]: slave signal asserted" << endl;
+            
             wait(clearIrq);
             irqFlag = false;
         }
@@ -104,6 +108,12 @@ class kpn_BusMaster_ifc : virtual public sc_interface
     public:
     virtual void read ( void* data, unsigned long len ) = 0;
     virtual void write ( const void* data, unsigned long len) = 0;
+
+    void register_port(sc_port_base& _port, const char * _if_typename)
+    {
+        cout << "binding " << _port.name() << " to interface: " 
+            << _if_typename << endl;
+    }
 };
 
 class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
@@ -122,6 +132,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
          _writeIrqThread("kpnBusMaster_writeIrqThread", _clearWriteIrq),
          _readIrqThread("kpnBusMaster_readIrqThread", _clearReadIrq)
     {
+        cout << "[BUS M] in constructor" << endl; 
         // Master bus protocol connections
         _master.ready(ready);
         _master.ack(ack);
@@ -150,6 +161,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
         _readIrqThread.irq(_readIrq);
         _readIrqThread.irqFlag(_readIrqFlag);
         //_readIrqThread.clearIrq(_clearReadIrq);
+        cout << "[BUS M] constructor exiting" << endl;
     }
 
     // Make sure these are connected to the slave interrupts in opposite order,

@@ -162,11 +162,37 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     os = new os_channel("os", 100, verbose);
     slaveBus = new kpn_BusSlave("slaveBus");
     masterBus= new kpn_BusMaster("masterBus");
- 
+    masterBus->os(*os); 
+
+    // binding the slave to the Master
+    sc_signal<bool> slaveReadyWrite, slaveReadyRead, ready, ack;
+    sc_signal< sc_bv<ADDR_WIDTH> > A;
+    sc_signal< sc_bv<DATA_WIDTH> > D; 
+
+    cout << "binding interrupts" << endl;
+    masterBus->write_interrupt(slaveReadyRead);    
+    slaveBus->read_interrupt(slaveReadyRead);
+
+    masterBus->read_interrupt(slaveReadyWrite);
+    slaveBus->write_interrupt(slaveReadyWrite);
+    
+    cout << "binding single bus signals" << endl; 
+    masterBus->ack(ack);
+    masterBus->ready(ready); 
+    slaveBus->ack(ack);
+    slaveBus->ready(ready); 
+
+    cout << "binding buses" << endl; 
+    masterBus->A(A);
+    masterBus->D(D);
+    slaveBus->A(A);
+    slaveBus->D(D);
+
 //    os_to_accel = new os_to_accel_fifo<float>(BIGGEST_FIFO_SIZE);
 //    os_to_accel->os(*os);
 //    accel_to_os = new accel_to_os_fifo<float>(BIGGEST_FIFO_SIZE);
 //    accel_to_os->os(*os);
+    cout << "creating neuralnet & accelerator" << endl;
     
     neuralnet = new kpn_neuralnet_os_bus("kpn_neuralnet_os_bus", os);
     neuralnet->max11->mDriver(*masterBus);

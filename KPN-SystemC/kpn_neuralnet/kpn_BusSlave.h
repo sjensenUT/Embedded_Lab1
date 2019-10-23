@@ -59,6 +59,7 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
              _slaveWriteDriver("kpnBusSlave_slaveWriteDriver"),
              _slaveReadDriver("kpnBusSlave_slaveReadDriver")
         {
+            
             _slave.ready(ready);
             _slave.ack(ack);
             _slave.A(A);

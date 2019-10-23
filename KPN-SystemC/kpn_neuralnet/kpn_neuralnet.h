@@ -128,7 +128,7 @@ class   conv_layer_to_bus : public kahn_process
 
 
 //    sc_fifo_in<float> in;
-    sc_port<kpn_BusMaster_ifc> mDriver;
+    sc_port<kpn_BusMaster_ifc,2,SC_ONE_OR_MORE_BOUND> mDriver;
     sc_fifo_out<float> out;
     sc_port<os_channel> os;    
 
@@ -153,7 +153,7 @@ class   max_layer_to_bus : public kahn_process
 
     sc_fifo_in<float> in;
 //    sc_fifo_out<float> out;
-    sc_port<kpn_BusMaster_ifc> mDriver;
+    sc_port<kpn_BusMaster_ifc,2,SC_ONE_OR_MORE_BOUND> mDriver;
 
     layer l;
     const bool crop;
