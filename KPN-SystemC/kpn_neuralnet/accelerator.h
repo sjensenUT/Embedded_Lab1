@@ -22,7 +22,7 @@ class   accelerator_to_bus : public kahn_process
 {
     public:
     
-    sc_port<kpn_BusSlave_ifc> os_to_accel, accel_to_os; 
+    sc_port<kpn_BusSlave_ifc> accel_to_bus; 
 
     convolutional_layer l1, l2;
     accelerator_to_bus(sc_module_name name);

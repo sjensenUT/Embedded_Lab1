@@ -156,7 +156,14 @@ kpn_neuralnet_os_bus::kpn_neuralnet_os_bus(sc_module_name name, os_channel *os) 
 }
 
 
-kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name) : sc_module(name)
+kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name) : 
+        sc_module(name),
+        slaveReadyWrite(0),
+        slaveReadyRead(0),
+        ready(0),
+        ack(0),
+        A(0),
+        D(0)
 {
     bool verbose = false;
     os = new os_channel("os", 100, verbose);
@@ -165,6 +172,8 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     masterBus= new kpn_BusMaster("masterBus");
     masterBus->os(*os);
     // binding the slave to the Master
+    //
+/*
     slaveReadyWrite = new sc_signal<bool>();
     slaveReadyRead  = new sc_signal<bool>();
     ready           = new sc_signal<bool>();
@@ -175,25 +184,25 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     *ack             = 0; 
     A = new sc_signal< sc_bv<ADDR_WIDTH> >;
     D = new sc_signal< sc_bv<DATA_WIDTH>,SC_MANY_WRITERS >; 
-
+*/
     cout << "binding interrupts" << endl;
-    masterBus->write_interrupt(*slaveReadyRead);    
-    slaveBus->read_interrupt(*slaveReadyRead);
+    masterBus->write_interrupt(slaveReadyRead);    
+    slaveBus->read_interrupt(slaveReadyRead);
 
-    masterBus->read_interrupt(*slaveReadyWrite);
-    slaveBus->write_interrupt(*slaveReadyWrite);
+    masterBus->read_interrupt(slaveReadyWrite);
+    slaveBus->write_interrupt(slaveReadyWrite);
     
     cout << "binding single bus signals" << endl; 
-    masterBus->ack(*ack);
-    masterBus->ready(*ready); 
-    slaveBus->ack(*ack);
-    slaveBus->ready(*ready); 
+    masterBus->ack(ack);
+    masterBus->ready(ready); 
+    slaveBus->ack(ack);
+    slaveBus->ready(ready); 
 
     cout << "binding buses" << endl; 
-    masterBus->A(*A);
-    masterBus->D(*D);
-    slaveBus->A(*A);
-    slaveBus->D(*D);
+    masterBus->A(A);
+    masterBus->D(D);
+    slaveBus->A(A);
+    slaveBus->D(D);
 
 //    os_to_accel = new os_to_accel_fifo<float>(BIGGEST_FIFO_SIZE);
 //    os_to_accel->os(*os);
@@ -202,14 +211,13 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     cout << "creating neuralnet & accelerator" << endl;
     
     neuralnet = new kpn_neuralnet_os_bus("kpn_neuralnet_os_bus", os);
-    
+//  if the ports are not bound correctly, this could be causing the issue
     neuralnet->max11->mDriver(*masterBus);
     neuralnet->conv14->mDriver(*masterBus);
     accel = new accelerator_to_bus("accelerator");
 
     // hookups to accelerator
-    accel->os_to_accel(*slaveBus);
-    accel->accel_to_os(*slaveBus); 
+    accel->accel_to_bus(*slaveBus);
 }
 /*
 kpn_neuralnet_bus()::kpn_neuralnet_bus(sc_module_name name) : sc_module(name)

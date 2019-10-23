@@ -165,7 +165,7 @@ void accelerator_to_bus::process(){
     float* input;
     input = new float[l1.w*l1.h*l1.c]; 
 //    input = readImageData(&in, l1.w, l1.h, l1.c);
-    os_to_accel->read(input,l1.w*l1.h*l1.c*sizeof(float));     
+    accel_to_bus->read(input,l1.w*l1.h*l1.c*sizeof(float));     
     cout << "read complete" << endl;  
     cout << "input[0]: " << input[0] << endl;
     network dummyNetwork1, dummyNetwork2;
@@ -197,6 +197,6 @@ void accelerator_to_bus::process(){
     cout << "writing image data" << endl;
     wait(187,SC_MS); // time of both layers 464 + 448 / 5
 
-    accel_to_os->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float));
+    accel_to_bus->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float));
          
 }

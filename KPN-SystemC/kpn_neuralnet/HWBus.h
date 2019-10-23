@@ -95,6 +95,7 @@ class	MasterHardwareBus : public IMasterHardwareBusProtocol, public sc_channel
 	{
         cout << "in masterRead" << endl;
 		t1:	A.write(a);
+            cout << "a was written" << endl;
 			wait(5000,SC_PS);
         cout << "asserting ready" << endl; 
 		t2:	ready.write(1);
@@ -261,7 +262,9 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 		unsigned long i;
 		unsigned char* p;
 		sc_bv<DATA_WIDTH> word;
-   
+        
+        cout << "in master read with length " << len << " and address " << addr << endl;
+         
 		for(p = (unsigned char*)data, i = 0; i < len; i++, p++)
 		{
 			if(!(i%DATA_BYTES))
