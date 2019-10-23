@@ -59,12 +59,20 @@ class	kpn_neuralnet_accelerated_bus : public sc_module
     kpn_neuralnet_os_bus *neuralnet;
     accelerator_to_bus *accel;
     os_channel *os;
+    
+    //
     //os_to_accel_fifo<float> *os_to_accel;
     //accel_to_os_fifo<float> *accel_to_os;
-    sc_port<kpn_BusSlave_ifc> *os_to_accel, accel_to_os;     
+    //sc_port<kpn_BusSlave_ifc> *os_to_accel, accel_to_os;     
+    
 
     kpn_neuralnet_accelerated_bus(sc_module_name name);
-    
+   
+    private: 
+ 
+    sc_signal<bool> *slaveReadyWrite, *slaveReadyRead, *ready, *ack;
+    sc_signal< sc_bv<ADDR_WIDTH> > *A;
+    sc_signal< sc_bv<DATA_WIDTH>, SC_MANY_WRITERS > *D;
 };
 
 #endif // KPN_NEURALNET_OS_BUS

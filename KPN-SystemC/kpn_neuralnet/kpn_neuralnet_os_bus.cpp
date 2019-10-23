@@ -165,28 +165,35 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     masterBus->os(*os); 
 
     // binding the slave to the Master
-    sc_signal<bool> slaveReadyWrite, slaveReadyRead, ready, ack;
-    sc_signal< sc_bv<ADDR_WIDTH> > A;
-    sc_signal< sc_bv<DATA_WIDTH> > D; 
+    slaveReadyWrite = new sc_signal<bool>();
+    slaveReadyRead  = new sc_signal<bool>();
+    ready           = new sc_signal<bool>();
+    ack             = new sc_signal<bool>();
+    *slaveReadyWrite = 0;
+    *slaveReadyRead  = 0;
+    *ready           = 0; 
+    *ack             = 0; 
+    A = new sc_signal< sc_bv<ADDR_WIDTH> >;
+    D = new sc_signal< sc_bv<DATA_WIDTH>,SC_MANY_WRITERS >; 
 
     cout << "binding interrupts" << endl;
-    masterBus->write_interrupt(slaveReadyRead);    
-    slaveBus->read_interrupt(slaveReadyRead);
+    masterBus->write_interrupt(*slaveReadyRead);    
+    slaveBus->read_interrupt(*slaveReadyRead);
 
-    masterBus->read_interrupt(slaveReadyWrite);
-    slaveBus->write_interrupt(slaveReadyWrite);
+    masterBus->read_interrupt(*slaveReadyWrite);
+    slaveBus->write_interrupt(*slaveReadyWrite);
     
     cout << "binding single bus signals" << endl; 
-    masterBus->ack(ack);
-    masterBus->ready(ready); 
-    slaveBus->ack(ack);
-    slaveBus->ready(ready); 
+    masterBus->ack(*ack);
+    masterBus->ready(*ready); 
+    slaveBus->ack(*ack);
+    slaveBus->ready(*ready); 
 
     cout << "binding buses" << endl; 
-    masterBus->A(A);
-    masterBus->D(D);
-    slaveBus->A(A);
-    slaveBus->D(D);
+    masterBus->A(*A);
+    masterBus->D(*D);
+    slaveBus->A(*A);
+    slaveBus->D(*D);
 
 //    os_to_accel = new os_to_accel_fifo<float>(BIGGEST_FIFO_SIZE);
 //    os_to_accel->os(*os);
