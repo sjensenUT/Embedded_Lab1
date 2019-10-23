@@ -1,0 +1,586 @@
+diff --git a/KPN-SystemC/kpn_neuralnet/Makefile b/KPN-SystemC/kpn_neuralnet/Makefile
+index 7cd8a4e..404d20c 100644
+--- a/KPN-SystemC/kpn_neuralnet/Makefile
++++ b/KPN-SystemC/kpn_neuralnet/Makefile
+@@ -7,7 +7,8 @@ PTHREADS := 1
+ CXXFLAGS += -std=c++11
+ 
+ PROJECT := kpn_neuralnet
+-SRCS    := $(wildcard *.cpp)
++SRCS    := $(wildcard *.cpp) 
++DEPS	:= $(wildcard *.h)
+ OBJS    := $(SRCS:.cpp=.o) $(filter-out ../../darknet/obj/darknet.o, $(wildcard ../../darknet/obj/*.o))
+ 
+ INCDIR  := -I../../darknet/include/ 
+diff --git a/KPN-SystemC/kpn_neuralnet/accelerator.cpp b/KPN-SystemC/kpn_neuralnet/accelerator.cpp
+index 880f26c..5bea43a 100644
+--- a/KPN-SystemC/kpn_neuralnet/accelerator.cpp
++++ b/KPN-SystemC/kpn_neuralnet/accelerator.cpp
+@@ -11,7 +11,8 @@
+ #include "kpn_neuralnet.h"
+ #include "image_data.h"
+ #include "kpn_neuralnet_fused.h"
+-
++#include "kpn_BusSlave.h" 
++#include "HWBus.h" 
+ 
+ 
+ /*void    load(int lIdx, const char* attr, float* ptr, int size)
+@@ -105,5 +106,95 @@ void accelerator::process(){
+     int outputHeight   = l2.out_h;
+     int outputChans    = 512;
+     cout << "writing image data" << endl;
++    wait(187,SC_MS); // time of both layers 464 + 448 / 5
+     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
+ }
++
++
++accelerator_to_bus::accelerator_to_bus(sc_module_name name)
++:   kahn_process(name)
++{
++    int filterSize = 3;
++    int padding = 1;
++    int w1 = 13;
++    int w2 = 13;
++    int h1 = 13;
++    int h2 = 13;
++    int c1 = 512;
++    int c2 = 1024;
++    int batch = 1;
++    int numFilters1 = 1024;
++    int numFilters2 = 512;
++    int groups = 1;
++    int stride = 1;
++    int batchNormalize = 1;
++    int layerIndex1 = 12;
++    int layerIndex2 = 13;
++    l1 = make_convolutional_layer(batch, h1, w1, c1, numFilters1, groups, filterSize, stride, padding, LEAKY, batchNormalize, 0, 0, 0);
++    l2 = make_convolutional_layer(batch, h2, w2, c2, numFilters2, groups, filterSize, stride, padding, LEAKY, batchNormalize, 0, 0, 0);
++    
++    int num1 = l1.c/l1.groups*l1.n*l1.size*l1.size;
++    load(layerIndex1, "biases", l1.biases, l1.n);
++
++    if(l1.batch_normalize)
++    {
++        load(layerIndex1, "scales", l1.scales, l1.n);
++        load(layerIndex1, "mean",   l1.rolling_mean, l1.n);
++        load(layerIndex1, "variance", l1.rolling_variance, l1.n);
++    }
++
++    load(layerIndex1, "weights", l1.weights, num1);
++    
++    int num2 = l2.c/l2.groups*l2.n*l2.size*l2.size;
++    load(layerIndex2, "biases", l2.biases, l2.n);
++
++    if(l2.batch_normalize)
++    {
++        load(layerIndex2, "scales", l2.scales, l2.n);
++        load(layerIndex2, "mean",   l2.rolling_mean, l2.n);
++        load(layerIndex2, "variance", l2.rolling_variance, l2.n);
++    }
++
++    load(layerIndex2, "weights", l2.weights, num2);
++}
++
++void accelerator_to_bus::init(){}
++
++void accelerator_to_bus::process(){
++    cout << "in accelerator::process" << endl;    
++    float* input;
++
++//    input = readImageData(&in, l1.w, l1.h, l1.c);
++    os_to_accel->read(input,l1.w*l1.h*l1.c*sizeof(float));     
++  
++    network dummyNetwork1, dummyNetwork2;
++    cout << "allocating network and workspace 1" << endl;
++    dummyNetwork1.input = input;
++    dummyNetwork1.train = 0;
++    size_t workspace_size1 = get_convolutional_workspace_size(l1);
++    dummyNetwork1.workspace = (float*) calloc(1, workspace_size1);
++    cout << "performing forward convolution 1" << endl;
++    forward_convolutional_layer(l1, dummyNetwork1);
++    
++    cout << "allocating network and workspace 2" << endl;
++    dummyNetwork2.train = 0;
++    size_t workspace_size2 = get_convolutional_workspace_size(l2);
++    //memcpy(dummyNetwork2.input, dummyNetwork1.output, workspace_size2);
++    dummyNetwork2.input = l1.output;
++    dummyNetwork2.workspace = (float*) calloc(1, workspace_size2);
++    cout << "performing forward convolution 2" << endl; 
++    forward_convolutional_layer(l2, dummyNetwork2);
++    cout << "freeing workspaces" << endl; 
++    free(dummyNetwork1.workspace);
++    free(dummyNetwork2.workspace);
++    
++    float* outputImage = l2.output;
++    int outputWidth    = l2.out_w;
++    int outputHeight   = l2.out_h;
++    int outputChans    = 512;
++    cout << "writing image data" << endl;
++    wait(187,SC_MS); // time of both layers 464 + 448 / 5
++
++    accel_to_os->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float));
++         
++}
+diff --git a/KPN-SystemC/kpn_neuralnet/accelerator.h b/KPN-SystemC/kpn_neuralnet/accelerator.h
+index ba67f85..8b87ee9 100644
+--- a/KPN-SystemC/kpn_neuralnet/accelerator.h
++++ b/KPN-SystemC/kpn_neuralnet/accelerator.h
+@@ -2,6 +2,8 @@
+ #define ACCELERATOR_H
+ #include "../kahn_process.h"
+ #include "../../darknet/src/convolutional_layer.h"
++#include "HWBus.h"
++#include "kpn_BusSlave.h"
+ 
+ class   accelerator : public kahn_process
+ {
+@@ -15,4 +17,16 @@ class   accelerator : public kahn_process
+     void init() override;
+ };
+ 
++
++class   accelerator_to_bus : public kahn_process
++{
++    public:
++    
++    sc_port<kpn_BusSlave_ifc> os_to_accel, accel_to_os; 
++
++    convolutional_layer l1, l2;
++    accelerator_to_bus(sc_module_name name);
++    void process() override;
++    void init() override;
++};
+ #endif // ACCELERATOR_H
+diff --git a/KPN-SystemC/kpn_neuralnet/gmon.out b/KPN-SystemC/kpn_neuralnet/gmon.out
+deleted file mode 100644
+index c1b8f9e..0000000
+Binary files a/KPN-SystemC/kpn_neuralnet/gmon.out and /dev/null differ
+diff --git a/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.cpp b/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.cpp
+index d936c6f..aa25aef 100644
+--- a/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.cpp
++++ b/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.cpp
+@@ -12,6 +12,7 @@
+ #include <chrono>
+ #include "kpn_neuralnet.h"
+ #include "kpn_neuralnet_os.h"
++#include "kpn_neuralnet_os_bus.h"
+ #include "kpn_BusSlave.h"
+ #include "kpn_BusMaster.h"
+  
+@@ -36,8 +37,11 @@ const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
+                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
+ 
+ 
+-
++//deprecated once accelerator used
+ const int LATENCY[17] = {30, 178, 12, 218, 7, 147, 2, 118, 1, 106, 1, 119, 1, 464, 448, 20, 4};
++//const int CONV_LATENCY[9] = {178,218,147,118,106,119,464,448,20}; 
++//const int MAXP_LATENCY[6] = {12,7,2,1,1,1}; 
++
+ 
+ int latencyIndex = 0; 
+ 
+@@ -99,10 +103,10 @@ void image_reader::process()
+ 		// sized.data is now the float* that points to the float array that will
+ 		// be the output/input of each layer. The image writer will call free on 
+         // this float* to deallocate the data.
+-        int layer_waitTime = LATENCY[latencyIndex];
+-        latencyIndex++; latencyIndex %= 17;
++        //int layer_waitTime = LATENCY[latencyIndex];
++        //latencyIndex++; latencyIndex %= 17;
+         if(this->waitTime > 0){
+-            this->os->time_wait(layer_waitTime);
++            this->os->time_wait(30); // hard-coded wait time for the region layer
+         }
+         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3 );
+ 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
+@@ -297,8 +301,8 @@ void conv_layer::process()
+     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
+     // Send off the layer's output to the next layer!
+     
+-    int layer_waitTime = LATENCY[latencyIndex];
+-    latencyIndex++; latencyIndex %= 17;
++    int layer_waitTime = LATENCY[layerIndex+1];
++//    latencyIndex++; latencyIndex %= 17;
+     if(this->waitTime > 0){
+         this->os->time_wait(layer_waitTime);
+     }
+@@ -403,8 +407,8 @@ void max_layer::process()
+     cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
+     // Send off the layer's output to the next layer!
+ 
+-    int layer_waitTime = LATENCY[latencyIndex];
+-    latencyIndex++; latencyIndex %= 17;
++    int layer_waitTime = LATENCY[layerIndex+1];
++//    latencyIndex++; latencyIndex %= 17;
+     if(this->waitTime > 0){
+         this->os->time_wait(layer_waitTime);
+     }
+@@ -555,8 +559,8 @@ void region_layer::process()
+ 
+ 	free_image(im); 
+     free(data);
+-    int layer_waitTime = LATENCY[latencyIndex];
+-    latencyIndex++; latencyIndex %= 17;
++    int layer_waitTime = 4; // hard coded value from measurements
++//    latencyIndex++; latencyIndex %= 17;
+     if(this->waitTime > 0){
+         this->os->time_wait(layer_waitTime);
+     }
+@@ -868,13 +872,272 @@ class	kpn_neuralnet : public sc_module
+ 	}
+ };
+ 
++
++conv_layer_to_bus::conv_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
++         int _stride, int _numFilters, int _pad, ACTIVATION _activation,
++         bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
++:	kahn_process(name),
++    stride(_stride),
++    numFilters(_numFilters),
++    layerIndex(_layerIndex),
++    filterSize(_filterSize),
++    pad(_pad),
++    activation(_activation),
++    batchNormalize(_batchNormalize),
++    crop(_crop),
++    waitTime(_waitTime)
++{
++    cout << "instantiated convolutional layer " << layerIndex << " with filter size of " << filterSize << ", stride of " << stride << " and " << numFilters << " filters" << endl;
++
++    int groups  = 1;
++    // Padding is 0 by default. If PAD is true (non-zero), then it equals half the 
++    // filter size rounding down (see parse_convolutional() in darknet's parser.c)
++    int padding = 0;
++    if (this->pad != 0) {
++        padding = this->filterSize / 2;
++    }
++
++    // Call make_convolutional_layer() to create the layer object
++    l = make_convolutional_layer(BATCH, _h, _w, _c, this->numFilters, groups,
++        this->filterSize, this->stride, padding, activation, (int) batchNormalize,
++        0, 0, 0);  
++
++    //new code for loading weights, copied from kamyar
++    int num = l.c/l.groups*l.n*l.size*l.size;
++    //cout << "l.size = " << l.size << endl;
++    load(layerIndex, "biases", l.biases, l.n);
++
++    if(l.batch_normalize)
++    {
++        load(layerIndex, "scales", l.scales, l.n);
++        load(layerIndex, "mean",   l.rolling_mean, l.n);
++        load(layerIndex, "variance", l.rolling_variance, l.n);
++    }
++
++    load(layerIndex, "weights", l.weights, num);
++    if (crop) {
++        inputCoords = new int[4];
++        outputCoords = new int[4];
++        for (int j = 0; j < 4; j++) {
++            inputCoords[j] = _inputCoords[j];
++            outputCoords[j] = _outputCoords[j];
++        }
++    }
++
++}
++
++void conv_layer_to_bus::init(){
++    cout << "in conv_layer::init()" << endl;
++    if(this->waitTime > 0){
++        cout << "detected os, registering task" << endl;
++        this->os->reg_task(this->name());
++    } 
++    cout << "asd wait time is:" << this->waitTime << endl; 
++}
++
++void conv_layer_to_bus::process()
++{
++    float* input;
++    
++    // Read the output from the previos layer
++    
++    mDriver->read(input,l.w*l.h*l.c*sizeof(float));
++    
++    //wait(LATENCY[latencyIndex],SC_MS);
++    //cout << "waited for " << LATENCY[latencyIndex] << endl;
++    //latencyIndex++;
++    cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
++    
++    // Create a dummy network object. forward_convolutional_layer only uses the "input"
++    // and "workspace" elements of the network struct. "input" is simply the output of
++    // the previous layer, while "workspace" points to an array of floats that we will
++    // create just before calling. The size can be determined by layer.get_workspace_size().
++    network dummyNetwork;
++    dummyNetwork.input = input;
++    dummyNetwork.train = 0; 
++    //cout << "Hello1" << endl;
++    //printf("inputs of layer %d, are", layerIndex);
++    //for(int j = 0; j < 10; j++){
++    //    printf(" %f", input[j]);
++    //}
++    //printf("\n");i
++    system_clock::time_point before = system_clock::now(); 
++    size_t workspace_size = get_convolutional_workspace_size(l);
++    dummyNetwork.workspace = (float*) calloc(1, workspace_size);
++    //cout << "performing forward convolution" << endl;
++    //cout << "l.outputs = " << l.outputs << endl;
++    //cout << "l.batch = " << l.batch << endl;
++    //cout << "l.output[0] = " << l.output[0] << endl;
++    forward_convolutional_layer(l, dummyNetwork);
++    //cout << "l.output[0] = " << l.output[0] << endl; 
++    printf("outputs of layer %d, are", layerIndex);
++    for(int j = 0; j < 10; j++){
++        printf(" %f", l.output[j]);
++    }
++    printf("\n"); 
++    unsigned long memoryFootprint = (l.nweights * sizeof(float) + l.inputs * sizeof(float) + workspace_size + l.outputs * sizeof(float))/1024; 
++    //cout << "Hello4" << endl;
++
++
++    free(dummyNetwork.workspace);
++
++    float* outputImage = l.output;
++    int outputWidth    = l.out_w;
++    int outputHeight   = l.out_h;
++    int outputChans    = this->numFilters;
++    //cout << "Hello5" << endl;
++    // Now it's time to crop the data if this layer is configured to do cropping.
++    if (crop) {
++        //cout << "Hello6" << endl;
++        // Calculate the relative coordinates for cropping
++        int* cropCoords = getCropCoords(inputCoords, outputCoords);
++                         
++        //printf("Cropping image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
++        //        inputCoords[0], inputCoords[1], inputCoords[2], inputCoords[3],
++        //        outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
++        outputImage  = getSubArray(l.output, cropCoords, l.w, l.h, this->numFilters);
++        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
++        outputHeight = cropCoords[3] - cropCoords[1] + 1;
++    }
++    
++    system_clock::time_point after = system_clock::now(); 
++    //cout << "Hello7" << endl;
++    milliseconds duration = std::chrono::duration_cast<milliseconds> (after - before); 
++    
++    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
++    // Send off the layer's output to the next layer!
++    
++    int layer_waitTime = LATENCY[layerIndex+1];
++//    latencyIndex++; latencyIndex %= 17;
++    if(this->waitTime > 0){
++        this->os->time_wait(layer_waitTime);
++    }
++   
++    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
++    
++    if(this->waitTime > 0)
++    {
++        //yielding so other tasks can run
++        //this->os->time_wait(0);
++        this->os->task_terminate(); 
++    }
++}
++
++max_layer_to_bus::max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
++    int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
++:	kahn_process(name),
++    stride(_stride),
++    layerIndex(_layerIndex),
++    filterSize(_filterSize),
++    crop(_crop),
++    waitTime(_waitTime)
++{
++    cout << "instantiated max layer " << layerIndex << " with filter size of " << filterSize << " and stride of " << stride << endl;
++
++    // Create the underlying darknet layer
++    l = make_maxpool_layer(BATCH, _h, _w, _c, this->filterSize, 
++                       this->stride, filterSize-1);
++
++    if (crop) {
++        inputCoords = new int[4];
++        outputCoords = new int[4];
++        for (int j = 0; j < 4; j++) {
++            inputCoords[j] = _inputCoords[j];
++            outputCoords[j] = _outputCoords[j];
++        }
++    }
++}
++
++void max_layer_to_bus::init(){
++    cout << "in max_layer::init()" << endl;
++    if(this->waitTime > 0){
++        cout << "detected os, registering task";
++        this->os->reg_task(this->name());
++    }
++}
++
++void max_layer_to_bus::process()
++{
++
++    float* data;
++    data = readImageData(&in, l.w, l.h, l.c );
++
++    //wait(LATENCY[latencyIndex],SC_MS);
++    //cout << "waited for " << LATENCY[latencyIndex] << endl;
++    //latencyIndex++;
++    cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
++
++    printf("inputs of layer %d, are", layerIndex);
++    for(int j = 0; j < 10; j++){
++      printf(" %f", data[j]);
++    }
++    printf("\n");
++
++    // Call forward_maxpool_layer() here, read from layer.output and write to out
++    // Create a dummy network object. The function only uses network.input
++    system_clock::time_point before = system_clock::now(); 
++     
++    network dummyNetwork;
++    dummyNetwork.input = data;
++    forward_maxpool_layer(l, dummyNetwork);
++    
++    
++    float* outputImage = l.output;
++    int outputWidth  = l.out_w;
++    int outputHeight = l.out_h;
++    int outputChans  = l.c;
++
++    // Now it's time to crop the data if this layer is configured to do cropping.
++    if (crop) {
++    
++        int preCropCoords[4] = { inputCoords[0] / this->stride,
++                               inputCoords[1] / this->stride,
++                               inputCoords[0] / this->stride + l.out_w - 1,
++                               inputCoords[1] / this->stride + l.out_h - 1 };
++
++        // Calculate the relative coordinates for cropping
++        int* cropCoords = getCropCoords(preCropCoords, outputCoords);
++        //printf("Cropping maxpool image from (%d, %d) (%d, %d) to (%d, %d) (%d, %d)\n",
++        //    preCropCoords[0], preCropCoords[1], preCropCoords[2], preCropCoords[3],
++        //    outputCoords[0], outputCoords[1], outputCoords[2], outputCoords[3]);
++        outputImage  = getSubArray(l.output, cropCoords, l.out_w, l.out_h, l.c);
++        outputWidth  = cropCoords[2] - cropCoords[0] + 1;
++        outputHeight = cropCoords[3] - cropCoords[1] + 1;
++    }
++    
++    
++    system_clock::time_point after = system_clock::now();
++    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
++
++    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
++    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
++    // Send off the layer's output to the next layer!
++
++    int layer_waitTime = LATENCY[layerIndex+1];
++//    latencyIndex++; latencyIndex %= 17;
++    if(this->waitTime > 0){
++        this->os->time_wait(layer_waitTime);
++    }
++//    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
++
++    mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
++
++    if(this->waitTime > 0)
++    {
++        //yielding so other tasks can run
++        //this->os->time_wait(0);
++        this->os->task_terminate(); 
++    }
++}
++
+ // This will probably remain as-is.
+ int sc_main(int argc, char * argv[]) 
+ {
+     //kpn_neuralnet knn0("kpn_neuralnet");
+     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
+     //kpn_neuralnet_os knn0("kpn_neuralnet_os");
+-    kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
++    //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
++    kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus");
+     sc_start();
+     return 0;
+ }
+diff --git a/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.h b/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.h
+index 278bd67..b94fb26 100644
+--- a/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.h
++++ b/KPN-SystemC/kpn_neuralnet/kpn_neuralnet.h
+@@ -26,7 +26,9 @@
+ #include "os_channel.h"
+ #include "os_sc_fifo.h"
+ #include "os_sc_fifo.cpp"
+-
++#include "HWBus.h" 
++#include "kpn_BusMaster.h"
++//#include "kpn_neuralnet_os_bus.h" 
+ 
+ void getTileCoords(int width, int height, int coords[9][4]);
+ void load(int lIdx, const char* attr, float* ptr, int size);
+@@ -108,6 +110,63 @@ class   max_layer : public kahn_process
+     void init() override;
+ };
+ 
++class   conv_layer_to_bus : public kahn_process
++{
++    public:
++
++    const   int stride;
++    const   int numFilters;
++    const   int layerIndex;
++    const   int filterSize;
++    const   int pad;
++    const   ACTIVATION activation;
++    const   bool batchNormalize;
++    const   bool crop;
++    const   int waitTime;
++    int* inputCoords;
++    int* outputCoords;
++
++
++//    sc_fifo_in<float> in;
++    sc_port<kpn_BusMaster_ifc> mDriver;
++    sc_fifo_out<float> out;
++    sc_port<os_channel> os;    
++
++    convolutional_layer l;
++    
++    void printCoords();
++    conv_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
++             int _stride, int _numFilters, int _pad, ACTIVATION _activation,
++             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
++    void process() override;
++    void init() override;
++};
++
++
++class   max_layer_to_bus : public kahn_process
++{
++    public:
++
++    const   int stride;
++    const   int layerIndex;
++    const   int filterSize;
++
++    sc_fifo_in<float> in;
++//    sc_fifo_out<float> out;
++    sc_port<kpn_BusMaster_ifc> mDriver;
++
++    layer l;
++    const bool crop;
++    const int waitTime;
++    int* inputCoords;
++    int* outputCoords;
++    sc_port<os_channel> os;
++
++    max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
++            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
++    void process() override;
++    void init() override;
++};
+ class   region_layer : public kahn_process
+ {
+     public:
+diff --git a/darknet/run_darknet.sh b/darknet/run_darknet.sh
+old mode 100644
+new mode 100755

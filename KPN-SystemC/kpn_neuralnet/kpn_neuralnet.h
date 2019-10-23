@@ -26,7 +26,9 @@
 #include "os_channel.h"
 #include "os_sc_fifo.h"
 #include "os_sc_fifo.cpp"
-
+#include "HWBus.h" 
+#include "kpn_BusMaster.h"
+//#include "kpn_neuralnet_os_bus.h" 
 
 void getTileCoords(int width, int height, int coords[9][4]);
 void load(int lIdx, const char* attr, float* ptr, int size);
@@ -108,6 +110,63 @@ class   max_layer : public kahn_process
     void init() override;
 };
 
+class   conv_layer_to_bus : public kahn_process
+{
+    public:
+
+    const   int stride;
+    const   int numFilters;
+    const   int layerIndex;
+    const   int filterSize;
+    const   int pad;
+    const   ACTIVATION activation;
+    const   bool batchNormalize;
+    const   bool crop;
+    const   int waitTime;
+    int* inputCoords;
+    int* outputCoords;
+
+
+//    sc_fifo_in<float> in;
+    sc_port<kpn_BusMaster_ifc> mDriver;
+    sc_fifo_out<float> out;
+    sc_port<os_channel> os;    
+
+    convolutional_layer l;
+    
+    void printCoords();
+    conv_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
+             int _stride, int _numFilters, int _pad, ACTIVATION _activation,
+             bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
+    void process() override;
+    void init() override;
+};
+
+
+class   max_layer_to_bus : public kahn_process
+{
+    public:
+
+    const   int stride;
+    const   int layerIndex;
+    const   int filterSize;
+
+    sc_fifo_in<float> in;
+//    sc_fifo_out<float> out;
+    sc_port<kpn_BusMaster_ifc> mDriver;
+
+    layer l;
+    const bool crop;
+    const int waitTime;
+    int* inputCoords;
+    int* outputCoords;
+    sc_port<os_channel> os;
+
+    max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
+            int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
+    void process() override;
+    void init() override;
+};
 class   region_layer : public kahn_process
 {
     public:

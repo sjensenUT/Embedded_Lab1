@@ -1,0 +1,19 @@
+[OS] Creating OS channel
+[OS] taskEvents size = 100
+in kpn_neuralnet_os
+instantiating channels
+instantiated image_reader
+instantiated convolutional layer 0 with filter size of 3, stride of 1 and 16 filters
+instantiated max layer 1 with filter size of 2 and stride of 2
+instantiated convolutional layer 2 with filter size of 3, stride of 1 and 32 filters
+instantiated max layer 3 with filter size of 2 and stride of 2
+instantiated convolutional layer 4 with filter size of 3, stride of 1 and 64 filters
+instantiated max layer 5 with filter size of 2 and stride of 2
+instantiated convolutional layer 6 with filter size of 3, stride of 1 and 128 filters
+instantiated max layer 7 with filter size of 2 and stride of 2
+instantiated convolutional layer 8 with filter size of 3, stride of 1 and 256 filters
+instantiated max layer 9 with filter size of 2 and stride of 2
+instantiated convolutional layer 10 with filter size of 3, stride of 1 and 512 filters
+instantiated max layer 11 with filter size of 2 and stride of 1
+instantiated convolutional layer 14 with filter size of 1, stride of 1 and 425 filters
+instantiating region layer
