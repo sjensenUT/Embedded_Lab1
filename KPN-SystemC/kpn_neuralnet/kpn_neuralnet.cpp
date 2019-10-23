@@ -12,7 +12,8 @@
 #include <chrono>
 #include "kpn_neuralnet.h"
 #include "kpn_neuralnet_os.h"
-
+#include "kpn_BusSlave.h"
+#include "kpn_BusMaster.h"
  
 using	std::cout;
 using	std::endl;

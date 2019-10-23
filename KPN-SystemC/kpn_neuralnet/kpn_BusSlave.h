@@ -18,28 +18,34 @@ class kpn_SlaveDriver : public sc_channel
 
         kpn_SlaveDriver(sc_module_name name) : sc_channel(name) {} 
 
-        sc_port<IIntrSend> _intr;
-        sc_port<ISlaveHardwareBusLinkAccess> _mac;
+        sc_port<IIntrSend> intr;
+        sc_port<ISlaveHardwareBusLinkAccess> mac;
         
         void read ( void* data, unsigned long len )
         {
             // Send the interrupt to the host that we're ready for data
-            _intr->send();
+            intr->send();
             // Read the data from the MAC
-            _mac->SlaveRead(kAddress, data, len);
+            mac->SlaveRead(kAddress, data, len);
         }
   
         void write ( const void* data, unsigned long len )
         {
+            // Notify the host that we are about to do a write
+            intr->send();
             // Write the data to the MAC
-            _mac->SlaveWrite(kAddress, data, len);
-            // Notify the host that data is available
-            _intr->send();
+            mac->SlaveWrite(kAddress, data, len);
         }
 };
 
+class kpn_BusSlave_ifc : virtual public sc_interface
+{
+    public:
+    virtual void read ( void* data, unsigned long len ) = 0;
+    virtual void write ( const void* data, unsigned long len) = 0;
+};
 
-class kpn_BusSlave : public sc_channel
+class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
 {
   
     public:
@@ -60,6 +66,10 @@ class kpn_BusSlave : public sc_channel
             _writeIrq.intr(write_interrupt);
             _readIrq.intr(read_interrupt);
             _slaveMAC.protocol(_slave);
+            _slaveWriteDriver.intr(_writeIrq);
+            _slaveWriteDriver.mac(_slaveMAC);
+            _slaveReadDriver.intr(_readIrq);
+            _slaveReadDriver.mac(_slaveMAC);
         }
 
         sc_out<bool> write_interrupt, read_interrupt;
@@ -69,6 +79,16 @@ class kpn_BusSlave : public sc_channel
         
         sc_in< sc_bv<ADDR_WIDTH> > A;
         sc_inout< sc_bv<DATA_WIDTH> > D;
+
+        void read ( void* data, unsigned long len )
+        {
+            this->_slaveReadDriver.read(data, len);
+        }
+
+        void write ( const void* data, unsigned long len )
+        {
+            this->_slaveWriteDriver.write(data, len);
+        }
 
     private:
 
