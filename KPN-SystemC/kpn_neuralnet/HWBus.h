@@ -77,14 +77,15 @@ class	MasterHardwareBus : public IMasterHardwareBusProtocol, public sc_channel
 
 	void	masterWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d)
 	{
+        //cout << "in masterWrite" << endl;
 		t1:	A.write(a);
 			D.write(d);
-			wait(5000,SC_US);
+			wait(5000,SC_PS);
 
 		t2:	ready.write(1);
 			while(!ack.read()) wait(ack.default_event());
 
-		t3:	wait(10000,SC_US);
+		t3:	wait(10000,SC_PS);
 
 		t4:	ready.write(0);
 			while(ack.read()) wait(ack.default_event());
@@ -92,15 +93,16 @@ class	MasterHardwareBus : public IMasterHardwareBusProtocol, public sc_channel
 
 	void	masterRead(const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d)
 	{
+        cout << "in masterRead" << endl;
 		t1:	A.write(a);
-			wait(5000,SC_US);
-
+			wait(5000,SC_PS);
+        cout << "asserting ready" << endl; 
 		t2:	ready.write(1);
 			while(!ack.read()) wait(ack.default_event());
-
+        cout << "reading" << endl;
 		t3:	d = D.read();
-			wait(15000,SC_US);
-
+			wait(15000,SC_PS);
+        cout << "deasserting ready" << endl;
 		t4:	ready.write(0);
 			while(ack.read()) wait(ack.default_event());
 	}
@@ -126,19 +128,21 @@ class	SlaveHardwareBus : public ISlaveHardwareBusProtocol, public sc_channel
 
 		t2:	if(a != A.read()) 
 			{
-				wait(1000,SC_US); // avoid hanging from t2 to t1
+				wait(1000,SC_PS); // avoid hanging from t2 to t1
 				goto t1;
 			}
 			else
 			{
+                cout << "slave attempting to write" << endl;
 				D.write(d);
-				wait(12000,SC_US);
+				wait(12000,SC_PS);
+                cout << "write successful" << endl;
 			}
 
 		t3:	ack.write(1);
 			while(ready.read()) wait(ready.default_event());
 
-		t4:	wait(7000,SC_US);
+		t4:	wait(7000,SC_PS);
 
 		t5:	ack.write(0);
 	}
@@ -149,19 +153,19 @@ class	SlaveHardwareBus : public ISlaveHardwareBusProtocol, public sc_channel
 
 		t2:	if(a != A.read()) 
 			{
-				wait(1000,SC_US);  // avoid hanging from t2 to t1
+				wait(1000,SC_PS);  // avoid hanging from t2 to t1
 				goto t1;
 			}
 			else 
 			{
 				d = D.read();
-				wait(12000,SC_US);
+				wait(12000,SC_PS);
 			}
 
 		t3:	ack.write(1);
 			while(ready.read()) wait(ready.default_event());
 
-		t4:	wait(7000,SC_US);
+		t4:	wait(7000,SC_PS);
 
 		t5:	ack.write(0);
 	}
@@ -193,10 +197,12 @@ class	SlaveHardwareSyncGenerate : public IIntrSend, public sc_channel
 
 	void	send(void)
 	{
-		intr.write(1);
-		wait(5000,SC_US);
+	    cout << "sending interrupt .... ";     
+    	intr.write(1);
+		wait(5000,SC_PS);
 		intr.write(0);
-	}
+	    cout << " sent !" << endl; 
+    }
 };
 
 

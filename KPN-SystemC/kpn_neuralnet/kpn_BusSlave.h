@@ -24,7 +24,10 @@ class kpn_SlaveDriver : public sc_channel
         void read ( void* data, unsigned long len )
         {
             // Send the interrupt to the host that we're ready for data
+            cout << "Slave ready to read, sending interrupt" << endl;
             intr->send();
+            
+            cout << "Slave entering Slave Read" << endl;
             // Read the data from the MAC
             mac->SlaveRead(kAddress, data, len);
         }
@@ -32,8 +35,12 @@ class kpn_SlaveDriver : public sc_channel
         void write ( const void* data, unsigned long len )
         {
             // Notify the host that we are about to do a write
+            cout << "Slave ready to write, sending interrupt " << endl;
+            
             intr->send();
             // Write the data to the MAC
+            cout << "Slave entering Slave Write" << endl;
+
             mac->SlaveWrite(kAddress, data, len);
         }
 };

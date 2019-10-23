@@ -71,15 +71,24 @@ class kpn_MasterDriver : public sc_channel
     void read ( void* data, unsigned long len )
     {
         // Wait for the slave to indicate it is about to start a write..
+        cout << "in the read driver method" << endl;
         waitForInterrupt();
+        
+		//wait(5000,SC_PS); // FIXME do i want this?
+        // need something here??
+        cout << "done waiting for interrupt. going to masterRead" << endl;
+
         // Read the data from the MAC
         mac->MasterRead(kAddressM, data, len);
     }
 
     void write ( const void* data, unsigned long len )
     {
+        cout << "In the Write Driver" << endl;
         // Wait for the slave to indicate it's ready for a write.
         waitForInterrupt();
+
+        cout << "done waiting for interrupt, driver entering masterWrite" << endl; 
         // Write the data to the MAC
         mac->MasterWrite(kAddressM, data, len);
     }
@@ -93,8 +102,10 @@ class kpn_MasterDriver : public sc_channel
         if (!irqFlag)
         {
             int task = os->pre_wait();
-            wait(irqFlag.posedge_event());
+            sc_core::wait(irqFlag.posedge_event());
+            cout << "Interrupt flag detected" << endl;
             os->post_wait(task);
+            cout << "post wait ended in driver, task woken up" << endl;
         }
         // Clear the interrupt right now to make room for the next one.
         // that is, if there is a next one...

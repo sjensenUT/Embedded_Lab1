@@ -227,7 +227,7 @@ void conv_layer::init(){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     } 
-    cout << "asd wait time is:" << this->waitTime << endl; 
+    //cout << "asd wait time is:" << this->waitTime << endl; 
 }
 
 void conv_layer::process()
@@ -927,22 +927,23 @@ conv_layer_to_bus::conv_layer_to_bus(sc_module_name name, int _layerIndex, int _
 }
 
 void conv_layer_to_bus::init(){
-    cout << "in conv_layer::init()" << endl;
+    cout << "in conv_layer_to_bus::init()" << endl;
     if(this->waitTime > 0){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     } 
-    cout << "asd wait time is:" << this->waitTime << endl; 
 }
 
 void conv_layer_to_bus::process()
 {
     float* input;
+    input = new float[l.w*l.h*l.c];
     
+    cout << "maxlayer giving master read" << endl;
     // Read the output from the previos layer
-    
     mDriver->read(input,l.w*l.h*l.c*sizeof(float));
-    
+   
+    cout << "finished reading" << endl;  
     //wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++;
@@ -978,7 +979,7 @@ void conv_layer_to_bus::process()
     unsigned long memoryFootprint = (l.nweights * sizeof(float) + l.inputs * sizeof(float) + workspace_size + l.outputs * sizeof(float))/1024; 
     //cout << "Hello4" << endl;
 
-
+    free(input); 
     free(dummyNetwork.workspace);
 
     float* outputImage = l.output;
@@ -1119,7 +1120,8 @@ void max_layer_to_bus::process()
         this->os->time_wait(layer_waitTime);
     }
 //    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
-
+    cout << "Maxlayer finished. Attempting to write to the bus" << endl; 
+    cout << "Output[0] " << outputImage[0] << endl;
     mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
 
     if(this->waitTime > 0)

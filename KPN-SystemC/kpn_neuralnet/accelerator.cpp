@@ -161,12 +161,13 @@ accelerator_to_bus::accelerator_to_bus(sc_module_name name)
 void accelerator_to_bus::init(){}
 
 void accelerator_to_bus::process(){
-    cout << "in accelerator::process" << endl;    
+    cout << "in accelerator_to_bus::process" << endl;    
     float* input;
-
+    input = new float[l1.w*l1.h*l1.c]; 
 //    input = readImageData(&in, l1.w, l1.h, l1.c);
     os_to_accel->read(input,l1.w*l1.h*l1.c*sizeof(float));     
-  
+    cout << "read complete" << endl;  
+    cout << "input[0]: " << input[0] << endl;
     network dummyNetwork1, dummyNetwork2;
     cout << "allocating network and workspace 1" << endl;
     dummyNetwork1.input = input;
@@ -185,6 +186,7 @@ void accelerator_to_bus::process(){
     cout << "performing forward convolution 2" << endl; 
     forward_convolutional_layer(l2, dummyNetwork2);
     cout << "freeing workspaces" << endl; 
+    free(input);
     free(dummyNetwork1.workspace);
     free(dummyNetwork2.workspace);
     

@@ -60,9 +60,9 @@ kpn_neuralnet_os_bus::kpn_neuralnet_os_bus(sc_module_name name, os_channel *os) 
 
     reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3);
     reader_to_writer->os(*os);
-    int_reader_to_writer	= new os_sc_fifo<int>(1); // needed to send im.w and im.h
+    int_reader_to_writer	= new os_sc_fifo<int>(2); // needed to send im.w and im.h
     int_reader_to_writer->os(*os);
-    int2_reader_to_writer 	= new os_sc_fifo<int>(1);
+    int2_reader_to_writer 	= new os_sc_fifo<int>(2);
     int2_reader_to_writer->os(*os); 
     char_reader_to_writer  	= new os_sc_fifo<string>(1);
     char_reader_to_writer->os(*os);
@@ -160,10 +160,10 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
 {
     bool verbose = false;
     os = new os_channel("os", 100, verbose);
+    
     slaveBus = new kpn_BusSlave("slaveBus");
     masterBus= new kpn_BusMaster("masterBus");
-    masterBus->os(*os); 
-
+    masterBus->os(*os);
     // binding the slave to the Master
     slaveReadyWrite = new sc_signal<bool>();
     slaveReadyRead  = new sc_signal<bool>();
@@ -202,6 +202,7 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     cout << "creating neuralnet & accelerator" << endl;
     
     neuralnet = new kpn_neuralnet_os_bus("kpn_neuralnet_os_bus", os);
+    
     neuralnet->max11->mDriver(*masterBus);
     neuralnet->conv14->mDriver(*masterBus);
     accel = new accelerator_to_bus("accelerator");
