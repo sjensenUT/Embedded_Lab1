@@ -93,17 +93,13 @@ class	MasterHardwareBus : public IMasterHardwareBusProtocol, public sc_channel
 
 	void	masterRead(const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d)
 	{
-        cout << "in masterRead" << endl;
+        //cout << "in masterRead" << endl;
 		t1:	A.write(a);
-            cout << "a was written" << endl;
 			wait(5000,SC_PS);
-        cout << "asserting ready" << endl; 
 		t2:	ready.write(1);
 			while(!ack.read()) wait(ack.default_event());
-        cout << "reading" << endl;
 		t3:	d = D.read();
 			wait(15000,SC_PS);
-        cout << "deasserting ready" << endl;
 		t4:	ready.write(0);
 			while(ack.read()) wait(ack.default_event());
 	}
@@ -134,10 +130,10 @@ class	SlaveHardwareBus : public ISlaveHardwareBusProtocol, public sc_channel
 			}
 			else
 			{
-                cout << "slave attempting to write" << endl;
+                //cout << "slave attempting to write" << endl;
 				D.write(d);
 				wait(12000,SC_PS);
-                cout << "write successful" << endl;
+                //cout << "write successful" << endl;
 			}
 
 		t3:	ack.write(1);
@@ -185,6 +181,7 @@ class	MasterHardwareSyncDetect : public IIntrRecv, public sc_channel
 	void	receive(void)
 	{
 		wait(intr.posedge_event());
+        //wait(intr.negedge_event());
 	}
 };
 
@@ -263,7 +260,7 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 		unsigned char* p;
 		sc_bv<DATA_WIDTH> word;
         
-        cout << "in master read with length " << len << " and address " << addr << endl;
+        //cout << "in master read with length " << len << " and address " << addr << endl;
          
 		for(p = (unsigned char*)data, i = 0; i < len; i++, p++)
 		{

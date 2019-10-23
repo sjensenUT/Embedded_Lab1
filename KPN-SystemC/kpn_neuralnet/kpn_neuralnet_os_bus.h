@@ -70,8 +70,8 @@ class	kpn_neuralnet_accelerated_bus : public sc_module
    
     private: 
  
-    sc_signal<bool> slaveReadyWrite, slaveReadyRead, ready, ack;
-    sc_signal< sc_bv<ADDR_WIDTH> > A;
+    sc_signal<bool, SC_MANY_WRITERS> slaveReadyWrite, slaveReadyRead, ready, ack;
+    sc_signal< sc_bv<ADDR_WIDTH>, SC_MANY_WRITERS > A;
     sc_signal< sc_bv<DATA_WIDTH>, SC_MANY_WRITERS > D;
 };
 

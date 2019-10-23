@@ -102,10 +102,18 @@ class kpn_MasterDriver : public sc_channel
         if (!irqFlag)
         {
             int task = os->pre_wait();
-            sc_core::wait(irqFlag.posedge_event());
+            sc_core::wait(irqFlag.posedge_event()); 
+//            sc_core::wait(irqFlag.negedge_event());
             cout << "Interrupt flag detected" << endl;
             os->post_wait(task);
             cout << "post wait ended in driver, task woken up" << endl;
+/*
+            task = os->pre_wait();
+            sc_core::wait(irqFlag.negedge_event());
+            sc_core::wait(1,SC_PS);
+            os->post_wait(task);
+            cout << " wait for interrupt is leaving" << endl;
+*/
         }
         // Clear the interrupt right now to make room for the next one.
         // that is, if there is a next one...

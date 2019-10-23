@@ -125,14 +125,14 @@ l.output[7] = -0.793745
 l.output[8] = -0.793745
 l.output[9] = -0.793745
 outputs of layer 0, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
-conv layer 0 data: Memory(kB): 31097 time(ms): 133
+conv layer 0 data: Memory(kB): 31097 time(ms): 124
 [OS] Task 2 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv0) called time_wait for 178 ms at time 30.000000 ms
 [OS] Task 2 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv0) yielding at time 208.000000 ms
 [OS] Task 2 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv0) woken up at time 208.000000 ms
 [OS] Terminating task 2 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv0)
 forwarding max layer 1 @ iter 0
 inputs of layer 1, are -0.731470 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745 -0.793745
-conv layer 1 data: Memory(kB): 13520 time(ms): 19
+conv layer 1 data: Memory(kB): 13520 time(ms): 18
 [OS] Task 3 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max1) called time_wait for 12 ms at time 208.000000 ms
 [OS] Task 3 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max1) yielding at time 220.000000 ms
 [OS] Task 3 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max1) woken up at time 220.000000 ms
@@ -166,14 +166,14 @@ l.output[7] = 3.170393
 l.output[8] = 3.170393
 l.output[9] = 3.170393
 outputs of layer 2, are 5.721379 -0.557609 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393
-conv layer 2 data: Memory(kB): 32466 time(ms): 175
+conv layer 2 data: Memory(kB): 32466 time(ms): 181
 [OS] Task 4 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv2) called time_wait for 218 ms at time 220.000000 ms
 [OS] Task 4 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv2) yielding at time 438.000000 ms
 [OS] Task 4 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv2) woken up at time 438.000000 ms
 [OS] Terminating task 4 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv2)
 forwarding max layer 3 @ iter 0
 inputs of layer 3, are 5.721379 -0.557609 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393 3.170393
-conv layer 3 data: Memory(kB): 6760 time(ms): 7
+conv layer 3 data: Memory(kB): 6760 time(ms): 6
 [OS] Task 5 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max3) called time_wait for 7 ms at time 438.000000 ms
 [OS] Task 5 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max3) yielding at time 445.000000 ms
 [OS] Task 5 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max3) woken up at time 445.000000 ms
@@ -207,14 +207,14 @@ l.output[7] = 0.432814
 l.output[8] = 0.432814
 l.output[9] = 0.432814
 outputs of layer 4, are -0.592325 -0.446994 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814
-conv layer 4 data: Memory(kB): 16296 time(ms): 128
+conv layer 4 data: Memory(kB): 16296 time(ms): 129
 [OS] Task 6 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv4) called time_wait for 147 ms at time 445.000000 ms
 [OS] Task 6 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv4) yielding at time 592.000000 ms
 [OS] Task 6 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv4) woken up at time 592.000000 ms
 [OS] Terminating task 6 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv4)
 forwarding max layer 5 @ iter 0
 inputs of layer 5, are -0.592325 -0.446994 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814 0.432814
-conv layer 5 data: Memory(kB): 3380 time(ms): 2
+conv layer 5 data: Memory(kB): 3380 time(ms): 3
 [OS] Task 7 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max5) called time_wait for 2 ms at time 592.000000 ms
 [OS] Task 7 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max5) yielding at time 594.000000 ms
 [OS] Task 7 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.max5) woken up at time 594.000000 ms
@@ -248,7 +248,7 @@ l.output[7] = -0.012022
 l.output[8] = -0.012022
 l.output[9] = -0.012022
 outputs of layer 6, are -0.115919 -0.015947 -0.012022 -0.012022 -0.012022 -0.012022 -0.012022 -0.012022 -0.012022 -0.012022
-conv layer 6 data: Memory(kB): 8400 time(ms): 102
+conv layer 6 data: Memory(kB): 8400 time(ms): 104
 [OS] Task 8 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv6) called time_wait for 118 ms at time 594.000000 ms
 [OS] Task 8 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv6) yielding at time 712.000000 ms
 [OS] Task 8 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv6) woken up at time 712.000000 ms
@@ -289,7 +289,7 @@ l.output[7] = -0.679322
 l.output[8] = -0.679322
 l.output[9] = -0.679322
 outputs of layer 8, are -0.986922 -0.708469 -0.679322 -0.679322 -0.679322 -0.679322 -0.679322 -0.679322 -0.679322 -0.679322
-conv layer 8 data: Memory(kB): 5208 time(ms): 99
+conv layer 8 data: Memory(kB): 5208 time(ms): 100
 [OS] Task 10 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv8) called time_wait for 106 ms at time 713.000000 ms
 [OS] Task 10 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv8) yielding at time 819.000000 ms
 [OS] Task 10 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv8) woken up at time 819.000000 ms
@@ -330,7 +330,7 @@ l.output[7] = -0.646971
 l.output[8] = -0.638890
 l.output[9] = -0.614401
 outputs of layer 10, are -0.698543 -0.658613 -0.636072 -0.632301 -0.643022 -0.634061 -0.644031 -0.646971 -0.638890 -0.614401
-conv layer 10 data: Memory(kB): 6636 time(ms): 111
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
 [OS] Task 12 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv10) called time_wait for 119 ms at time 820.000000 ms
 [OS] Task 12 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv10) yielding at time 939.000000 ms
 [OS] Task 12 (kpn_neuralnet_accelerated_bus.kpn_neuralnet_os_bus.conv10) woken up at time 939.000000 ms
@@ -413,5 +413,5 @@ Slave ready to write, sending interrupt
 sending interrupt .... [BUS M]: slave signal asserted
 Interrupt flag detected
 post wait ended in driver, task woken up
-done waiting for interrupt. going to masterRead
-in masterRead
+ sent !
+Slave entering Slave Write
