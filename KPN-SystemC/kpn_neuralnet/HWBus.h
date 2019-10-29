@@ -244,7 +244,7 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 			{
 				protocol->masterWrite(addr, word);
 				word = 0;
-      			}
+      		}
 		}
     
 		if(i%DATA_BYTES)
