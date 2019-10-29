@@ -167,10 +167,11 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
 {
     bool verbose = false;
     os = new os_channel("os", 100, verbose);
-    
-    slaveBus = new kpn_BusSlave("slaveBus");
-    masterBus= new kpn_BusMaster("masterBus");
+    tlm = new bus_tlm("bus_tlm"); 
+    slaveBus = new kpn_BusSlave("slaveBus", tlm);
+    masterBus= new kpn_BusMaster("masterBus", tlm);
     masterBus->os(*os);
+
     // binding the slave to the Master
     //
 /*

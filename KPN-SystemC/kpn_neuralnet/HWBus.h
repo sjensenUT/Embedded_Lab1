@@ -12,7 +12,7 @@
  */
 
 #include <systemc.h>
-
+#include "bus_tlm.h"
 // Simple hardware bus
 
 #define ADDR_WIDTH	16u
@@ -210,16 +210,16 @@ class	IMasterHardwareBusLinkAccess : virtual public sc_interface
 {
 	public:
 
-	virtual void	MasterRead(int addr, void *data, unsigned long len) = 0;
-	virtual void	MasterWrite(int addr, const void* data, unsigned long len) = 0;
+	virtual void	MasterRead(int addr, void *data, unsigned long len, bool useTLM) = 0;
+	virtual void	MasterWrite(int addr, const void* data, unsigned long len, bool useTLM) = 0;
 };
   
 class	ISlaveHardwareBusLinkAccess : virtual public sc_interface
 {
 	public:
 
-	virtual void	SlaveRead(int addr, void *data, unsigned long len) = 0;
-	virtual void	SlaveWrite(int addr, const void* data, unsigned long len) = 0;
+	virtual void	SlaveRead(int addr, void *data, unsigned long len, bool useTLM) = 0;
+	virtual void	SlaveWrite(int addr, const void* data, unsigned long len, bool useTLM) = 0;
 };
 
 class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public sc_channel
@@ -227,10 +227,12 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 	public:
 
 	sc_port<IMasterHardwareBusProtocol> protocol;
+    
+    sc_port<IMasterTLM> tlm;
 
 	MasterHardwareBusLinkAccess(sc_module_name name)  : sc_channel(name) {}
 
-	void	MasterWrite(int addr, const void* data, unsigned long len)
+	void	MasterWrite(int addr, const void* data, unsigned long len, bool useTLM)
 	{
 		unsigned long i;
 		unsigned char *p;
@@ -242,7 +244,11 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
       
 			if(!((i+1)%DATA_BYTES)) 
 			{
-				protocol->masterWrite(addr, word);
+                if(useTLM){
+				    tlm->masterWrite(addr, word);
+                }else{
+                    protocol->masterWrite(addr, word);
+                }
 				word = 0;
       		}
 		}
@@ -250,11 +256,15 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 		if(i%DATA_BYTES)
 		{
 			word <<= 8 * (DATA_BYTES - (i%DATA_BYTES));
-			protocol->masterWrite(addr, word);
+            if(useTLM){
+                tlm->masterWrite(addr, word);
+            }else{
+			    protocol->masterWrite(addr, word);
+            }
 		}
 	}
   
-	void	MasterRead(int addr, void* data, unsigned long len)
+	void	MasterRead(int addr, void* data, unsigned long len, bool useTLM)
 	{
 		unsigned long i;
 		unsigned char* p;
@@ -266,7 +276,11 @@ class	MasterHardwareBusLinkAccess : public IMasterHardwareBusLinkAccess, public 
 		{
 			if(!(i%DATA_BYTES))
 			{
-				protocol->masterRead(addr, word);
+                if(useTLM){
+                    tlm->masterRead(addr, word);
+                }else{
+				    protocol->masterRead(addr, word);
+                }
 			}
 
 			// limitations of SystemC, need to do this weird casting
@@ -283,9 +297,11 @@ class	SlaveHardwareBusLinkAccess : public ISlaveHardwareBusLinkAccess, public sc
 
 	sc_port<ISlaveHardwareBusProtocol> protocol;
 
+    sc_port<ISlaveTLM> tlm;
+
 	SlaveHardwareBusLinkAccess(sc_module_name name) : sc_channel(name) {}
 
-	void	SlaveWrite(int addr, const void* data, unsigned long len)
+	void	SlaveWrite(int addr, const void* data, unsigned long len, bool useTLM)
 	{
 		unsigned long i;
 		unsigned char *p;
@@ -297,7 +313,11 @@ class	SlaveHardwareBusLinkAccess : public ISlaveHardwareBusLinkAccess, public sc
 
 			if(!((i+1)%DATA_BYTES))
 			{
-				protocol->slaveWrite(addr, word);
+                if(useTLM){
+                    tlm->slaveWrite(addr, word);
+                }else{
+				    protocol->slaveWrite(addr, word);
+                }
 				word = 0;
 			}
 		}
@@ -305,11 +325,15 @@ class	SlaveHardwareBusLinkAccess : public ISlaveHardwareBusLinkAccess, public sc
 		if(i%DATA_BYTES)
 		{
 			word <<= 8 * (DATA_BYTES - (i%DATA_BYTES));
-			protocol->slaveWrite(addr, word);
+            if(useTLM){
+                tlm->slaveWrite(addr, word); 
+            }else{
+			    protocol->slaveWrite(addr, word);
+            }
 		}
 	}
 
-	void	SlaveRead(int addr, void* data, unsigned long len)
+	void	SlaveRead(int addr, void* data, unsigned long len, bool useTLM)
 	{
 		unsigned long i;
 		unsigned char* p;
@@ -319,7 +343,11 @@ class	SlaveHardwareBusLinkAccess : public ISlaveHardwareBusLinkAccess, public sc
 		{
 			if(!(i%DATA_BYTES))
 			{
-				protocol->slaveRead(addr, word);
+                if(useTLM){
+                    tlm->slaveRead(addr, word);
+                }else{
+				    protocol->slaveRead(addr, word);
+                }
 			}
 
 			// limitations of SystemC, need to do this weird casting

@@ -8,6 +8,7 @@
 #include "os_sc_fifo.h"
 #include "accelerator.h"
 #include "kpn_neuralnet_os_bus.h"
+#include "bus_tlm.h"
 using std::string;
 
 
@@ -59,6 +60,7 @@ class	kpn_neuralnet_accelerated_bus : public sc_module
     kpn_neuralnet_os_bus *neuralnet;
     accelerator_to_bus *accel;
     os_channel *os;
+    bus_tlm *tlm;
     
     //
     //os_to_accel_fifo<float> *os_to_accel;

@@ -3,13 +3,14 @@
 
 #include <systemc.h>
 #include "HWBus.h"
+#include "bus_tlm.h"
 #include "../kahn_process.h"
 
 // If there were multiple bus slaves, each would need to be designated its own
 // address range. However, for our case, there is just one, so let's just keep 
 // it simple by hard-coding the address to 0.
 static const int kAddressM = 0;
-
+static const bool USE_TLM_M = false;
 
 class kpn_MasterInterruptThread : public kahn_process
 {
@@ -79,7 +80,7 @@ class kpn_MasterDriver : public sc_channel
         cout << "done waiting for interrupt. going to masterRead" << endl;
 
         // Read the data from the MAC
-        mac->MasterRead(kAddressM, data, len);
+        mac->MasterRead(kAddressM, data, len, USE_TLM_M);
     }
 
     void write ( const void* data, unsigned long len )
@@ -90,7 +91,7 @@ class kpn_MasterDriver : public sc_channel
 
         cout << "done waiting for interrupt, driver entering masterWrite" << endl; 
         // Write the data to the MAC
-        mac->MasterWrite(kAddressM, data, len);
+        mac->MasterWrite(kAddressM, data, len, USE_TLM_M);
     }
 
     private:
@@ -140,7 +141,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
 
     public:
   
-    kpn_BusMaster(sc_module_name name) :
+    kpn_BusMaster(sc_module_name name, bus_tlm *tlm) :
          sc_channel(name),
          _master("kpnBusMaster_master"),
          _writeIrq("kpnBusMaster_writeIrq"),
@@ -162,6 +163,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
         _readIrq.intr(read_interrupt);
         // Master MAC connections
         _masterMAC.protocol(_master);
+        _masterMAC.tlm(*tlm);
         // Master write driver connections
         _masterWriteDriver.mac(_masterMAC);
         _masterWriteDriver.os(os);
@@ -213,10 +215,11 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
     MasterHardwareBusLinkAccess _masterMAC;
     kpn_MasterDriver _masterWriteDriver, _masterReadDriver;
     kpn_MasterInterruptThread _writeIrqThread, _readIrqThread;
-
+    
     // Connections between the interrupt threads and master drivers
     sc_signal<bool> _writeIrqFlag, _readIrqFlag;
     sc_event _clearWriteIrq, _clearReadIrq;
+
 
 };
 

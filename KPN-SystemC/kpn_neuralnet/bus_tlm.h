@@ -40,11 +40,24 @@ class bus_tlm: public sc_channel, public IMasterTLM, public ISlaveTLM
     public:
         //sc_inout< sc_bv<DATA_WIDTH> > master_data;
         //sc_inout< sc_bv<DATA_WIDTH> > slave_data;
+        sc_bv<DATA_WIDTH> data;
+        bool valid = false;
         bus_tlm(sc_module_name name)  : sc_channel(name) {}
-        masterRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d); 
-        masterWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d);
-        slaveRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d);
-        slaveWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d);
+        void masterRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d){
+            cout << "in masterRead" << endl;   
+        }
+
+        void masterWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d){
+            cout << "in masterWrite" << endl;
+        }
+
+        void slaveRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d){
+            cout << "in slaveRead" << endl;
+        }
+
+        void slaveWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d){
+            cout << "in slaveWrite" << endl;
+        }
 
 
 };

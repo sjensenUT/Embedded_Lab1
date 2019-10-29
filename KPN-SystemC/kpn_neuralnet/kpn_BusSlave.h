@@ -5,11 +5,12 @@
 
 #include <systemc.h>
 #include "HWBus.h"
-
+#include "bus_tlm.h"
 // If there were multiple bus slaves, each would need to be designated its own
 // address range. However, for our case, there is just one, so let's just keep 
 // it simple by hard-coding the address to 0.
 static const int kAddress = 0;
+static const bool USE_TLM = false;
 
 class kpn_SlaveDriver : public sc_channel
 {
@@ -29,7 +30,7 @@ class kpn_SlaveDriver : public sc_channel
             
             cout << "Slave entering Slave Read" << endl;
             // Read the data from the MAC
-            mac->SlaveRead(kAddress, data, len);
+            mac->SlaveRead(kAddress, data, len, USE_TLM);
         }
   
         void write ( const void* data, unsigned long len )
@@ -41,7 +42,7 @@ class kpn_SlaveDriver : public sc_channel
             // Write the data to the MAC
             cout << "Slave entering Slave Write" << endl;
 
-            mac->SlaveWrite(kAddress, data, len);
+            mac->SlaveWrite(kAddress, data, len, USE_TLM);
         }
 };
 
@@ -57,7 +58,7 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
   
     public:
     
-        kpn_BusSlave(sc_module_name name) :
+        kpn_BusSlave(sc_module_name name, bus_tlm *tlm) :
              sc_channel(name),
              _slave("kpnBusSlave_slave"),
              _writeIrq("kpnBusSlave_writeIrq"),
@@ -74,6 +75,7 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
             _writeIrq.intr(write_interrupt);
             _readIrq.intr(read_interrupt);
             _slaveMAC.protocol(_slave);
+            _slaveMAC.tlm(*tlm);
             _slaveWriteDriver.intr(_writeIrq);
             _slaveWriteDriver.mac(_slaveMAC);
             _slaveReadDriver.intr(_readIrq);
