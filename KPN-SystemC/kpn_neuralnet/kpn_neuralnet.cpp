@@ -121,6 +121,10 @@ void image_reader::process()
         if(this->waitTime > 0){
             this->os->time_wait(30); // hard-coded wait time for the region layer
         }
+        else{ // this should execute if there isn't an OS
+            cout << "image reader waiting but not yielding" << endl;
+            wait(LATENCY[0],SC_MS); 
+        }
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3 );
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
 		im_w_out->write(orig.w);
@@ -145,6 +149,9 @@ void image_reader::process()
             this->os->time_wait(0);
         }
         //cout << "terminating" << endl; 
+    }
+    else{ // this should execute if there isn't an OS
+        break; 
     }
 
 #if OS_ENABLE == TRUE
@@ -336,6 +343,9 @@ void conv_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
+    else{ // if there is isn't an OS
+        wait(LATENCY[layerIndex+1],SC_MS); 
+    }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
     if(this->waitTime > 0)
@@ -350,6 +360,9 @@ void conv_layer::process()
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
+    }
+    else{
+        break; 
     }
     
 #if OS_ENABLE == TRUE
@@ -415,7 +428,7 @@ void max_layer::process()
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
-    system_clock::time_point before = system_clock::now(); 
+    //system_clock::time_point before = system_clock::now(); 
      
     network dummyNetwork;
     dummyNetwork.input = data;
@@ -446,10 +459,10 @@ void max_layer::process()
     }
     
     
-    system_clock::time_point after = system_clock::now();
-    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
+    //system_clock::time_point after = system_clock::now();
+    //milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
 
-    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
+    //unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
     //cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
 
@@ -457,6 +470,9 @@ void max_layer::process()
 //    latencyIndex++; latencyIndex %= 17;
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
+    }
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS); 
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
 
@@ -473,6 +489,9 @@ void max_layer::process()
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
+    }
+    else{
+        break; 
     }
 #if OS_ENABLE == TRUE   
     iter++;
@@ -630,6 +649,9 @@ void region_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
+    else { 
+        wait(LATENCY[16],SC_MS);
+    }
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;	
     cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
     
@@ -644,6 +666,10 @@ void region_layer::process()
         }
         //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+    
     //free(alphabets);  Now part of the constructor and I don't free it here? 
     
 #if OS_ENABLE == TRUE
@@ -841,8 +867,8 @@ class	kpn_neuralnet : public sc_module
     // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-	  	strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		//strs images = {"../../darknet/data/dog.jpg"};
+	  	//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
@@ -1119,7 +1145,9 @@ void conv_layer_to_bus::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
-   
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS); 
+    } 
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
     if(this->waitTime > 0)
@@ -1135,6 +1163,10 @@ void conv_layer_to_bus::process()
         }
         //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+    
 #if OS_ENABLE == TRUE
     iter++; 
     } // while(true)
@@ -1184,7 +1216,7 @@ void max_layer_to_bus::process()
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
 
-    //wait(LATENCY[latencyIndex],SC_MS);
+    //wait(latency[latencyindex],sc_ms);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++;
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
@@ -1197,7 +1229,7 @@ void max_layer_to_bus::process()
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
-    system_clock::time_point before = system_clock::now(); 
+    //system_clock::time_point before = system_clock::now(); 
      
     network dummyNetwork;
     dummyNetwork.input = data;
@@ -1228,10 +1260,10 @@ void max_layer_to_bus::process()
     }
     
     
-    system_clock::time_point after = system_clock::now();
-    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
+    //system_clock::time_point after = system_clock::now();
+    //milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
 
-    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
+    //unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
     //cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
 
@@ -1240,7 +1272,10 @@ void max_layer_to_bus::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
-//    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS);
+    }
+    //    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
     cout << "Maxlayer finished. Attempting to write to the bus" << endl; 
     cout << "Output[0] " << outputImage[0] << endl;
     mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
@@ -1258,6 +1293,9 @@ void max_layer_to_bus::process()
         }
         //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
 #if OS_ENABLE == TRUE
     iter++; 
     } // while(true)
@@ -1268,9 +1306,9 @@ void max_layer_to_bus::process()
 // This will probably remain as-is.
 int sc_main(int argc, char * argv[]) 
 {
-    kpn_neuralnet knn0("kpn_neuralnet");
+    //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    //kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    kpn_neuralnet_os knn0("kpn_neuralnet_os");
     //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
     //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
     sc_start();
