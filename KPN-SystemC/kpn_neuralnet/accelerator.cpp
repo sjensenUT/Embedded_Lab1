@@ -76,6 +76,7 @@ accelerator::accelerator(sc_module_name name)
 void accelerator::init(){}
 
 void accelerator::process(){
+    while(true) {
     cout << "in accelerator::process" << endl;    
     float* input;
     input = readImageData(&in, l1.w, l1.h, l1.c);
@@ -108,6 +109,7 @@ void accelerator::process(){
     cout << "writing image data" << endl;
     wait(187,SC_MS); // time of both layers 464 + 448 / 5
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
+    }
 }
 
 
