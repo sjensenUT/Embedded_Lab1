@@ -10,7 +10,7 @@
 // address range. However, for our case, there is just one, so let's just keep 
 // it simple by hard-coding the address to 0.
 static const int kAddressM = 0;
-static const bool USE_TLM_M = false;
+//static const bool USE_TLM_M = true;
 
 class kpn_MasterInterruptThread : public kahn_process
 {
@@ -69,7 +69,7 @@ class kpn_MasterDriver : public sc_channel
     sc_in<bool>     irqFlag;
     sc_event&       clearIrq;
 
-    void read ( void* data, unsigned long len )
+    void read ( void* data, unsigned long len, bool useTLM )
     {
         // Wait for the slave to indicate it is about to start a write..
         cout << "in the read driver method" << endl;
@@ -80,10 +80,10 @@ class kpn_MasterDriver : public sc_channel
         cout << "done waiting for interrupt. going to masterRead" << endl;
 
         // Read the data from the MAC
-        mac->MasterRead(kAddressM, data, len, USE_TLM_M);
+        mac->MasterRead(kAddressM, data, len, useTLM);
     }
 
-    void write ( const void* data, unsigned long len )
+    void write ( const void* data, unsigned long len, bool useTLM )
     {
         cout << "In the Write Driver" << endl;
         // Wait for the slave to indicate it's ready for a write.
@@ -91,7 +91,7 @@ class kpn_MasterDriver : public sc_channel
 
         cout << "done waiting for interrupt, driver entering masterWrite" << endl; 
         // Write the data to the MAC
-        mac->MasterWrite(kAddressM, data, len, USE_TLM_M);
+        mac->MasterWrite(kAddressM, data, len, useTLM);
     }
 
     private:
@@ -141,7 +141,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
 
     public:
   
-    kpn_BusMaster(sc_module_name name, bus_tlm *tlm) :
+    kpn_BusMaster(sc_module_name name, bus_tlm *tlm, bool _useTLM) :
          sc_channel(name),
          _master("kpnBusMaster_master"),
          _writeIrq("kpnBusMaster_writeIrq"),
@@ -150,7 +150,8 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
          _masterWriteDriver("kpnBusMaster_masterWriteDriver", _clearWriteIrq),
          _masterReadDriver("kpnBusMaster_masterReadDriver", _clearReadIrq),
          _writeIrqThread("kpnBusMaster_writeIrqThread", _clearWriteIrq),
-         _readIrqThread("kpnBusMaster_readIrqThread", _clearReadIrq)
+         _readIrqThread("kpnBusMaster_readIrqThread", _clearReadIrq),
+        useTLM(_useTLM)
     {
         cout << "[BUS M] in constructor" << endl; 
         // Master bus protocol connections
@@ -200,12 +201,12 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
 
     void read ( void* data, unsigned long len )
     {
-        this->_masterReadDriver.read(data, len);
+        this->_masterReadDriver.read(data, len, useTLM);
     }
 
     void write ( const void* data, unsigned long len )
     {
-        this->_masterWriteDriver.write(data, len);
+        this->_masterWriteDriver.write(data, len, useTLM);
     }
 
     private:
@@ -219,6 +220,7 @@ class kpn_BusMaster : public kpn_BusMaster_ifc, public sc_channel
     // Connections between the interrupt threads and master drivers
     sc_signal<bool> _writeIrqFlag, _readIrqFlag;
     sc_event _clearWriteIrq, _clearReadIrq;
+    bool useTLM;
 
 
 };

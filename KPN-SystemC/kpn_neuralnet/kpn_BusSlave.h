@@ -10,7 +10,7 @@
 // address range. However, for our case, there is just one, so let's just keep 
 // it simple by hard-coding the address to 0.
 static const int kAddress = 0;
-static const bool USE_TLM = false;
+//static const bool USE_TLM = true;
 
 class kpn_SlaveDriver : public sc_channel
 {
@@ -22,7 +22,7 @@ class kpn_SlaveDriver : public sc_channel
         sc_port<IIntrSend> intr;
         sc_port<ISlaveHardwareBusLinkAccess> mac;
         
-        void read ( void* data, unsigned long len )
+        void read ( void* data, unsigned long len, bool useTLM )
         {
             // Send the interrupt to the host that we're ready for data
             cout << "Slave ready to read, sending interrupt" << endl;
@@ -30,10 +30,10 @@ class kpn_SlaveDriver : public sc_channel
             
             cout << "Slave entering Slave Read" << endl;
             // Read the data from the MAC
-            mac->SlaveRead(kAddress, data, len, USE_TLM);
+            mac->SlaveRead(kAddress, data, len, useTLM);
         }
   
-        void write ( const void* data, unsigned long len )
+        void write ( const void* data, unsigned long len, bool useTLM)
         {
             // Notify the host that we are about to do a write
             cout << "Slave ready to write, sending interrupt " << endl;
@@ -42,7 +42,7 @@ class kpn_SlaveDriver : public sc_channel
             // Write the data to the MAC
             cout << "Slave entering Slave Write" << endl;
 
-            mac->SlaveWrite(kAddress, data, len, USE_TLM);
+            mac->SlaveWrite(kAddress, data, len, useTLM);
         }
 };
 
@@ -58,14 +58,15 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
   
     public:
     
-        kpn_BusSlave(sc_module_name name, bus_tlm *tlm) :
+        kpn_BusSlave(sc_module_name name, bus_tlm *tlm, bool _useTLM) :
              sc_channel(name),
              _slave("kpnBusSlave_slave"),
              _writeIrq("kpnBusSlave_writeIrq"),
              _readIrq("kpnBusSlave_readIrq"),
              _slaveMAC("kpnBusSlave_slaveMAC"),
              _slaveWriteDriver("kpnBusSlave_slaveWriteDriver"),
-             _slaveReadDriver("kpnBusSlave_slaveReadDriver")
+             _slaveReadDriver("kpnBusSlave_slaveReadDriver"),
+            useTLM(_useTLM)
         {
             
             _slave.ready(ready);
@@ -92,12 +93,12 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
 
         void read ( void* data, unsigned long len )
         {
-            this->_slaveReadDriver.read(data, len);
+            this->_slaveReadDriver.read(data, len, useTLM);
         }
 
         void write ( const void* data, unsigned long len )
         {
-            this->_slaveWriteDriver.write(data, len);
+            this->_slaveWriteDriver.write(data, len, useTLM);
         }
 
     private:
@@ -106,7 +107,7 @@ class kpn_BusSlave : public kpn_BusSlave_ifc, public sc_channel
         SlaveHardwareSyncGenerate _writeIrq, _readIrq;
         SlaveHardwareBusLinkAccess _slaveMAC;
         kpn_SlaveDriver _slaveWriteDriver, _slaveReadDriver;
-
+        bool useTLM;
 };
 
 #endif

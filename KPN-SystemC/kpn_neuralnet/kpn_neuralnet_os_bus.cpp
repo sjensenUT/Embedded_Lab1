@@ -137,9 +137,11 @@ kpn_neuralnet_os_bus::kpn_neuralnet_os_bus(sc_module_name name, os_channel *os) 
     // !!! NOTE !!! this is the only max layer with stride=1
     max11 = new max_layer_to_bus("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, 1);
     max11->in(*conv10_to_max11);
+    //max11->mDriver(); //FIXME
     max11->os(*os);
 
     conv14 = new conv_layer_to_bus("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, 1);
+    //conv14->mDriver(); //FIXME
     conv14->out(*conv14_to_region);
     conv14->os(*os);
 
@@ -154,20 +156,21 @@ kpn_neuralnet_os_bus::kpn_neuralnet_os_bus(sc_module_name name, os_channel *os) 
 }
 
 
-kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name) : 
+kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name, bool _useTLM) : 
         sc_module(name),
         slaveReadyWrite(0),
         slaveReadyRead(0),
         ready(0),
         ack(0),
         A(0),
-        D(0)
+        D(0),
+        useTLM(_useTLM)
 {
     bool verbose = false;
     os = new os_channel("os", 100, verbose);
-    tlm = new bus_tlm("bus_tlm"); 
-    slaveBus = new kpn_BusSlave("slaveBus", tlm);
-    masterBus= new kpn_BusMaster("masterBus", tlm);
+    tlm = new bus_tlm("bus_tlm", os); 
+    slaveBus = new kpn_BusSlave("slaveBus", tlm, useTLM);
+    masterBus= new kpn_BusMaster("masterBus", tlm, useTLM);
     masterBus->os(*os);
 
     // binding the slave to the Master

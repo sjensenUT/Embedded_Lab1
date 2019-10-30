@@ -47,6 +47,7 @@ class	kpn_neuralnet_os_bus : public sc_module
     max_layer_to_bus *max11;
     region_layer	*region;
 	image_reader	*reader0;
+
     kpn_neuralnet_os_bus(sc_module_name name, os_channel *os);
     
 };
@@ -68,13 +69,14 @@ class	kpn_neuralnet_accelerated_bus : public sc_module
     //sc_port<kpn_BusSlave_ifc> *os_to_accel, accel_to_os;     
     
 
-    kpn_neuralnet_accelerated_bus(sc_module_name name);
+    kpn_neuralnet_accelerated_bus(sc_module_name name, bool useTLM);
    
     private: 
  
     sc_signal<bool, SC_MANY_WRITERS> slaveReadyWrite, slaveReadyRead, ready, ack;
     sc_signal< sc_bv<ADDR_WIDTH>, SC_MANY_WRITERS > A;
     sc_signal< sc_bv<DATA_WIDTH>, SC_MANY_WRITERS > D;
+    bool useTLM;
 };
 
 #endif // KPN_NEURALNET_OS_BUS
