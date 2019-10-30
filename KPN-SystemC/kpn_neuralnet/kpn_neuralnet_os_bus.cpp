@@ -214,12 +214,16 @@ kpn_neuralnet_accelerated_bus::kpn_neuralnet_accelerated_bus(sc_module_name name
     
     neuralnet = new kpn_neuralnet_os_bus("kpn_neuralnet_os_bus", os);
 //  if the ports are not bound correctly, this could be causing the issue
+    cout << "devining nn to acc ports" << endl;
     neuralnet->max11->mDriver(*masterBus);
     neuralnet->conv14->mDriver(*masterBus);
+    cout << "instantiating accelerator" << endl;
     accel = new accelerator_to_bus("accelerator");
 
     // hookups to accelerator
+    cout << "hooking accel up to slave bus" << endl;
     accel->accel_to_bus(*slaveBus);
+    cout << "done hooking accel up to slave bus" << endl;
 }
 /*
 kpn_neuralnet_bus()::kpn_neuralnet_bus(sc_module_name name) : sc_module(name)
