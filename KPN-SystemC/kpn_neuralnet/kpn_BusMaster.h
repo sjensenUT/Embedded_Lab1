@@ -33,9 +33,9 @@ class kpn_MasterInterruptThread : public kahn_process
 
     void process()
     {
+        cout << "in masterInterruptThread::process" << endl;
         while(true)
-        {
-    
+        { 
             cout << "[BUS M]: waiting for slave to assert signal" << endl;
             // Wait for the slave to assert the IRQ
             irq->receive();

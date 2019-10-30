@@ -1303,14 +1303,42 @@ void max_layer_to_bus::process()
     
 }
 
-// This will probably remain as-is.
-int sc_main(int argc, char * argv[]) 
+
+//for some reason this main seg faults
+int sc_main(int argc, char * argv[])
+{
+    if(strcmp(argv[1], "part1") == 0){
+        cout << "running part1" << endl;
+        kpn_neuralnet knn0("kpn_neuralnet");
+    }else if(strcmp(argv[1], "part2") == 0){
+        cout << "running part2" << endl;
+        kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    }else if(strcmp(argv[1], "part3") == 0){
+        cout << "running part3 " << endl;
+        kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
+    }else if(strcmp(argv[1], "part5") == 0){
+        cout << "running part5" << endl;
+        kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
+    }else{
+        cout << "running part6" << endl;
+        kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", true);
+    }
+    //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
+    cout << "starting simulation" << endl;
+    sc_start();
+    return 0;
+}
+
+
+// This main works fine though even though the instantiation is identical
+/*int sc_main(int argc, char * argv[]) 
 {
     //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
     kpn_neuralnet_os knn0("kpn_neuralnet_os");
     //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
-    //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
+    kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
+    cout << "starting simulation" << endl;
     sc_start();
     return 0;
-}
+}*/
