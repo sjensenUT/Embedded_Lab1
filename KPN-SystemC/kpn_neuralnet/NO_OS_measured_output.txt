@@ -1,0 +1,4120 @@
+printing argv[0]
+part1
+running part1
+instantiated image_reader
+instantiated convolutional layer 0 with filter size of 3, stride of 1 and 16 filters
+instantiated max layer 1 with filter size of 2 and stride of 2
+instantiated convolutional layer 2 with filter size of 3, stride of 1 and 32 filters
+instantiated max layer 3 with filter size of 2 and stride of 2
+instantiated convolutional layer 4 with filter size of 3, stride of 1 and 64 filters
+instantiated max layer 5 with filter size of 2 and stride of 2
+instantiated convolutional layer 6 with filter size of 3, stride of 1 and 128 filters
+instantiated max layer 7 with filter size of 2 and stride of 2
+instantiated convolutional layer 8 with filter size of 3, stride of 1 and 256 filters
+instantiated max layer 9 with filter size of 2 and stride of 2
+instantiated convolutional layer 10 with filter size of 3, stride of 1 and 512 filters
+instantiated max layer 11 with filter size of 2 and stride of 1
+instantiated convolutional layer 12 with filter size of 3, stride of 1 and 1024 filters
+instantiated convolutional layer 13 with filter size of 3, stride of 1 and 512 filters
+instantiated convolutional layer 14 with filter size of 1, stride of 1 and 425 filters
+instantiating region layer
+reading image ../../darknet/data/dog.jpg @ iter 0
+iter_time: 0 s @ iter 0
+reading image ../../darknet/data/dog.jpg @ iter 1
+forwarding convolutional layer 0 @ iter 0
+iter_time: 30 ms @ iter 1
+reading image ../../darknet/data/dog.jpg @ iter 2
+iter_time: 60 ms @ iter 2
+reading image ../../darknet/data/dog.jpg @ iter 3
+iter_time: 90 ms @ iter 3
+reading image ../../darknet/data/dog.jpg @ iter 4
+iter_time: 120 ms @ iter 4
+reading image ../../darknet/data/dog.jpg @ iter 5
+iter_time: 150 ms @ iter 5
+reading image ../../darknet/data/dog.jpg @ iter 6
+conv layer 0 data: Memory(kB): 31097 time(ms): 115
+forwarding convolutional layer 0 @ iter 1
+forwarding max layer 1 @ iter 0
+iter_time: 180 ms @ iter 6
+reading image ../../darknet/data/dog.jpg @ iter 7
+conv layer 1 data: Memory(kB): 13520 time(ms): 11
+forwarding convolutional layer 2 @ iter 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 107
+forwarding convolutional layer 0 @ iter 2
+forwarding max layer 1 @ iter 1
+iter_time: 356 ms @ iter 7
+reading image ../../darknet/data/dog.jpg @ iter 8
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 169
+forwarding convolutional layer 2 @ iter 1
+forwarding max layer 3 @ iter 0
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 103
+forwarding convolutional layer 0 @ iter 3
+forwarding max layer 1 @ iter 2
+iter_time: 534 ms @ iter 8
+reading image ../../darknet/data/dog.jpg @ iter 9
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 132
+forwarding max layer 5 @ iter 0
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 0
+conv layer 2 data: Memory(kB): 32466 time(ms): 180
+forwarding convolutional layer 2 @ iter 2
+forwarding max layer 3 @ iter 1
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 1
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 0
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 109
+forwarding convolutional layer 0 @ iter 4
+forwarding max layer 1 @ iter 3
+iter_time: 712 ms @ iter 9
+reading image ../../darknet/data/dog.jpg @ iter 10
+conv layer 1 data: Memory(kB): 13520 time(ms): 17
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 1
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 1
+conv layer 8 data: Memory(kB): 5208 time(ms): 101
+forwarding max layer 9 @ iter 0
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 0
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding convolutional layer 2 @ iter 3
+forwarding max layer 3 @ iter 2
+conv layer 3 data: Memory(kB): 6760 time(ms): 6
+forwarding convolutional layer 4 @ iter 2
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding convolutional layer 0 @ iter 5
+forwarding max layer 1 @ iter 4
+iter_time: 890 ms @ iter 10
+reading image ../../darknet/data/dog.jpg @ iter 11
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 1
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 1
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 10 data: Memory(kB): 6636 time(ms): 118
+forwarding max layer 11 @ iter 0
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+forwarding convolutional layer 12 @ iter 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 127
+forwarding max layer 5 @ iter 2
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 2
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 1
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 1
+conv layer 2 data: Memory(kB): 32466 time(ms): 163
+forwarding convolutional layer 2 @ iter 4
+forwarding max layer 3 @ iter 3
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding convolutional layer 0 @ iter 6
+forwarding max layer 1 @ iter 5
+iter_time: 1068 ms @ iter 11
+reading image ../../darknet/data/dog.jpg @ iter 12
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 3
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 2
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 2
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 1
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 3
+conv layer 5 data: Memory(kB): 3380 time(ms): 3
+forwarding convolutional layer 6 @ iter 3
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 2
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 2
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding convolutional layer 0 @ iter 7
+forwarding max layer 1 @ iter 6
+iter_time: 1246 ms @ iter 12
+reading image ../../darknet/data/dog.jpg @ iter 13
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 170
+forwarding convolutional layer 2 @ iter 5
+forwarding max layer 3 @ iter 4
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 4
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 3
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 3
+conv layer 10 data: Memory(kB): 6636 time(ms): 110
+forwarding max layer 11 @ iter 2
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 1
+forwarding convolutional layer 13 @ iter 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding convolutional layer 0 @ iter 8
+forwarding max layer 1 @ iter 7
+iter_time: 1424 ms @ iter 13
+reading image ../../darknet/data/dog.jpg @ iter 14
+conv layer 4 data: Memory(kB): 16296 time(ms): 118
+forwarding max layer 5 @ iter 4
+conv layer 1 data: Memory(kB): 13520 time(ms): 15
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 4
+conv layer 8 data: Memory(kB): 5208 time(ms): 103
+forwarding max layer 9 @ iter 3
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 3
+conv layer 2 data: Memory(kB): 32466 time(ms): 164
+forwarding convolutional layer 2 @ iter 6
+forwarding max layer 3 @ iter 5
+conv layer 3 data: Memory(kB): 6760 time(ms): 6
+forwarding convolutional layer 4 @ iter 5
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 4
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 4
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 3
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding convolutional layer 0 @ iter 9
+forwarding max layer 1 @ iter 8
+iter_time: 1602 ms @ iter 14
+reading image ../../darknet/data/dog.jpg @ iter 15
+conv layer 1 data: Memory(kB): 13520 time(ms): 12
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 5
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 5
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 4
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 4
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding convolutional layer 2 @ iter 7
+forwarding max layer 3 @ iter 6
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 6
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 5
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 5
+conv layer 0 data: Memory(kB): 31097 time(ms): 100
+forwarding convolutional layer 0 @ iter 10
+forwarding max layer 1 @ iter 9
+iter_time: 1780 ms @ iter 15
+reading image ../../darknet/data/dog.jpg @ iter 16
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 4
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 13 data: Memory(kB): 25530 time(ms): 455
+forwarding convolutional layer 14 @ iter 0
+conv layer 12 data: Memory(kB): 22488 time(ms): 441
+forwarding convolutional layer 12 @ iter 2
+forwarding convolutional layer 13 @ iter 1
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 0
+TIMESTAMP: 1876 ms
+ITER_TIME: 1876 ms @ iter 0
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 132
+forwarding max layer 5 @ iter 6
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 6
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 5
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 5
+conv layer 2 data: Memory(kB): 32466 time(ms): 164
+forwarding convolutional layer 2 @ iter 8
+forwarding max layer 3 @ iter 7
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 7
+conv layer 0 data: Memory(kB): 31097 time(ms): 92
+forwarding convolutional layer 0 @ iter 11
+forwarding max layer 1 @ iter 10
+iter_time: 1958 ms @ iter 16
+reading image ../../darknet/data/dog.jpg @ iter 17
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 6
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 6
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 5
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 7
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 7
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 6
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 6
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding convolutional layer 0 @ iter 12
+forwarding max layer 1 @ iter 11
+iter_time: 2136 ms @ iter 17
+reading image ../../darknet/data/dog.jpg @ iter 18
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 166
+forwarding convolutional layer 2 @ iter 9
+forwarding max layer 3 @ iter 8
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 8
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 7
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 7
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 6
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 1
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 3
+forwarding convolutional layer 13 @ iter 2
+conv layer 4 data: Memory(kB): 16296 time(ms): 117
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding max layer 5 @ iter 8
+forwarding detection layer @ iter 1
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 8
+TIMESTAMP: 2340 ms
+ITER_TIME: 2310 ms @ iter 1
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 1
+conv layer 0 data: Memory(kB): 31097 time(ms): 104
+forwarding convolutional layer 0 @ iter 13
+forwarding max layer 1 @ iter 12
+iter_time: 2314 ms @ iter 18
+reading image ../../darknet/data/dog.jpg @ iter 19
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 7
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 7
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding convolutional layer 2 @ iter 10
+forwarding max layer 3 @ iter 9
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 9
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 8
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 8
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 7
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding convolutional layer 0 @ iter 14
+forwarding max layer 1 @ iter 13
+iter_time: 2492 ms @ iter 19
+reading image ../../darknet/data/dog.jpg @ iter 20
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 9
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 9
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 8
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding convolutional layer 2 @ iter 11
+forwarding max layer 3 @ iter 10
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 10
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 9
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 9
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 8
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding convolutional layer 0 @ iter 15
+forwarding max layer 1 @ iter 14
+iter_time: 2670 ms @ iter 20
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 10
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 10
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 2
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 9
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 9
+conv layer 12 data: Memory(kB): 22488 time(ms): 430
+forwarding convolutional layer 12 @ iter 4
+forwarding convolutional layer 13 @ iter 3
+conv layer 14 data: Memory(kB): 1806 time(ms): 21
+forwarding detection layer @ iter 2
+reading image ../../darknet/data/dog.jpg @ iter 21
+TIMESTAMP: 2804 ms
+ITER_TIME: 2744 ms @ iter 2
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 2
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding convolutional layer 2 @ iter 12
+forwarding max layer 3 @ iter 11
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 11
+conv layer 0 data: Memory(kB): 31097 time(ms): 92
+forwarding convolutional layer 0 @ iter 16
+forwarding max layer 1 @ iter 15
+iter_time: 2848 ms @ iter 21
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 6 data: Memory(kB): 8400 time(ms): 104
+forwarding max layer 7 @ iter 10
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 10
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 9
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 11
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 11
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 10
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 10
+conv layer 2 data: Memory(kB): 32466 time(ms): 160
+forwarding convolutional layer 2 @ iter 13
+forwarding max layer 3 @ iter 12
+conv layer 0 data: Memory(kB): 31097 time(ms): 100
+forwarding convolutional layer 0 @ iter 17
+forwarding max layer 1 @ iter 16
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 12
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+conv layer 6 data: Memory(kB): 8400 time(ms): 104
+forwarding max layer 7 @ iter 11
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 11
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 10
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 12
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 12
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 11
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 11
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding convolutional layer 0 @ iter 18
+forwarding max layer 1 @ iter 17
+conv layer 13 data: Memory(kB): 25530 time(ms): 440
+forwarding convolutional layer 14 @ iter 3
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 5
+forwarding convolutional layer 13 @ iter 4
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 3
+reading image ../../darknet/data/dog.jpg @ iter 22
+TIMESTAMP: 3268 ms
+ITER_TIME: 3178 ms @ iter 3
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 3
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding convolutional layer 2 @ iter 14
+forwarding max layer 3 @ iter 13
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 13
+iter_time: 3264 ms @ iter 22
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 12
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 12
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 11
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding convolutional layer 0 @ iter 19
+forwarding max layer 1 @ iter 18
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 118
+forwarding max layer 5 @ iter 13
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 13
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 12
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 12
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding convolutional layer 2 @ iter 15
+forwarding max layer 3 @ iter 14
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 14
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 13
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 13
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 12
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding convolutional layer 0 @ iter 20
+forwarding max layer 1 @ iter 19
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 119
+forwarding max layer 5 @ iter 14
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 14
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 13
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 13
+conv layer 2 data: Memory(kB): 32466 time(ms): 152
+forwarding convolutional layer 2 @ iter 16
+conv layer 13 data: Memory(kB): 25530 time(ms): 434
+forwarding max layer 3 @ iter 15
+forwarding convolutional layer 14 @ iter 4
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 15
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 6
+forwarding convolutional layer 13 @ iter 5
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 4
+reading image ../../darknet/data/dog.jpg @ iter 23
+TIMESTAMP: 3732 ms
+ITER_TIME: 3612 ms @ iter 4
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 4
+iter_time: 3728 ms @ iter 23
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 14
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 14
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding convolutional layer 0 @ iter 21
+forwarding max layer 1 @ iter 20
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 13
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 119
+forwarding max layer 5 @ iter 15
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 15
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 14
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 14
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding convolutional layer 2 @ iter 17
+forwarding max layer 3 @ iter 16
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 16
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding convolutional layer 0 @ iter 22
+forwarding max layer 1 @ iter 21
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 15
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 15
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 14
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 118
+forwarding max layer 5 @ iter 16
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 16
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 15
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 15
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding convolutional layer 0 @ iter 23
+forwarding max layer 1 @ iter 22
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 152
+forwarding convolutional layer 2 @ iter 18
+forwarding max layer 3 @ iter 17
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 17
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 5
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 7
+forwarding convolutional layer 13 @ iter 6
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 5
+reading image ../../darknet/data/dog.jpg @ iter 24
+TIMESTAMP: 4196 ms
+ITER_TIME: 4046 ms @ iter 5
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 5
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 16
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 16
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 15
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 4192 ms @ iter 24
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 17
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 17
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding convolutional layer 0 @ iter 24
+forwarding max layer 1 @ iter 23
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 16
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 16
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 2 data: Memory(kB): 32466 time(ms): 152
+forwarding convolutional layer 2 @ iter 19
+forwarding max layer 3 @ iter 18
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 18
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 17
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 17
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 16
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 24
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 18
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 18
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 17
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 17
+conv layer 2 data: Memory(kB): 32466 time(ms): 151
+forwarding convolutional layer 2 @ iter 20
+forwarding max layer 3 @ iter 19
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 19
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+conv layer 13 data: Memory(kB): 25530 time(ms): 437
+forwarding max layer 7 @ iter 18
+forwarding convolutional layer 14 @ iter 6
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 18
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 17
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 12 data: Memory(kB): 22488 time(ms): 435
+forwarding convolutional layer 12 @ iter 8
+forwarding convolutional layer 13 @ iter 7
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 6
+reading image ../../darknet/data/dog.jpg @ iter 25
+TIMESTAMP: 4660 ms
+ITER_TIME: 4480 ms @ iter 6
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 6
+iter_time: 4656 ms @ iter 25
+forwarding convolutional layer 0 @ iter 25
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 19
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 19
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 18
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 18
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding convolutional layer 2 @ iter 21
+forwarding max layer 3 @ iter 20
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 20
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 19
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 19
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 18
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+forwarding max layer 1 @ iter 25
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 20
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 20
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 19
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 19
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding convolutional layer 2 @ iter 22
+forwarding max layer 3 @ iter 21
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 21
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 20
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 20
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 19
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 7
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 9
+forwarding convolutional layer 13 @ iter 8
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 7
+reading image ../../darknet/data/dog.jpg @ iter 26
+TIMESTAMP: 5124 ms
+ITER_TIME: 4768 ms @ iter 7
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 7
+iter_time: 5120 ms @ iter 26
+forwarding convolutional layer 0 @ iter 26
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 21
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 21
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 20
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 20
+conv layer 2 data: Memory(kB): 32466 time(ms): 165
+forwarding convolutional layer 2 @ iter 23
+forwarding max layer 3 @ iter 22
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 22
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 21
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 21
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 20
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 26
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 119
+forwarding max layer 5 @ iter 22
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 22
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 21
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 21
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding convolutional layer 2 @ iter 24
+forwarding max layer 3 @ iter 23
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 23
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 22
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 22
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 21
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 8
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 10
+forwarding convolutional layer 13 @ iter 9
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 8
+reading image ../../darknet/data/dog.jpg @ iter 27
+TIMESTAMP: 5588 ms
+ITER_TIME: 5054 ms @ iter 8
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 23
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 23
+iter_time: 5584 ms @ iter 27
+forwarding convolutional layer 0 @ iter 27
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 22
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 22
+conv layer 2 data: Memory(kB): 32466 time(ms): 152
+forwarding convolutional layer 2 @ iter 25
+forwarding max layer 3 @ iter 24
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 24
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 23
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 23
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 22
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 0 data: Memory(kB): 31097 time(ms): 92
+forwarding max layer 1 @ iter 27
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 4 data: Memory(kB): 16296 time(ms): 119
+forwarding max layer 5 @ iter 24
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 24
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 23
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 23
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding convolutional layer 2 @ iter 26
+forwarding max layer 3 @ iter 25
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 25
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 24
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 24
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 23
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 9
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 25
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 11
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 13 @ iter 10
+forwarding convolutional layer 6 @ iter 25
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 9
+reading image ../../darknet/data/dog.jpg @ iter 28
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 24
+TIMESTAMP: 6052 ms
+ITER_TIME: 5340 ms @ iter 9
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 9
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 24
+iter_time: 6048 ms @ iter 28
+forwarding convolutional layer 0 @ iter 28
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding convolutional layer 2 @ iter 27
+forwarding max layer 3 @ iter 26
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 26
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 25
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 25
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 24
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+conv layer 0 data: Memory(kB): 31097 time(ms): 92
+forwarding max layer 1 @ iter 28
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 26
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 26
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 25
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 25
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding convolutional layer 2 @ iter 28
+forwarding max layer 3 @ iter 27
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 27
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 26
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 26
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 25
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 27
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 27
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 26
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 26
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 10
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 12
+forwarding convolutional layer 13 @ iter 11
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 10
+reading image ../../darknet/data/dog.jpg @ iter 29
+TIMESTAMP: 6516 ms
+ITER_TIME: 5626 ms @ iter 10
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 10
+iter_time: 6512 ms @ iter 29
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding convolutional layer 0 @ iter 29
+forwarding max layer 3 @ iter 28
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 28
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 27
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 27
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 26
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 28
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 28
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 27
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 27
+conv layer 0 data: Memory(kB): 31097 time(ms): 93
+forwarding max layer 1 @ iter 29
+conv layer 1 data: Memory(kB): 13520 time(ms): 7
+forwarding convolutional layer 2 @ iter 29
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 28
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 28
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 27
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 28
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 28
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 29
+conv layer 13 data: Memory(kB): 25530 time(ms): 432
+forwarding convolutional layer 14 @ iter 11
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 29
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 13
+forwarding convolutional layer 13 @ iter 12
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 11
+reading image ../../darknet/data/dog.jpg @ iter 30
+TIMESTAMP: 6980 ms
+ITER_TIME: 5912 ms @ iter 11
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 11
+iter_time: 6976 ms @ iter 30
+forwarding convolutional layer 0 @ iter 30
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 28
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 29
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 29
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 30
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 30
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 29
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 29
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 29
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 29
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 30
+conv layer 13 data: Memory(kB): 25530 time(ms): 431
+forwarding convolutional layer 14 @ iter 12
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 30
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 14
+forwarding convolutional layer 13 @ iter 13
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 12
+reading image ../../darknet/data/dog.jpg @ iter 31
+TIMESTAMP: 7444 ms
+ITER_TIME: 6198 ms @ iter 12
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 12
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 29
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 7440 ms @ iter 31
+forwarding convolutional layer 0 @ iter 31
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 30
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 30
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 31
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 31
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 30
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 30
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 30
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 30
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 31
+conv layer 13 data: Memory(kB): 25530 time(ms): 432
+forwarding convolutional layer 14 @ iter 13
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 31
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 15
+forwarding convolutional layer 13 @ iter 14
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 13
+reading image ../../darknet/data/dog.jpg @ iter 32
+TIMESTAMP: 7908 ms
+ITER_TIME: 6484 ms @ iter 13
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 13
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 30
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 7904 ms @ iter 32
+forwarding convolutional layer 0 @ iter 32
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 31
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 31
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 32
+conv layer 1 data: Memory(kB): 13520 time(ms): 7
+forwarding convolutional layer 2 @ iter 32
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 31
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 31
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 31
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 31
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 32
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 14
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 32
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 16
+forwarding convolutional layer 13 @ iter 15
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 14
+reading image ../../darknet/data/dog.jpg @ iter 33
+TIMESTAMP: 8372 ms
+ITER_TIME: 6770 ms @ iter 14
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 14
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 31
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 8368 ms @ iter 33
+forwarding convolutional layer 0 @ iter 33
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 32
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 32
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 33
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 33
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 32
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 32
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 32
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 32
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 33
+conv layer 13 data: Memory(kB): 25530 time(ms): 442
+forwarding convolutional layer 14 @ iter 15
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 33
+conv layer 12 data: Memory(kB): 22488 time(ms): 427
+forwarding convolutional layer 12 @ iter 17
+forwarding convolutional layer 13 @ iter 16
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 15
+reading image ../../darknet/data/dog.jpg @ iter 34
+TIMESTAMP: 8836 ms
+ITER_TIME: 7056 ms @ iter 15
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 15
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 32
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 8832 ms @ iter 34
+forwarding convolutional layer 0 @ iter 34
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 33
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 33
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 34
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 34
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 33
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 33
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 33
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 33
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 34
+conv layer 13 data: Memory(kB): 25530 time(ms): 443
+forwarding convolutional layer 14 @ iter 16
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 34
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 18
+forwarding convolutional layer 13 @ iter 17
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 16
+reading image ../../darknet/data/dog.jpg @ iter 35
+TIMESTAMP: 9300 ms
+ITER_TIME: 7342 ms @ iter 16
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 16
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 33
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 9296 ms @ iter 35
+forwarding convolutional layer 0 @ iter 35
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 34
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 34
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 35
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 35
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 34
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 34
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 34
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 34
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 35
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 17
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 35
+conv layer 12 data: Memory(kB): 22488 time(ms): 435
+forwarding convolutional layer 12 @ iter 19
+forwarding convolutional layer 13 @ iter 18
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 17
+reading image ../../darknet/data/dog.jpg @ iter 36
+TIMESTAMP: 9764 ms
+ITER_TIME: 7628 ms @ iter 17
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 17
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 34
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 9760 ms @ iter 36
+forwarding convolutional layer 0 @ iter 36
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 35
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 35
+conv layer 0 data: Memory(kB): 31097 time(ms): 113
+forwarding max layer 1 @ iter 36
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 36
+conv layer 6 data: Memory(kB): 8400 time(ms): 106
+forwarding max layer 7 @ iter 35
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 35
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 35
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 35
+conv layer 2 data: Memory(kB): 32466 time(ms): 165
+forwarding max layer 3 @ iter 36
+conv layer 13 data: Memory(kB): 25530 time(ms): 432
+forwarding convolutional layer 14 @ iter 18
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 36
+conv layer 12 data: Memory(kB): 22488 time(ms): 425
+forwarding convolutional layer 12 @ iter 20
+forwarding convolutional layer 13 @ iter 19
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 18
+reading image ../../darknet/data/dog.jpg @ iter 37
+TIMESTAMP: 10228 ms
+ITER_TIME: 7914 ms @ iter 18
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 18
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 35
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 10224 ms @ iter 37
+forwarding convolutional layer 0 @ iter 37
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 36
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 36
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 37
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 37
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 36
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 36
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 36
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 36
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 37
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 19
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 37
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 21
+forwarding convolutional layer 13 @ iter 20
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 19
+reading image ../../darknet/data/dog.jpg @ iter 38
+TIMESTAMP: 10692 ms
+ITER_TIME: 8200 ms @ iter 19
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 19
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 36
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 10688 ms @ iter 38
+forwarding convolutional layer 0 @ iter 38
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 37
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 37
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 38
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 38
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 37
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 37
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 37
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 37
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 38
+conv layer 13 data: Memory(kB): 25530 time(ms): 431
+forwarding convolutional layer 14 @ iter 20
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 38
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 22
+forwarding convolutional layer 13 @ iter 21
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 20
+reading image ../../darknet/data/dog.jpg @ iter 39
+TIMESTAMP: 11156 ms
+ITER_TIME: 8486 ms @ iter 20
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 20
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 37
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 11152 ms @ iter 39
+forwarding convolutional layer 0 @ iter 39
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 38
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 38
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 39
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 39
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 38
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 38
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 38
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 38
+conv layer 2 data: Memory(kB): 32466 time(ms): 159
+forwarding max layer 3 @ iter 39
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 21
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 39
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 23
+forwarding convolutional layer 13 @ iter 22
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 21
+reading image ../../darknet/data/dog.jpg @ iter 40
+TIMESTAMP: 11620 ms
+ITER_TIME: 8772 ms @ iter 21
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 21
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 38
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 11616 ms @ iter 40
+forwarding convolutional layer 0 @ iter 40
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 39
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 39
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 40
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 40
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 39
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 39
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 39
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 39
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 40
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 22
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 40
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 24
+forwarding convolutional layer 13 @ iter 23
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 22
+reading image ../../darknet/data/dog.jpg @ iter 41
+TIMESTAMP: 12084 ms
+ITER_TIME: 8820 ms @ iter 22
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 22
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 39
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 12080 ms @ iter 41
+forwarding convolutional layer 0 @ iter 41
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 40
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 40
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 41
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 41
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 40
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 40
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 40
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 40
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 41
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 23
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 41
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 25
+forwarding convolutional layer 13 @ iter 24
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 23
+reading image ../../darknet/data/dog.jpg @ iter 42
+TIMESTAMP: 12548 ms
+ITER_TIME: 8820 ms @ iter 23
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 23
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 40
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 12544 ms @ iter 42
+forwarding convolutional layer 0 @ iter 42
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 41
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 41
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 42
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 42
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 41
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 41
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 41
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 41
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding max layer 3 @ iter 42
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 24
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 42
+conv layer 12 data: Memory(kB): 22488 time(ms): 425
+forwarding convolutional layer 12 @ iter 26
+forwarding convolutional layer 13 @ iter 25
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 24
+reading image ../../darknet/data/dog.jpg @ iter 43
+TIMESTAMP: 13012 ms
+ITER_TIME: 8820 ms @ iter 24
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 24
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 41
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 13008 ms @ iter 43
+forwarding convolutional layer 0 @ iter 43
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 42
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 42
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 43
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 43
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 42
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 42
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 42
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 42
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding max layer 3 @ iter 43
+conv layer 13 data: Memory(kB): 25530 time(ms): 426
+forwarding convolutional layer 14 @ iter 25
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 43
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 27
+forwarding convolutional layer 13 @ iter 26
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 25
+reading image ../../darknet/data/dog.jpg @ iter 44
+TIMESTAMP: 13476 ms
+ITER_TIME: 8820 ms @ iter 25
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 25
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 42
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 13472 ms @ iter 44
+forwarding convolutional layer 0 @ iter 44
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 43
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 43
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 44
+conv layer 1 data: Memory(kB): 13520 time(ms): 7
+forwarding convolutional layer 2 @ iter 44
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 43
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 43
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 43
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 43
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 44
+conv layer 13 data: Memory(kB): 25530 time(ms): 426
+forwarding convolutional layer 14 @ iter 26
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 44
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 28
+forwarding convolutional layer 13 @ iter 27
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 26
+reading image ../../darknet/data/dog.jpg @ iter 45
+TIMESTAMP: 13940 ms
+ITER_TIME: 8820 ms @ iter 26
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 26
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 43
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 13936 ms @ iter 45
+forwarding convolutional layer 0 @ iter 45
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 44
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 44
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 45
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 45
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 44
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 44
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 44
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 44
+conv layer 2 data: Memory(kB): 32466 time(ms): 176
+forwarding max layer 3 @ iter 45
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 27
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 45
+conv layer 12 data: Memory(kB): 22488 time(ms): 430
+forwarding convolutional layer 12 @ iter 29
+forwarding convolutional layer 13 @ iter 28
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 27
+reading image ../../darknet/data/dog.jpg @ iter 46
+TIMESTAMP: 14404 ms
+ITER_TIME: 8820 ms @ iter 27
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 27
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 44
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 14400 ms @ iter 46
+forwarding convolutional layer 0 @ iter 46
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 45
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 45
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 46
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 46
+conv layer 6 data: Memory(kB): 8400 time(ms): 106
+forwarding max layer 7 @ iter 45
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 45
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 45
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 45
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 46
+conv layer 13 data: Memory(kB): 25530 time(ms): 447
+forwarding convolutional layer 14 @ iter 28
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 46
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 30
+forwarding convolutional layer 13 @ iter 29
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 28
+reading image ../../darknet/data/dog.jpg @ iter 47
+TIMESTAMP: 14868 ms
+ITER_TIME: 8820 ms @ iter 28
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 28
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 45
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 14864 ms @ iter 47
+forwarding convolutional layer 0 @ iter 47
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 46
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 46
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 47
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 47
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 46
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 46
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 46
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 46
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 47
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 29
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 47
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 31
+forwarding convolutional layer 13 @ iter 30
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 29
+reading image ../../darknet/data/dog.jpg @ iter 48
+TIMESTAMP: 15332 ms
+ITER_TIME: 8820 ms @ iter 29
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 29
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 46
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 15328 ms @ iter 48
+forwarding convolutional layer 0 @ iter 48
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 47
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 47
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 48
+conv layer 1 data: Memory(kB): 13520 time(ms): 7
+forwarding convolutional layer 2 @ iter 48
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 47
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 47
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 47
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 47
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 48
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 30
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 48
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 32
+forwarding convolutional layer 13 @ iter 31
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 30
+reading image ../../darknet/data/dog.jpg @ iter 49
+TIMESTAMP: 15796 ms
+ITER_TIME: 8820 ms @ iter 30
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 30
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 47
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 15792 ms @ iter 49
+forwarding convolutional layer 0 @ iter 49
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 48
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 48
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 49
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 49
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 48
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 48
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 48
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 48
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding max layer 3 @ iter 49
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 31
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 49
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 33
+forwarding convolutional layer 13 @ iter 32
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 31
+reading image ../../darknet/data/dog.jpg @ iter 50
+TIMESTAMP: 16260 ms
+ITER_TIME: 8820 ms @ iter 31
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 31
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 48
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 16256 ms @ iter 50
+forwarding convolutional layer 0 @ iter 50
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 49
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 49
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 50
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 50
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 49
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 49
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 49
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 49
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 50
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 32
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 50
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 34
+forwarding convolutional layer 13 @ iter 33
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 32
+reading image ../../darknet/data/dog.jpg @ iter 51
+TIMESTAMP: 16724 ms
+ITER_TIME: 8820 ms @ iter 32
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 32
+conv layer 10 data: Memory(kB): 6636 time(ms): 107
+forwarding max layer 11 @ iter 49
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 16720 ms @ iter 51
+forwarding convolutional layer 0 @ iter 51
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 50
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 50
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 51
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 51
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 50
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 50
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 50
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 50
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 51
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 33
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 51
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 35
+forwarding convolutional layer 13 @ iter 34
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 33
+reading image ../../darknet/data/dog.jpg @ iter 52
+TIMESTAMP: 17188 ms
+ITER_TIME: 8820 ms @ iter 33
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 33
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 50
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 17184 ms @ iter 52
+forwarding convolutional layer 0 @ iter 52
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 51
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 51
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 52
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 52
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 51
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 51
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 51
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 51
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 52
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 34
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 52
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 36
+forwarding convolutional layer 13 @ iter 35
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 34
+reading image ../../darknet/data/dog.jpg @ iter 53
+TIMESTAMP: 17652 ms
+ITER_TIME: 8820 ms @ iter 34
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 34
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 51
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 17648 ms @ iter 53
+forwarding convolutional layer 0 @ iter 53
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 52
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 52
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 53
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 53
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 52
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 52
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 52
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 52
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 53
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 35
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 53
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 37
+forwarding convolutional layer 13 @ iter 36
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 35
+reading image ../../darknet/data/dog.jpg @ iter 54
+TIMESTAMP: 18116 ms
+ITER_TIME: 8820 ms @ iter 35
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 35
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 52
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 18112 ms @ iter 54
+forwarding convolutional layer 0 @ iter 54
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 53
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 53
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 54
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 54
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 53
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 53
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 53
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 53
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 54
+conv layer 13 data: Memory(kB): 25530 time(ms): 432
+forwarding convolutional layer 14 @ iter 36
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 54
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 38
+forwarding convolutional layer 13 @ iter 37
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 36
+reading image ../../darknet/data/dog.jpg @ iter 55
+TIMESTAMP: 18580 ms
+ITER_TIME: 8820 ms @ iter 36
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 36
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 53
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 18576 ms @ iter 55
+forwarding convolutional layer 0 @ iter 55
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 54
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 54
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 55
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 55
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 54
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 54
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 54
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 54
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding max layer 3 @ iter 55
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 37
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 55
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 39
+forwarding convolutional layer 13 @ iter 38
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 37
+reading image ../../darknet/data/dog.jpg @ iter 56
+TIMESTAMP: 19044 ms
+ITER_TIME: 8820 ms @ iter 37
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 37
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 54
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 19040 ms @ iter 56
+forwarding convolutional layer 0 @ iter 56
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 55
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 55
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 56
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 56
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 55
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 55
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 55
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 55
+conv layer 2 data: Memory(kB): 32466 time(ms): 166
+forwarding max layer 3 @ iter 56
+conv layer 13 data: Memory(kB): 25530 time(ms): 445
+forwarding convolutional layer 14 @ iter 38
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 56
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 40
+forwarding convolutional layer 13 @ iter 39
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 38
+reading image ../../darknet/data/dog.jpg @ iter 57
+TIMESTAMP: 19508 ms
+ITER_TIME: 8820 ms @ iter 38
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 38
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 55
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 19504 ms @ iter 57
+forwarding convolutional layer 0 @ iter 57
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 56
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 56
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding max layer 1 @ iter 57
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 57
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 56
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 56
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 56
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 56
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 57
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 39
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 57
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 41
+forwarding convolutional layer 13 @ iter 40
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 39
+reading image ../../darknet/data/dog.jpg @ iter 58
+TIMESTAMP: 19972 ms
+ITER_TIME: 8820 ms @ iter 39
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 39
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 56
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 19968 ms @ iter 58
+forwarding convolutional layer 0 @ iter 58
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 57
+conv layer 5 data: Memory(kB): 3380 time(ms): 5
+forwarding convolutional layer 6 @ iter 57
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding max layer 1 @ iter 58
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 58
+conv layer 6 data: Memory(kB): 8400 time(ms): 106
+forwarding max layer 7 @ iter 57
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 57
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 57
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 57
+conv layer 2 data: Memory(kB): 32466 time(ms): 163
+forwarding max layer 3 @ iter 58
+conv layer 13 data: Memory(kB): 25530 time(ms): 444
+forwarding convolutional layer 14 @ iter 40
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 58
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 42
+forwarding convolutional layer 13 @ iter 41
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 40
+reading image ../../darknet/data/dog.jpg @ iter 59
+TIMESTAMP: 20436 ms
+ITER_TIME: 8820 ms @ iter 40
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 40
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 57
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 20432 ms @ iter 59
+forwarding convolutional layer 0 @ iter 59
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 58
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 58
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding max layer 1 @ iter 59
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 59
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 58
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 58
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 58
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 58
+conv layer 2 data: Memory(kB): 32466 time(ms): 159
+forwarding max layer 3 @ iter 59
+conv layer 13 data: Memory(kB): 25530 time(ms): 447
+forwarding convolutional layer 14 @ iter 41
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 59
+conv layer 12 data: Memory(kB): 22488 time(ms): 438
+forwarding convolutional layer 12 @ iter 43
+forwarding convolutional layer 13 @ iter 42
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 41
+reading image ../../darknet/data/dog.jpg @ iter 60
+TIMESTAMP: 20900 ms
+ITER_TIME: 8820 ms @ iter 41
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 41
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 58
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 20896 ms @ iter 60
+forwarding convolutional layer 0 @ iter 60
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 59
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 59
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 60
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 60
+conv layer 6 data: Memory(kB): 8400 time(ms): 105
+forwarding max layer 7 @ iter 59
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 59
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 59
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 59
+conv layer 2 data: Memory(kB): 32466 time(ms): 159
+forwarding max layer 3 @ iter 60
+conv layer 13 data: Memory(kB): 25530 time(ms): 444
+forwarding convolutional layer 14 @ iter 42
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 60
+conv layer 12 data: Memory(kB): 22488 time(ms): 444
+forwarding convolutional layer 12 @ iter 44
+forwarding convolutional layer 13 @ iter 43
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 42
+reading image ../../darknet/data/dog.jpg @ iter 61
+TIMESTAMP: 21364 ms
+ITER_TIME: 8820 ms @ iter 42
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 42
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 59
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 21360 ms @ iter 61
+forwarding convolutional layer 0 @ iter 61
+conv layer 4 data: Memory(kB): 16296 time(ms): 128
+forwarding max layer 5 @ iter 60
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 60
+conv layer 0 data: Memory(kB): 31097 time(ms): 100
+forwarding max layer 1 @ iter 61
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 61
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 60
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 60
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 60
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 60
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 61
+conv layer 13 data: Memory(kB): 25530 time(ms): 447
+forwarding convolutional layer 14 @ iter 43
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 61
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 45
+forwarding convolutional layer 13 @ iter 44
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 43
+reading image ../../darknet/data/dog.jpg @ iter 62
+TIMESTAMP: 21828 ms
+ITER_TIME: 8820 ms @ iter 43
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 43
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 60
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 21824 ms @ iter 62
+forwarding convolutional layer 0 @ iter 62
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 61
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 61
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 62
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 62
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 61
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 61
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 61
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 61
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 62
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 44
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 62
+conv layer 12 data: Memory(kB): 22488 time(ms): 427
+forwarding convolutional layer 12 @ iter 46
+forwarding convolutional layer 13 @ iter 45
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 44
+reading image ../../darknet/data/dog.jpg @ iter 63
+TIMESTAMP: 22292 ms
+ITER_TIME: 8820 ms @ iter 44
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 44
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 61
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 22288 ms @ iter 63
+forwarding convolutional layer 0 @ iter 63
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 62
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 62
+conv layer 0 data: Memory(kB): 31097 time(ms): 111
+forwarding max layer 1 @ iter 63
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 63
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 62
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 62
+conv layer 8 data: Memory(kB): 5208 time(ms): 103
+forwarding max layer 9 @ iter 62
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 62
+conv layer 2 data: Memory(kB): 32466 time(ms): 160
+forwarding max layer 3 @ iter 63
+conv layer 13 data: Memory(kB): 25530 time(ms): 457
+forwarding convolutional layer 14 @ iter 45
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 63
+conv layer 12 data: Memory(kB): 22488 time(ms): 444
+forwarding convolutional layer 12 @ iter 47
+forwarding convolutional layer 13 @ iter 46
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 45
+reading image ../../darknet/data/dog.jpg @ iter 64
+TIMESTAMP: 22756 ms
+ITER_TIME: 8820 ms @ iter 45
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 45
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 62
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 22752 ms @ iter 64
+forwarding convolutional layer 0 @ iter 64
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 63
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 63
+conv layer 0 data: Memory(kB): 31097 time(ms): 100
+forwarding max layer 1 @ iter 64
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 64
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 63
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 63
+conv layer 8 data: Memory(kB): 5208 time(ms): 100
+forwarding max layer 9 @ iter 63
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 63
+conv layer 2 data: Memory(kB): 32466 time(ms): 163
+forwarding max layer 3 @ iter 64
+conv layer 13 data: Memory(kB): 25530 time(ms): 458
+forwarding convolutional layer 14 @ iter 46
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 64
+conv layer 12 data: Memory(kB): 22488 time(ms): 446
+forwarding convolutional layer 12 @ iter 48
+forwarding convolutional layer 13 @ iter 47
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 46
+reading image ../../darknet/data/dog.jpg @ iter 65
+TIMESTAMP: 23220 ms
+ITER_TIME: 8820 ms @ iter 46
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 46
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 63
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 23216 ms @ iter 65
+forwarding convolutional layer 0 @ iter 65
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 64
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 64
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 65
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 65
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 64
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 64
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 64
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 64
+conv layer 2 data: Memory(kB): 32466 time(ms): 159
+forwarding max layer 3 @ iter 65
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 47
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 65
+conv layer 12 data: Memory(kB): 22488 time(ms): 436
+forwarding convolutional layer 12 @ iter 49
+forwarding convolutional layer 13 @ iter 48
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 47
+reading image ../../darknet/data/dog.jpg @ iter 66
+TIMESTAMP: 23684 ms
+ITER_TIME: 8820 ms @ iter 47
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 47
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 64
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 23680 ms @ iter 66
+forwarding convolutional layer 0 @ iter 66
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 65
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 65
+conv layer 0 data: Memory(kB): 31097 time(ms): 105
+forwarding max layer 1 @ iter 66
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 66
+conv layer 6 data: Memory(kB): 8400 time(ms): 106
+forwarding max layer 7 @ iter 65
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 65
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 65
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 65
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 66
+conv layer 13 data: Memory(kB): 25530 time(ms): 442
+forwarding convolutional layer 14 @ iter 48
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 66
+conv layer 12 data: Memory(kB): 22488 time(ms): 441
+forwarding convolutional layer 12 @ iter 50
+forwarding convolutional layer 13 @ iter 49
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 48
+reading image ../../darknet/data/dog.jpg @ iter 67
+TIMESTAMP: 24148 ms
+ITER_TIME: 8820 ms @ iter 48
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 48
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 65
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 24144 ms @ iter 67
+forwarding convolutional layer 0 @ iter 67
+conv layer 4 data: Memory(kB): 16296 time(ms): 130
+forwarding max layer 5 @ iter 66
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 66
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 67
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 67
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 66
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 66
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 66
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 66
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 67
+conv layer 13 data: Memory(kB): 25530 time(ms): 448
+forwarding convolutional layer 14 @ iter 49
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 67
+conv layer 12 data: Memory(kB): 22488 time(ms): 443
+forwarding convolutional layer 12 @ iter 51
+forwarding convolutional layer 13 @ iter 50
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 49
+reading image ../../darknet/data/dog.jpg @ iter 68
+TIMESTAMP: 24612 ms
+ITER_TIME: 8820 ms @ iter 49
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 49
+conv layer 10 data: Memory(kB): 6636 time(ms): 110
+forwarding max layer 11 @ iter 66
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 24608 ms @ iter 68
+forwarding convolutional layer 0 @ iter 68
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 67
+conv layer 5 data: Memory(kB): 3380 time(ms): 4
+forwarding convolutional layer 6 @ iter 67
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 68
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 68
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 67
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 67
+conv layer 8 data: Memory(kB): 5208 time(ms): 100
+forwarding max layer 9 @ iter 67
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 67
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 68
+conv layer 13 data: Memory(kB): 25530 time(ms): 442
+forwarding convolutional layer 14 @ iter 50
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 68
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 52
+forwarding convolutional layer 13 @ iter 51
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 50
+reading image ../../darknet/data/dog.jpg @ iter 69
+TIMESTAMP: 25076 ms
+ITER_TIME: 8820 ms @ iter 50
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 50
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 67
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 25072 ms @ iter 69
+forwarding convolutional layer 0 @ iter 69
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 68
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 68
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 69
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 69
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 68
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 68
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 68
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 68
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 69
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 51
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 69
+conv layer 12 data: Memory(kB): 22488 time(ms): 432
+forwarding convolutional layer 12 @ iter 53
+forwarding convolutional layer 13 @ iter 52
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 51
+reading image ../../darknet/data/dog.jpg @ iter 70
+TIMESTAMP: 25540 ms
+ITER_TIME: 8820 ms @ iter 51
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 51
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 68
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 25536 ms @ iter 70
+forwarding convolutional layer 0 @ iter 70
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 69
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 69
+conv layer 0 data: Memory(kB): 31097 time(ms): 99
+forwarding max layer 1 @ iter 70
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 70
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 69
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 69
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 69
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 69
+conv layer 2 data: Memory(kB): 32466 time(ms): 160
+forwarding max layer 3 @ iter 70
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 52
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 70
+conv layer 12 data: Memory(kB): 22488 time(ms): 436
+forwarding convolutional layer 12 @ iter 54
+forwarding convolutional layer 13 @ iter 53
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 52
+reading image ../../darknet/data/dog.jpg @ iter 71
+TIMESTAMP: 26004 ms
+ITER_TIME: 8820 ms @ iter 52
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 52
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 69
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 26 s @ iter 71
+forwarding convolutional layer 0 @ iter 71
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 70
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 70
+conv layer 0 data: Memory(kB): 31097 time(ms): 103
+forwarding max layer 1 @ iter 71
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 71
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 70
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 70
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 70
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 70
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 71
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 53
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 71
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 55
+forwarding convolutional layer 13 @ iter 54
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 53
+reading image ../../darknet/data/dog.jpg @ iter 72
+TIMESTAMP: 26468 ms
+ITER_TIME: 8820 ms @ iter 53
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 53
+conv layer 10 data: Memory(kB): 6636 time(ms): 110
+forwarding max layer 11 @ iter 70
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 26464 ms @ iter 72
+forwarding convolutional layer 0 @ iter 72
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 71
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 71
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 72
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 72
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 71
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 71
+conv layer 8 data: Memory(kB): 5208 time(ms): 100
+forwarding max layer 9 @ iter 71
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 71
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 72
+conv layer 13 data: Memory(kB): 25530 time(ms): 437
+forwarding convolutional layer 14 @ iter 54
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 72
+conv layer 12 data: Memory(kB): 22488 time(ms): 425
+forwarding convolutional layer 12 @ iter 56
+forwarding convolutional layer 13 @ iter 55
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 54
+reading image ../../darknet/data/dog.jpg @ iter 73
+TIMESTAMP: 26932 ms
+ITER_TIME: 8820 ms @ iter 54
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 54
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 71
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 26928 ms @ iter 73
+forwarding convolutional layer 0 @ iter 73
+conv layer 4 data: Memory(kB): 16296 time(ms): 121
+forwarding max layer 5 @ iter 72
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 72
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 73
+conv layer 1 data: Memory(kB): 13520 time(ms): 7
+forwarding convolutional layer 2 @ iter 73
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 72
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 72
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 72
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 72
+conv layer 2 data: Memory(kB): 32466 time(ms): 152
+forwarding max layer 3 @ iter 73
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 55
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 73
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 57
+forwarding convolutional layer 13 @ iter 56
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 55
+reading image ../../darknet/data/dog.jpg @ iter 74
+TIMESTAMP: 27396 ms
+ITER_TIME: 8820 ms @ iter 55
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 55
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 72
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 27392 ms @ iter 74
+forwarding convolutional layer 0 @ iter 74
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 73
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 73
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 74
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 74
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 73
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 73
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 73
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 73
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 74
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 56
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 74
+conv layer 12 data: Memory(kB): 22488 time(ms): 435
+forwarding convolutional layer 12 @ iter 58
+forwarding convolutional layer 13 @ iter 57
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 56
+reading image ../../darknet/data/dog.jpg @ iter 75
+TIMESTAMP: 27860 ms
+ITER_TIME: 8820 ms @ iter 56
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 56
+conv layer 10 data: Memory(kB): 6636 time(ms): 110
+forwarding max layer 11 @ iter 73
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 27856 ms @ iter 75
+forwarding convolutional layer 0 @ iter 75
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 74
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 74
+conv layer 0 data: Memory(kB): 31097 time(ms): 103
+forwarding max layer 1 @ iter 75
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 75
+conv layer 6 data: Memory(kB): 8400 time(ms): 104
+forwarding max layer 7 @ iter 74
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 74
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 74
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 74
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 75
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 57
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 75
+conv layer 12 data: Memory(kB): 22488 time(ms): 428
+forwarding convolutional layer 12 @ iter 59
+forwarding convolutional layer 13 @ iter 58
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 57
+reading image ../../darknet/data/dog.jpg @ iter 76
+TIMESTAMP: 28324 ms
+ITER_TIME: 8820 ms @ iter 57
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 57
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 74
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 28320 ms @ iter 76
+forwarding convolutional layer 0 @ iter 76
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 75
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 75
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 76
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 76
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 75
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 75
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 75
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 75
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 76
+conv layer 13 data: Memory(kB): 25530 time(ms): 427
+forwarding convolutional layer 14 @ iter 58
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 76
+conv layer 12 data: Memory(kB): 22488 time(ms): 428
+forwarding convolutional layer 12 @ iter 60
+forwarding convolutional layer 13 @ iter 59
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 58
+reading image ../../darknet/data/dog.jpg @ iter 77
+TIMESTAMP: 28788 ms
+ITER_TIME: 8820 ms @ iter 58
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 58
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 75
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 28784 ms @ iter 77
+forwarding convolutional layer 0 @ iter 77
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 76
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 76
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 77
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 77
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 76
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 76
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 76
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 76
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 77
+conv layer 13 data: Memory(kB): 25530 time(ms): 434
+forwarding convolutional layer 14 @ iter 59
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 77
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 61
+forwarding convolutional layer 13 @ iter 60
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 59
+reading image ../../darknet/data/dog.jpg @ iter 78
+TIMESTAMP: 29252 ms
+ITER_TIME: 8820 ms @ iter 59
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 59
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 76
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 29248 ms @ iter 78
+forwarding convolutional layer 0 @ iter 78
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 77
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 77
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 78
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 78
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 77
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 77
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 77
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 77
+conv layer 2 data: Memory(kB): 32466 time(ms): 161
+forwarding max layer 3 @ iter 78
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 60
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 78
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 12 @ iter 62
+forwarding convolutional layer 13 @ iter 61
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 60
+reading image ../../darknet/data/dog.jpg @ iter 79
+TIMESTAMP: 29716 ms
+ITER_TIME: 8820 ms @ iter 60
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 60
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 77
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 29712 ms @ iter 79
+forwarding convolutional layer 0 @ iter 79
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 78
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 78
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 79
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 79
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 78
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 78
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 78
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 78
+conv layer 2 data: Memory(kB): 32466 time(ms): 159
+forwarding max layer 3 @ iter 79
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 61
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 79
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 63
+forwarding convolutional layer 13 @ iter 62
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 61
+reading image ../../darknet/data/dog.jpg @ iter 80
+TIMESTAMP: 30180 ms
+ITER_TIME: 8820 ms @ iter 61
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 61
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 78
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 30176 ms @ iter 80
+forwarding convolutional layer 0 @ iter 80
+conv layer 4 data: Memory(kB): 16296 time(ms): 128
+forwarding max layer 5 @ iter 79
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 79
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 80
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 80
+conv layer 6 data: Memory(kB): 8400 time(ms): 125
+forwarding max layer 7 @ iter 79
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 79
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 79
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 79
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 80
+conv layer 13 data: Memory(kB): 25530 time(ms): 431
+forwarding convolutional layer 14 @ iter 62
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 80
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 64
+forwarding convolutional layer 13 @ iter 63
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 62
+reading image ../../darknet/data/dog.jpg @ iter 81
+TIMESTAMP: 30644 ms
+ITER_TIME: 8820 ms @ iter 62
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 62
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 79
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 30640 ms @ iter 81
+forwarding convolutional layer 0 @ iter 81
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 80
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 80
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 81
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 81
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 80
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 80
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 80
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 80
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 81
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 63
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 81
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 65
+forwarding convolutional layer 13 @ iter 64
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 63
+reading image ../../darknet/data/dog.jpg @ iter 82
+TIMESTAMP: 31108 ms
+ITER_TIME: 8820 ms @ iter 63
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 63
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 80
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 31104 ms @ iter 82
+forwarding convolutional layer 0 @ iter 82
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 81
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 81
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 82
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 82
+conv layer 6 data: Memory(kB): 8400 time(ms): 99
+forwarding max layer 7 @ iter 81
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 81
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 81
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 81
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 82
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 64
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 82
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 66
+forwarding convolutional layer 13 @ iter 65
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 64
+reading image ../../darknet/data/dog.jpg @ iter 83
+TIMESTAMP: 31572 ms
+ITER_TIME: 8820 ms @ iter 64
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 64
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 81
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 31568 ms @ iter 83
+forwarding convolutional layer 0 @ iter 83
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 82
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 82
+conv layer 0 data: Memory(kB): 31097 time(ms): 106
+forwarding max layer 1 @ iter 83
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 83
+conv layer 6 data: Memory(kB): 8400 time(ms): 112
+forwarding max layer 7 @ iter 82
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 82
+conv layer 8 data: Memory(kB): 5208 time(ms): 101
+forwarding max layer 9 @ iter 82
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 82
+conv layer 2 data: Memory(kB): 32466 time(ms): 161
+forwarding max layer 3 @ iter 83
+conv layer 13 data: Memory(kB): 25530 time(ms): 447
+forwarding convolutional layer 14 @ iter 65
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 83
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 67
+forwarding convolutional layer 13 @ iter 66
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 65
+reading image ../../darknet/data/dog.jpg @ iter 84
+TIMESTAMP: 32036 ms
+ITER_TIME: 8820 ms @ iter 65
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 65
+conv layer 10 data: Memory(kB): 6636 time(ms): 112
+forwarding max layer 11 @ iter 82
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 32032 ms @ iter 84
+forwarding convolutional layer 0 @ iter 84
+conv layer 4 data: Memory(kB): 16296 time(ms): 127
+forwarding max layer 5 @ iter 83
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 83
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding max layer 1 @ iter 84
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 84
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 83
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 83
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 83
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 83
+conv layer 2 data: Memory(kB): 32466 time(ms): 161
+forwarding max layer 3 @ iter 84
+conv layer 13 data: Memory(kB): 25530 time(ms): 440
+forwarding convolutional layer 14 @ iter 66
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 84
+conv layer 12 data: Memory(kB): 22488 time(ms): 443
+forwarding convolutional layer 12 @ iter 68
+forwarding convolutional layer 13 @ iter 67
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 66
+reading image ../../darknet/data/dog.jpg @ iter 85
+TIMESTAMP: 32500 ms
+ITER_TIME: 8820 ms @ iter 66
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 66
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 83
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 32496 ms @ iter 85
+forwarding convolutional layer 0 @ iter 85
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 84
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 84
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding max layer 1 @ iter 85
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 85
+conv layer 6 data: Memory(kB): 8400 time(ms): 104
+forwarding max layer 7 @ iter 84
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 84
+conv layer 8 data: Memory(kB): 5208 time(ms): 103
+forwarding max layer 9 @ iter 84
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 84
+conv layer 2 data: Memory(kB): 32466 time(ms): 164
+forwarding max layer 3 @ iter 85
+conv layer 13 data: Memory(kB): 25530 time(ms): 439
+forwarding convolutional layer 14 @ iter 67
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 85
+conv layer 12 data: Memory(kB): 22488 time(ms): 439
+forwarding convolutional layer 12 @ iter 69
+forwarding convolutional layer 13 @ iter 68
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 67
+reading image ../../darknet/data/dog.jpg @ iter 86
+TIMESTAMP: 32964 ms
+ITER_TIME: 8820 ms @ iter 67
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 67
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 84
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 32960 ms @ iter 86
+forwarding convolutional layer 0 @ iter 86
+conv layer 4 data: Memory(kB): 16296 time(ms): 128
+forwarding max layer 5 @ iter 85
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 85
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 86
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 86
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 85
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 85
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 85
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 85
+conv layer 2 data: Memory(kB): 32466 time(ms): 153
+forwarding max layer 3 @ iter 86
+conv layer 13 data: Memory(kB): 25530 time(ms): 431
+forwarding convolutional layer 14 @ iter 68
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 86
+conv layer 12 data: Memory(kB): 22488 time(ms): 430
+forwarding convolutional layer 12 @ iter 70
+forwarding convolutional layer 13 @ iter 69
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 68
+reading image ../../darknet/data/dog.jpg @ iter 87
+TIMESTAMP: 33428 ms
+ITER_TIME: 8820 ms @ iter 68
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 68
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 85
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 33424 ms @ iter 87
+forwarding convolutional layer 0 @ iter 87
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 86
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 86
+conv layer 0 data: Memory(kB): 31097 time(ms): 97
+forwarding max layer 1 @ iter 87
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 87
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 86
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 86
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 86
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 86
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 87
+conv layer 13 data: Memory(kB): 25530 time(ms): 439
+forwarding convolutional layer 14 @ iter 69
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 87
+conv layer 12 data: Memory(kB): 22488 time(ms): 435
+forwarding convolutional layer 12 @ iter 71
+forwarding convolutional layer 13 @ iter 70
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 69
+reading image ../../darknet/data/dog.jpg @ iter 88
+TIMESTAMP: 33892 ms
+ITER_TIME: 8820 ms @ iter 69
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 69
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 86
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 33888 ms @ iter 88
+forwarding convolutional layer 0 @ iter 88
+conv layer 4 data: Memory(kB): 16296 time(ms): 123
+forwarding max layer 5 @ iter 87
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 87
+conv layer 0 data: Memory(kB): 31097 time(ms): 103
+forwarding max layer 1 @ iter 88
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 88
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 87
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 87
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 87
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 87
+conv layer 2 data: Memory(kB): 32466 time(ms): 155
+forwarding max layer 3 @ iter 88
+conv layer 13 data: Memory(kB): 25530 time(ms): 426
+forwarding convolutional layer 14 @ iter 70
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 88
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 12 @ iter 72
+forwarding convolutional layer 13 @ iter 71
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 70
+reading image ../../darknet/data/dog.jpg @ iter 89
+TIMESTAMP: 34356 ms
+ITER_TIME: 8820 ms @ iter 70
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 70
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 87
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 34352 ms @ iter 89
+forwarding convolutional layer 0 @ iter 89
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 88
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 88
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 89
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 89
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 88
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 88
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 88
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 88
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 89
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 71
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 89
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 73
+forwarding convolutional layer 13 @ iter 72
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 71
+reading image ../../darknet/data/dog.jpg @ iter 90
+TIMESTAMP: 34820 ms
+ITER_TIME: 8820 ms @ iter 71
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 71
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 88
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 34816 ms @ iter 90
+forwarding convolutional layer 0 @ iter 90
+conv layer 4 data: Memory(kB): 16296 time(ms): 120
+forwarding max layer 5 @ iter 89
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 89
+conv layer 0 data: Memory(kB): 31097 time(ms): 103
+forwarding max layer 1 @ iter 90
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 90
+conv layer 6 data: Memory(kB): 8400 time(ms): 105
+forwarding max layer 7 @ iter 89
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 89
+conv layer 8 data: Memory(kB): 5208 time(ms): 100
+forwarding max layer 9 @ iter 89
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 89
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 90
+conv layer 13 data: Memory(kB): 25530 time(ms): 443
+forwarding convolutional layer 14 @ iter 72
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 90
+conv layer 12 data: Memory(kB): 22488 time(ms): 446
+forwarding convolutional layer 12 @ iter 74
+forwarding convolutional layer 13 @ iter 73
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 72
+reading image ../../darknet/data/dog.jpg @ iter 91
+TIMESTAMP: 35284 ms
+ITER_TIME: 8820 ms @ iter 72
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 72
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 89
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 35280 ms @ iter 91
+forwarding convolutional layer 0 @ iter 91
+conv layer 4 data: Memory(kB): 16296 time(ms): 122
+forwarding max layer 5 @ iter 90
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 90
+conv layer 0 data: Memory(kB): 31097 time(ms): 96
+forwarding max layer 1 @ iter 91
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 91
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 90
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 90
+conv layer 8 data: Memory(kB): 5208 time(ms): 98
+forwarding max layer 9 @ iter 90
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 90
+conv layer 2 data: Memory(kB): 32466 time(ms): 161
+forwarding max layer 3 @ iter 91
+conv layer 13 data: Memory(kB): 25530 time(ms): 445
+forwarding convolutional layer 14 @ iter 73
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 91
+conv layer 12 data: Memory(kB): 22488 time(ms): 442
+forwarding convolutional layer 12 @ iter 75
+forwarding convolutional layer 13 @ iter 74
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 73
+reading image ../../darknet/data/dog.jpg @ iter 92
+TIMESTAMP: 35748 ms
+ITER_TIME: 8820 ms @ iter 73
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 73
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 90
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 35744 ms @ iter 92
+forwarding convolutional layer 0 @ iter 92
+conv layer 4 data: Memory(kB): 16296 time(ms): 127
+forwarding max layer 5 @ iter 91
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 91
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding max layer 1 @ iter 92
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 92
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 91
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 91
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 91
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 91
+conv layer 2 data: Memory(kB): 32466 time(ms): 162
+forwarding max layer 3 @ iter 92
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 74
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 92
+conv layer 12 data: Memory(kB): 22488 time(ms): 427
+forwarding convolutional layer 12 @ iter 76
+forwarding convolutional layer 13 @ iter 75
+conv layer 14 data: Memory(kB): 1806 time(ms): 22
+forwarding detection layer @ iter 74
+reading image ../../darknet/data/dog.jpg @ iter 93
+TIMESTAMP: 36212 ms
+ITER_TIME: 8820 ms @ iter 74
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 74
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 91
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 36208 ms @ iter 93
+forwarding convolutional layer 0 @ iter 93
+conv layer 4 data: Memory(kB): 16296 time(ms): 126
+forwarding max layer 5 @ iter 92
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 92
+conv layer 0 data: Memory(kB): 31097 time(ms): 102
+forwarding max layer 1 @ iter 93
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 93
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 92
+conv layer 7 data: Memory(kB): 1690 time(ms): 3
+forwarding convolutional layer 8 @ iter 92
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 92
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 92
+conv layer 2 data: Memory(kB): 32466 time(ms): 161
+forwarding max layer 3 @ iter 93
+conv layer 13 data: Memory(kB): 25530 time(ms): 447
+forwarding convolutional layer 14 @ iter 75
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 93
+conv layer 12 data: Memory(kB): 22488 time(ms): 443
+forwarding convolutional layer 12 @ iter 77
+forwarding convolutional layer 13 @ iter 76
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 75
+reading image ../../darknet/data/dog.jpg @ iter 94
+TIMESTAMP: 36676 ms
+ITER_TIME: 8820 ms @ iter 75
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 75
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 92
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 36672 ms @ iter 94
+forwarding convolutional layer 0 @ iter 94
+conv layer 4 data: Memory(kB): 16296 time(ms): 127
+forwarding max layer 5 @ iter 93
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 93
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 94
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 94
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 93
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 93
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 93
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 93
+conv layer 2 data: Memory(kB): 32466 time(ms): 156
+forwarding max layer 3 @ iter 94
+conv layer 13 data: Memory(kB): 25530 time(ms): 431
+forwarding convolutional layer 14 @ iter 76
+conv layer 3 data: Memory(kB): 6760 time(ms): 3
+forwarding convolutional layer 4 @ iter 94
+conv layer 12 data: Memory(kB): 22488 time(ms): 427
+forwarding convolutional layer 12 @ iter 78
+forwarding convolutional layer 13 @ iter 77
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 76
+reading image ../../darknet/data/dog.jpg @ iter 95
+TIMESTAMP: 37140 ms
+ITER_TIME: 8820 ms @ iter 76
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 76
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 93
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 37136 ms @ iter 95
+forwarding convolutional layer 0 @ iter 95
+conv layer 4 data: Memory(kB): 16296 time(ms): 130
+forwarding max layer 5 @ iter 94
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 94
+conv layer 0 data: Memory(kB): 31097 time(ms): 98
+forwarding max layer 1 @ iter 95
+conv layer 1 data: Memory(kB): 13520 time(ms): 10
+forwarding convolutional layer 2 @ iter 95
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 94
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 94
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 94
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 94
+conv layer 2 data: Memory(kB): 32466 time(ms): 160
+forwarding max layer 3 @ iter 95
+conv layer 13 data: Memory(kB): 25530 time(ms): 448
+forwarding convolutional layer 14 @ iter 77
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 95
+conv layer 12 data: Memory(kB): 22488 time(ms): 443
+forwarding convolutional layer 12 @ iter 79
+forwarding convolutional layer 13 @ iter 78
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 77
+reading image ../../darknet/data/dog.jpg @ iter 96
+TIMESTAMP: 37604 ms
+ITER_TIME: 8820 ms @ iter 77
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 77
+conv layer 10 data: Memory(kB): 6636 time(ms): 111
+forwarding max layer 11 @ iter 94
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 37600 ms @ iter 96
+forwarding convolutional layer 0 @ iter 96
+conv layer 4 data: Memory(kB): 16296 time(ms): 124
+forwarding max layer 5 @ iter 95
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 95
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding max layer 1 @ iter 96
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 96
+conv layer 6 data: Memory(kB): 8400 time(ms): 102
+forwarding max layer 7 @ iter 95
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 95
+conv layer 8 data: Memory(kB): 5208 time(ms): 99
+forwarding max layer 9 @ iter 95
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 95
+conv layer 2 data: Memory(kB): 32466 time(ms): 157
+forwarding max layer 3 @ iter 96
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 78
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 96
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 80
+forwarding convolutional layer 13 @ iter 79
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 78
+reading image ../../darknet/data/dog.jpg @ iter 97
+TIMESTAMP: 38068 ms
+ITER_TIME: 8820 ms @ iter 78
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 78
+conv layer 10 data: Memory(kB): 6636 time(ms): 108
+forwarding max layer 11 @ iter 95
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 38064 ms @ iter 97
+forwarding convolutional layer 0 @ iter 97
+conv layer 4 data: Memory(kB): 16296 time(ms): 128
+forwarding max layer 5 @ iter 96
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 96
+conv layer 0 data: Memory(kB): 31097 time(ms): 94
+forwarding max layer 1 @ iter 97
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 97
+conv layer 6 data: Memory(kB): 8400 time(ms): 103
+forwarding max layer 7 @ iter 96
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 96
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 96
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 96
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 97
+conv layer 13 data: Memory(kB): 25530 time(ms): 443
+forwarding convolutional layer 14 @ iter 79
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 97
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 81
+forwarding convolutional layer 13 @ iter 80
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 79
+reading image ../../darknet/data/dog.jpg @ iter 98
+TIMESTAMP: 38532 ms
+ITER_TIME: 8820 ms @ iter 79
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 79
+conv layer 10 data: Memory(kB): 6636 time(ms): 107
+forwarding max layer 11 @ iter 96
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+iter_time: 38528 ms @ iter 98
+forwarding convolutional layer 0 @ iter 98
+conv layer 4 data: Memory(kB): 16296 time(ms): 125
+forwarding max layer 5 @ iter 97
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 97
+conv layer 0 data: Memory(kB): 31097 time(ms): 95
+forwarding max layer 1 @ iter 98
+conv layer 1 data: Memory(kB): 13520 time(ms): 8
+forwarding convolutional layer 2 @ iter 98
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 97
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 97
+conv layer 8 data: Memory(kB): 5208 time(ms): 96
+forwarding max layer 9 @ iter 97
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 97
+conv layer 2 data: Memory(kB): 32466 time(ms): 154
+forwarding max layer 3 @ iter 98
+conv layer 13 data: Memory(kB): 25530 time(ms): 433
+forwarding convolutional layer 14 @ iter 80
+conv layer 3 data: Memory(kB): 6760 time(ms): 5
+forwarding convolutional layer 4 @ iter 98
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 82
+forwarding convolutional layer 13 @ iter 81
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 80
+reading image ../../darknet/data/dog.jpg @ iter 99
+TIMESTAMP: 38996 ms
+ITER_TIME: 8820 ms @ iter 80
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 80
+conv layer 10 data: Memory(kB): 6636 time(ms): 109
+forwarding max layer 11 @ iter 97
+conv layer 11 data: Memory(kB): 676 time(ms): 1
+iter_time: 38992 ms @ iter 99
+forwarding convolutional layer 0 @ iter 99
+conv layer 4 data: Memory(kB): 16296 time(ms): 127
+forwarding max layer 5 @ iter 98
+conv layer 5 data: Memory(kB): 3380 time(ms): 2
+forwarding convolutional layer 6 @ iter 98
+conv layer 0 data: Memory(kB): 31097 time(ms): 101
+forwarding max layer 1 @ iter 99
+conv layer 1 data: Memory(kB): 13520 time(ms): 9
+forwarding convolutional layer 2 @ iter 99
+conv layer 6 data: Memory(kB): 8400 time(ms): 100
+forwarding max layer 7 @ iter 98
+conv layer 7 data: Memory(kB): 1690 time(ms): 1
+forwarding convolutional layer 8 @ iter 98
+conv layer 8 data: Memory(kB): 5208 time(ms): 97
+forwarding max layer 9 @ iter 98
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 98
+conv layer 2 data: Memory(kB): 32466 time(ms): 158
+forwarding max layer 3 @ iter 99
+conv layer 13 data: Memory(kB): 25530 time(ms): 436
+forwarding convolutional layer 14 @ iter 81
+conv layer 3 data: Memory(kB): 6760 time(ms): 4
+forwarding convolutional layer 4 @ iter 99
+conv layer 12 data: Memory(kB): 22488 time(ms): 430
+forwarding convolutional layer 12 @ iter 83
+forwarding convolutional layer 13 @ iter 82
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 81
+TIMESTAMP: 39460 ms
+ITER_TIME: 8820 ms @ iter 81
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 81
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 98
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 4 data: Memory(kB): 16296 time(ms): 115
+forwarding max layer 5 @ iter 99
+conv layer 5 data: Memory(kB): 3380 time(ms): 1
+forwarding convolutional layer 6 @ iter 99
+conv layer 6 data: Memory(kB): 8400 time(ms): 101
+forwarding max layer 7 @ iter 99
+conv layer 7 data: Memory(kB): 1690 time(ms): 0
+forwarding convolutional layer 8 @ iter 99
+conv layer 8 data: Memory(kB): 5208 time(ms): 101
+forwarding max layer 9 @ iter 99
+conv layer 9 data: Memory(kB): 845 time(ms): 0
+forwarding convolutional layer 10 @ iter 99
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 82
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 12 @ iter 84
+forwarding convolutional layer 13 @ iter 83
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 82
+TIMESTAMP: 39924 ms
+ITER_TIME: 8820 ms @ iter 82
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 82
+conv layer 10 data: Memory(kB): 6636 time(ms): 106
+forwarding max layer 11 @ iter 99
+conv layer 11 data: Memory(kB): 676 time(ms): 0
+conv layer 13 data: Memory(kB): 25530 time(ms): 428
+forwarding convolutional layer 14 @ iter 83
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 12 @ iter 85
+forwarding convolutional layer 13 @ iter 84
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 83
+TIMESTAMP: 40388 ms
+ITER_TIME: 8820 ms @ iter 83
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 83
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 84
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 86
+forwarding convolutional layer 13 @ iter 85
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 84
+TIMESTAMP: 40852 ms
+ITER_TIME: 8820 ms @ iter 84
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 84
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 85
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 87
+forwarding convolutional layer 13 @ iter 86
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 85
+TIMESTAMP: 41316 ms
+ITER_TIME: 8820 ms @ iter 85
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 85
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 86
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 12 @ iter 88
+forwarding convolutional layer 13 @ iter 87
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 86
+TIMESTAMP: 41780 ms
+ITER_TIME: 8820 ms @ iter 86
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 86
+conv layer 13 data: Memory(kB): 25530 time(ms): 437
+forwarding convolutional layer 14 @ iter 87
+conv layer 12 data: Memory(kB): 22488 time(ms): 434
+forwarding convolutional layer 12 @ iter 89
+forwarding convolutional layer 13 @ iter 88
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 87
+TIMESTAMP: 42244 ms
+ITER_TIME: 8820 ms @ iter 87
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 87
+conv layer 13 data: Memory(kB): 25530 time(ms): 438
+forwarding convolutional layer 14 @ iter 88
+conv layer 12 data: Memory(kB): 22488 time(ms): 435
+forwarding convolutional layer 12 @ iter 90
+forwarding convolutional layer 13 @ iter 89
+conv layer 14 data: Memory(kB): 1806 time(ms): 20
+forwarding detection layer @ iter 88
+TIMESTAMP: 42708 ms
+ITER_TIME: 8820 ms @ iter 88
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 88
+conv layer 13 data: Memory(kB): 25530 time(ms): 439
+forwarding convolutional layer 14 @ iter 89
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 91
+forwarding convolutional layer 13 @ iter 90
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 89
+TIMESTAMP: 43172 ms
+ITER_TIME: 8820 ms @ iter 89
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 89
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 90
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 92
+forwarding convolutional layer 13 @ iter 91
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 90
+TIMESTAMP: 43636 ms
+ITER_TIME: 8820 ms @ iter 90
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 90
+conv layer 13 data: Memory(kB): 25530 time(ms): 440
+forwarding convolutional layer 14 @ iter 91
+conv layer 12 data: Memory(kB): 22488 time(ms): 433
+forwarding convolutional layer 12 @ iter 93
+forwarding convolutional layer 13 @ iter 92
+conv layer 14 data: Memory(kB): 1806 time(ms): 22
+forwarding detection layer @ iter 91
+TIMESTAMP: 44100 ms
+ITER_TIME: 8820 ms @ iter 91
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 91
+conv layer 13 data: Memory(kB): 25530 time(ms): 430
+forwarding convolutional layer 14 @ iter 92
+conv layer 12 data: Memory(kB): 22488 time(ms): 423
+forwarding convolutional layer 12 @ iter 94
+forwarding convolutional layer 13 @ iter 93
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 92
+TIMESTAMP: 44564 ms
+ITER_TIME: 8820 ms @ iter 92
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 92
+conv layer 13 data: Memory(kB): 25530 time(ms): 435
+forwarding convolutional layer 14 @ iter 93
+conv layer 12 data: Memory(kB): 22488 time(ms): 424
+forwarding convolutional layer 12 @ iter 95
+forwarding convolutional layer 13 @ iter 94
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 93
+TIMESTAMP: 45028 ms
+ITER_TIME: 8820 ms @ iter 93
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 93
+conv layer 13 data: Memory(kB): 25530 time(ms): 429
+forwarding convolutional layer 14 @ iter 94
+conv layer 12 data: Memory(kB): 22488 time(ms): 432
+forwarding convolutional layer 12 @ iter 96
+forwarding convolutional layer 13 @ iter 95
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 94
+TIMESTAMP: 45492 ms
+ITER_TIME: 8820 ms @ iter 94
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 94
+conv layer 13 data: Memory(kB): 25530 time(ms): 439
+forwarding convolutional layer 14 @ iter 95
+conv layer 12 data: Memory(kB): 22488 time(ms): 427
+forwarding convolutional layer 12 @ iter 97
+forwarding convolutional layer 13 @ iter 96
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 95
+TIMESTAMP: 45956 ms
+ITER_TIME: 8820 ms @ iter 95
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 95
+conv layer 13 data: Memory(kB): 25530 time(ms): 432
+forwarding convolutional layer 14 @ iter 96
+conv layer 12 data: Memory(kB): 22488 time(ms): 425
+forwarding convolutional layer 12 @ iter 98
+forwarding convolutional layer 13 @ iter 97
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 96
+TIMESTAMP: 46420 ms
+ITER_TIME: 8820 ms @ iter 96
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 96
+conv layer 13 data: Memory(kB): 25530 time(ms): 445
+forwarding convolutional layer 14 @ iter 97
+conv layer 12 data: Memory(kB): 22488 time(ms): 431
+forwarding convolutional layer 12 @ iter 99
+forwarding convolutional layer 13 @ iter 98
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 97
+TIMESTAMP: 46884 ms
+ITER_TIME: 8820 ms @ iter 97
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 97
+conv layer 13 data: Memory(kB): 25530 time(ms): 433
+forwarding convolutional layer 14 @ iter 98
+conv layer 12 data: Memory(kB): 22488 time(ms): 426
+forwarding convolutional layer 13 @ iter 99
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 98
+TIMESTAMP: 47348 ms
+ITER_TIME: 8820 ms @ iter 98
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 98
+conv layer 13 data: Memory(kB): 25530 time(ms): 426
+forwarding convolutional layer 14 @ iter 99
+conv layer 14 data: Memory(kB): 1806 time(ms): 19
+forwarding detection layer @ iter 99
+TIMESTAMP: 47812 ms
+ITER_TIME: 8820 ms @ iter 99
+getting detections
+drawing detections
+dog: 82%
+car: 74%
+bicycle: 59%
+writing predictions to image0_testOut  @ iter 99
