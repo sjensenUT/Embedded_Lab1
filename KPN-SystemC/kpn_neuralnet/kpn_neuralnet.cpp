@@ -1164,7 +1164,7 @@ int sc_main(int argc, char * argv[])
 {
     kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    //kpn_neuralnet_os knn0("kpn_neuralnet_os");
     //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
     //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
     sc_start();
