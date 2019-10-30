@@ -119,7 +119,7 @@ void image_reader::process()
         //int layer_waitTime = LATENCY[latencyIndex];
         //latencyIndex++; latencyIndex %= 17;
         if(this->waitTime > 0){
-            this->os->time_wait(30); // hard-coded wait time for the region layer
+            this->os->time_wait(LATENCY[0]); // hard-coded wait time for the region layer
         }
         else{ // this should execute if there isn't an OS
             cout << "image reader waiting but not yielding" << endl;
