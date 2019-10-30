@@ -27,7 +27,7 @@ class	kahn_process : public sc_module
 	void	main()
     {   
         init(); 
-           while(iter < 20){
+        while (true) {
             process(); 
             iter++;
         } 
@@ -41,6 +41,7 @@ class	kahn_process : public sc_module
 	int iter = 0;
 
 	virtual void process() = 0;
-    virtual void init() = 0;
+  virtual void init() = 0;
+
 };
 #endif

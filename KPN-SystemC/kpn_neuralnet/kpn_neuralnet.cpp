@@ -103,17 +103,16 @@ void image_reader::process()
     //while(true){
  
     cout << "top of image reader @ iter " << iter << endl;
-    for(size_t i=0; i<images.size(); i++)
-	{
-		
+    for(size_t i=0; i<images.size(); i++) {
+
         cout << "reading image " << images[i] << " @ iter " << iter << endl;
 
         ITER_TIME[iter%ITER_SIZE] = sc_time_stamp();
         cout << "iter_time: " << ITER_TIME[iter%ITER_SIZE] << " @ iter " << iter << endl;
 
 		// read images[i] from file
-		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
- 		image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
+        image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
+        image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
         cout << "read image" << endl;
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
@@ -128,18 +127,17 @@ void image_reader::process()
             wait(LATENCY[0],SC_MS); 
         }
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3 );
-		writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
-		im_w_out->write(orig.w);
-		im_h_out->write(orig.h); //give both width in height in queue of length 2
-		char name[10];
+        writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
+        im_w_out->write(orig.w);
+        im_h_out->write(orig.h); //give both width in height in queue of length 2
+        char name[10];
         sprintf(name,"image%zu",i);
         string name_str(name);			
-        im_name_out->write(name_str); 
-       
-	}
+        im_name_out->write(name_str);   
+    }
 
     cout << "finished reading" << endl; 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //yielding so other tasks can run
         if(iter >= ITER_MAX-1)
@@ -154,12 +152,7 @@ void image_reader::process()
     }
     else{ // this should execute if there isn't an OS
         //break; 
-    }
-
-
-    //iter++; 
-    //} // while(true)
- 
+    }*/
     
 }
 
@@ -268,10 +261,10 @@ void conv_layer::process()
 {
 
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     { 
         //int iter = 0; 
-    }
+    }*/
     //while(true){
  
     
@@ -353,7 +346,7 @@ void conv_layer::process()
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //yielding so other tasks can run
         if(iter >= ITER_MAX-1)
@@ -368,11 +361,7 @@ void conv_layer::process()
     }
     else{
         //break; 
-    }
-    
-
-    //iter++; 
-    //} // while(true)
+    }*/
  
 }
 
@@ -413,10 +402,10 @@ void max_layer::init(){
 void max_layer::process()
 {
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //int iter = 0; 
-    }
+    }*/
     //while(true){
  
     
@@ -484,7 +473,7 @@ void max_layer::process()
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //yielding so other tasks can run
        
@@ -500,10 +489,7 @@ void max_layer::process()
     }
     else{
         //break; 
-    }
-   
-    //iter++;
-    //} // while(true)
+    }*/
  
 }
 
@@ -568,10 +554,10 @@ void region_layer::init(){
 void region_layer::process()
 {
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //int iter;   
-    }
+    }*/
     //while(true){
  
 
@@ -666,7 +652,7 @@ void region_layer::process()
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;	
     cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
     
-    if(this->waitTime >0){
+    /*if(this->waitTime >0){
         if(iter >= ITER_MAX-1)
         {        
             cout << "terminating region layer @ iter "<< iter << endl; 
@@ -679,16 +665,9 @@ void region_layer::process()
     }
     else{
         //break; 
-    }
+    }*/
     
     //free(alphabets);  Now part of the constructor and I don't free it here? 
-    
-
-    //cout << "Incrementing iteration" << endl;
-    iter ++;     
-    //} // while(true)    
- 
-
 }
 
 
@@ -1164,7 +1143,7 @@ void conv_layer_to_bus::process()
     } 
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //yielding so other tasks can run
         if(iter >= ITER_MAX-1)
@@ -1179,13 +1158,9 @@ void conv_layer_to_bus::process()
     }
     else{
         //break; 
-    }
-    
-
-    //iter++; 
-    //} // while(true)
- 
+    }*/
 }
+
 
 max_layer_to_bus::max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
     int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
@@ -1297,7 +1272,7 @@ void max_layer_to_bus::process()
     cout << "Output[0] " << outputImage[0] << endl;
     mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     {
         //yielding so other tasks can run
         if(iter >= ITER_MAX-1)
@@ -1313,11 +1288,7 @@ void max_layer_to_bus::process()
     else{
         // get out of os while loop
         //break; 
-    }
-
-    //iter++; 
-    //} // while(true)
- 
+    }*/
     
 }
 

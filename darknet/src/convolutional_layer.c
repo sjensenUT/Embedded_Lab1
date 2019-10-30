@@ -467,7 +467,7 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     int m = l.n/l.groups;
     int k = l.size*l.size*l.c/l.groups;
     int n = l.out_w*l.out_h;
-    printf("m = %d, k =%d, n = %d\n", m, k, n);
+    /*printf("m = %d, k =%d, n = %d\n", m, k, n);
     printf("l.groups    = %d\n", l.groups);
     printf("l.batch     = %d\n", l.batch);
     printf("l.nweights  = %d\n", l.nweights);
@@ -480,7 +480,7 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     printf("l.binary  = %d\n", l.binary);
     printf("l.xnor  = %d\n", l.xnor);
     printf("Workspace size: %zu\n", get_workspace_size(l));
-    printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);
+    printf("Input: %f %f %f ...\n", net.input[0], net.input[1], net.input[2]);*/
     for(i = 0; i < l.batch; ++i){
         for(j = 0; j < l.groups; ++j){
 	          //printf("in inner loop j = %d\n", j);
@@ -509,9 +509,9 @@ void forward_convolutional_layer(convolutional_layer l, network net)
         add_bias(l.output, l.biases, l.batch, l.n, l.out_h*l.out_w);
     }
     activate_array(l.output, l.outputs*l.batch, l.activation);
-    for(i = 0; i < 10; i++){
+    /*for(i = 0; i < 10; i++){
         printf("l.output[%d] = %f\n", i, l.output[i]);
-    }
+    }*/
     
     if(l.binary || l.xnor) swap_binary(&l);
 }
