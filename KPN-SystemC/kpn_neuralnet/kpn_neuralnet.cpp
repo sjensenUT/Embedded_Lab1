@@ -26,7 +26,6 @@ typedef std::vector<std::string> strs;
 
 // this should match the number of iterations in the kahn process.h file
 const int ITER_MAX = 2;
-#define OS_ENABLE TRUE
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;
