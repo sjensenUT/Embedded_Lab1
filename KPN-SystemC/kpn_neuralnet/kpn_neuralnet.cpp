@@ -97,7 +97,10 @@ void image_reader::process()
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++; 
 #if OS_ENABLE == TRUE
-    int iter = 0;
+    if(this->waitTime > 0)
+    {
+        int iter = 0;
+    }
     while(true){
 #endif 
     cout << "top of image reader @ iter " << iter << endl;
@@ -266,7 +269,10 @@ void conv_layer::process()
 {
 
 #if OS_ENABLE == TRUE
-    int iter = 0; 
+    if(this->waitTime > 0)
+    { 
+        int iter = 0; 
+    }
     while(true){
 #endif 
     
@@ -408,7 +414,10 @@ void max_layer::init(){
 void max_layer::process()
 {
 #if OS_ENABLE == TRUE
-    int iter = 0; 
+    if(this->waitTime > 0)
+    {
+        int iter = 0; 
+    }
     while(true){
 #endif 
     
@@ -560,7 +569,10 @@ void region_layer::init(){
 void region_layer::process()
 {
 #if OS_ENABLE == TRUE
-    int iter;   
+    if(this->waitTime > 0)
+    {
+        int iter;   
+    }
     while(true){
 #endif 
 
@@ -673,7 +685,7 @@ void region_layer::process()
     //free(alphabets);  Now part of the constructor and I don't free it here? 
     
 #if OS_ENABLE == TRUE
-    cout << "Incrementing iteration" << endl;
+    //cout << "Incrementing iteration" << endl;
     iter ++;     
     } // while(true)    
 #endif 
@@ -1064,7 +1076,10 @@ void conv_layer_to_bus::init(){
 void conv_layer_to_bus::process()
 {
 #if OS_ENABLE == TRUE
-    int iter = 0;  
+    if(this->waitTime > 0)
+    { 
+        int iter = 0;  
+    }
     while(true){
 #endif 
     
@@ -1209,7 +1224,10 @@ void max_layer_to_bus::init(){
 void max_layer_to_bus::process()
 {
 #if OS_ENABLE == TRUE
-    int iter = 0; 
+    if(this->waitTime > 0){
+       //reset iter to the scope of this function 
+       int iter = 0; 
+    }
     while(true){
 #endif 
     
@@ -1294,6 +1312,7 @@ void max_layer_to_bus::process()
         //this->os->task_terminate(); 
     }
     else{
+        // get out of os while loop
         break; 
     }
 #if OS_ENABLE == TRUE
@@ -1307,6 +1326,7 @@ void max_layer_to_bus::process()
 //for some reason this main seg faults
 int sc_main(int argc, char * argv[])
 {
+       
     if(strcmp(argv[1], "part1") == 0){
         cout << "running part1" << endl;
         kpn_neuralnet knn0("kpn_neuralnet");
