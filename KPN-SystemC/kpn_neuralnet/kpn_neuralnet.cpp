@@ -47,6 +47,10 @@ const int BIGGEST_FIFO_SIZE = 416 * 416 * 16;
 const float ANCHORS[10] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843,
                            5.47434, 7.88282 , 3.52778, 9.77052, 9.16828};
 
+// FIXME
+const int LATENCY[17] = {30,178,12,218,7,147,2,118,1,106,1,119,1,464,448,20,4}; 
+const int ITER_SIZE = 30;
+sc_core::sc_time ITER_TIME[30]; 
 
 void getTileCoords(int width, int height, int coords[9][4]){
     for(int i = 0; i < 3; i++){ // TILE ROW
@@ -83,16 +87,27 @@ void image_reader::process()
 {
 	for(size_t i=0; i<images.size(); i++)
 	{
-		cout << "reading image " << images[i] << " @ iter " << iter << endl;
-
-		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
  		image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
 
 		// sized.data is now the float* that points to the float array that will
 		// be the output/input of each layer. The image writer will call free on 
         // this float* to deallocate the data.
-    writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
+        //
+        
+        
+		cout << "reading image " << images[i] << " @ iter " << iter << endl;
+        wait(LATENCY[0],SC_MS);
+        
+        writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3);
+        
+        // go to the previous time
+        ITER_TIME[iter%ITER_SIZE] = sc_time_stamp() - sc_time(30,SC_MS);
+ 
+		// this wait happens after the data write because this is the only time we'd expect it to stall while we're waiting an
+        cout << "iter_time: "<< sc_time_stamp() - sc_time(30,SC_MS) << " @ iter " << iter << endl; 
+	
+
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3);
 		im_w_out->write(orig.w);
 		im_h_out->write(orig.h); //give both width in height in queue of length 2
@@ -203,6 +218,7 @@ void conv_layer::process()
     input = readImageData(&in, l.w, l.h, l.c);
     cout << "forwarding convolutional layer " << layerIndex << " @ iter " << iter << endl;
 
+    wait(LATENCY[layerIndex+1],SC_MS);
     // Create a dummy network object. forward_convolutional_layer only uses the "input"
     // and "workspace" elements of the network struct. "input" is simply the output of
     // the previous layer, while "workspace" points to an array of floats that we will
@@ -296,6 +312,7 @@ void max_layer::process()
 
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
 
+    wait(LATENCY[layerIndex+1],SC_MS);
     //printf("inputs of layer %d, are", layerIndex);
     //for(int j = 0; j < 10; j++){
     //  printf(" %f", data[j]);
@@ -411,7 +428,13 @@ void region_layer::process()
 
 	cout << "forwarding detection layer @ iter " << iter << endl;
  
-  network dummyNetwork;
+    wait(LATENCY[16],SC_MS);
+    
+    ITER_TIME[iter%ITER_SIZE] = sc_time_stamp() - ITER_TIME[iter%ITER_SIZE]; 
+    cout << "TIMESTAMP: " << sc_time_stamp() << endl; 
+    cout << "ITER_TIME: " << ITER_TIME[iter%ITER_SIZE] << " @ iter " << iter << endl; 
+
+    network dummyNetwork;
 	dummyNetwork.input = data;
 	forward_region_layer(l, dummyNetwork);
 
@@ -661,10 +684,10 @@ class	kpn_neuralnet_tiled : public sc_module
         conv13_to_conv14   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 		conv14_to_region   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 
-		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
-		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
-		int2_reader_to_writer 	= new sc_fifo<int>(1); 
-		char_reader_to_writer  	= new sc_fifo<string>(1);
+		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3 * 17); 
+		int_reader_to_writer	= new sc_fifo<int>(20); // needed to send im.w and im.h
+		int2_reader_to_writer 	= new sc_fifo<int>(20); 
+		char_reader_to_writer  	= new sc_fifo<string>(2000);
 		
         // Here is where we will indicate the parameters for each layer. These can
         // be found in the cfg file for yolov2-tiny in the darknet folder.
@@ -799,8 +822,8 @@ class	kpn_neuralnet : public sc_module
     // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-	  	strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		//strs images = {"../../darknet/data/dog.jpg"};
+	  	//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
@@ -825,10 +848,10 @@ class	kpn_neuralnet : public sc_module
         conv13_to_conv14   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 		conv14_to_region   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 
-		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3); 
-		int_reader_to_writer	= new sc_fifo<int>(1); // needed to send im.w and im.h
-		int2_reader_to_writer 	= new sc_fifo<int>(1); 
-		char_reader_to_writer  	= new sc_fifo<string>(1);
+		reader_to_writer 	= new sc_fifo<float>(800 * 600 * 3 * 17); 
+		int_reader_to_writer	= new sc_fifo<int>(20); // needed to send im.w and im.h
+		int2_reader_to_writer 	= new sc_fifo<int>(20); 
+		char_reader_to_writer  	= new sc_fifo<string>(2000);
 		
         // Here is where we will indicate the parameters for each layer. These can
         // be found in the cfg file for yolov2-tiny in the darknet folder.

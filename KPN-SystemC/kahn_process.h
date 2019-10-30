@@ -24,7 +24,14 @@ class	kahn_process : public sc_module
 		SC_THREAD(main);
 	}
 
-	void	main()	{ while(true) {process(); iter++;} }
+	void	main()	{ 
+        while(iter < 100) 
+        {
+            process(); 
+            //cout << "MainTime: " << sc_time_stamp() << endl; // why this breaks I don't know 
+            iter++;
+        } 
+    }
     //void  main()  { process(); }
 	
 	protected:
