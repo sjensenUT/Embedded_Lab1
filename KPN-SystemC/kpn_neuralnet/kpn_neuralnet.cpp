@@ -1330,22 +1330,25 @@ int sc_main(int argc, char * argv[])
     if(strcmp(argv[1], "part1") == 0){
         cout << "running part1" << endl;
         kpn_neuralnet knn0("kpn_neuralnet");
+        sc_start();
     }else if(strcmp(argv[1], "part2") == 0){
         cout << "running part2" << endl;
         kpn_neuralnet_os knn0("kpn_neuralnet_os");
+        sc_start();
     }else if(strcmp(argv[1], "part3") == 0){
         cout << "running part3 " << endl;
         kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
+        sc_start();
     }else if(strcmp(argv[1], "part5") == 0){
         cout << "running part5" << endl;
         kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
+        sc_start();
     }else{
         cout << "running part6" << endl;
         kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", true);
+        sc_start();
     }
     //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
-    cout << "starting simulation" << endl;
-    sc_start();
     return 0;
 }
 
