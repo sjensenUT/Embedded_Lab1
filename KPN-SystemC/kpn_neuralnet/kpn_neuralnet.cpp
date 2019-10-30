@@ -96,13 +96,13 @@ void image_reader::process()
 	//wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++; 
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0)
     {
         int iter = 0;
     }
     while(true){
-#endif 
+ 
     cout << "top of image reader @ iter " << iter << endl;
     for(size_t i=0; i<images.size(); i++)
 	{
@@ -157,10 +157,10 @@ void image_reader::process()
         break; 
     }
 
-#if OS_ENABLE == TRUE
+
     iter++; 
     } // while(true)
-#endif 
+ 
     
 }
 
@@ -268,13 +268,13 @@ void conv_layer::init(){
 void conv_layer::process()
 {
 
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0)
     { 
         int iter = 0; 
     }
     while(true){
-#endif 
+ 
     
     float* input;
     // Read the output from the previos layer
@@ -371,10 +371,10 @@ void conv_layer::process()
         break; 
     }
     
-#if OS_ENABLE == TRUE
+
     iter++; 
     } // while(true)
-#endif 
+ 
 }
 
 
@@ -413,13 +413,13 @@ void max_layer::init(){
 
 void max_layer::process()
 {
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0)
     {
         int iter = 0; 
     }
     while(true){
-#endif 
+ 
     
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
@@ -502,10 +502,10 @@ void max_layer::process()
     else{
         break; 
     }
-#if OS_ENABLE == TRUE   
+   
     iter++;
     } // while(true)
-#endif 
+ 
 }
 
 
@@ -568,13 +568,13 @@ void region_layer::init(){
 
 void region_layer::process()
 {
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0)
     {
         int iter;   
     }
     while(true){
-#endif 
+ 
 
 	float* data;
 	string image_name; 
@@ -684,11 +684,11 @@ void region_layer::process()
     
     //free(alphabets);  Now part of the constructor and I don't free it here? 
     
-#if OS_ENABLE == TRUE
+
     //cout << "Incrementing iteration" << endl;
     iter ++;     
     } // while(true)    
-#endif 
+ 
 
 }
 
@@ -1075,13 +1075,13 @@ void conv_layer_to_bus::init(){
 
 void conv_layer_to_bus::process()
 {
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0)
     { 
         int iter = 0;  
     }
     while(true){
-#endif 
+ 
     
     float* input;
     input = new float[l.w*l.h*l.c];
@@ -1182,10 +1182,10 @@ void conv_layer_to_bus::process()
         break; 
     }
     
-#if OS_ENABLE == TRUE
+
     iter++; 
     } // while(true)
-#endif 
+ 
 }
 
 max_layer_to_bus::max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
@@ -1223,13 +1223,13 @@ void max_layer_to_bus::init(){
 
 void max_layer_to_bus::process()
 {
-#if OS_ENABLE == TRUE
+
     if(this->waitTime > 0){
        //reset iter to the scope of this function 
        int iter = 0; 
     }
     while(true){
-#endif 
+ 
     
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
@@ -1315,10 +1315,10 @@ void max_layer_to_bus::process()
         // get out of os while loop
         break; 
     }
-#if OS_ENABLE == TRUE
+
     iter++; 
     } // while(true)
-#endif 
+ 
     
 }
 
