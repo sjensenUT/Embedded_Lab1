@@ -137,11 +137,9 @@ kpn_neuralnet_os_bus::kpn_neuralnet_os_bus(sc_module_name name, os_channel *os) 
     // !!! NOTE !!! this is the only max layer with stride=1
     max11 = new max_layer_to_bus("max11", 11, 13, 13, 512, 2, 1, false, NULL, NULL, 1);
     max11->in(*conv10_to_max11);
-    //max11->mDriver(); //FIXME
     max11->os(*os);
 
     conv14 = new conv_layer_to_bus("conv14", 14, 13, 13, 512, 1, 1, 425, 1, LINEAR, false, false, NULL, NULL, 1);
-    //conv14->mDriver(); //FIXME
     conv14->out(*conv14_to_region);
     conv14->os(*os);
 

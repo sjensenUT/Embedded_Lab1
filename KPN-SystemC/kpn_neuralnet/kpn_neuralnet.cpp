@@ -42,6 +42,8 @@ const int LATENCY[17] = {30, 178, 12, 218, 7, 147, 2, 118, 1, 106, 1, 119, 1, 46
 //const int CONV_LATENCY[9] = {178,218,147,118,106,119,464,448,20}; 
 //const int MAXP_LATENCY[6] = {12,7,2,1,1,1}; 
 
+const int ITER_SIZE = 30; 
+sc_core::sc_time ITER_TIME[ITER_SIZE];
 
 int latencyIndex = 0; 
 
@@ -95,7 +97,9 @@ void image_reader::process()
 	{
 		
         cout << "reading image " << images[i] << " @ iter " << iter << endl;
-
+        
+        ITER_TIME[iter%ITER_SIZE] = sc_time_stamp();
+        cout << "iter_time: " << ITER_TIME[iter%ITER_SIZE] << " @ iter " << iter << endl; 
 		// read images[i] from file
 		image orig  = load_image_color( const_cast<char*> (images[i].c_str()), 0, 0);
  		image sized = letterbox_image(orig, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -561,6 +565,11 @@ void region_layer::process()
     free(data);
     int layer_waitTime = 4; // hard coded value from measurements
 //    latencyIndex++; latencyIndex %= 17;
+    
+    // done here so the time is accurate by what it would be at the end of this OS cycle
+    ITER_TIME[iter%ITER_SIZE] = sc_time_stamp() + sc_time(4,SC_MS) - ITER_TIME[iter%ITER_SIZE];
+    cout << "ITER_TIME: " << ITER_TIME[iter%ITER_SIZE] << " @ iter " << iter << endl; 
+    
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
@@ -1137,9 +1146,9 @@ int sc_main(int argc, char * argv[])
 {
     //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    //kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    kpn_neuralnet_os knn0("kpn_neuralnet_os");
     //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
-    kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus");
+    //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus");
     sc_start();
     return 0;
 }
