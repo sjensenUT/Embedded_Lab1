@@ -25,7 +25,7 @@ using std::chrono::milliseconds;
 typedef std::vector<std::string> strs;
 
 // this should match the number of iterations in the kahn process.h file
-const int ITER_MAX = 2;
+const int ITER_MAX = 20;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;
@@ -98,9 +98,9 @@ void image_reader::process()
 
     if(this->waitTime > 0)
     {
-        int iter = 0;
+        //int iter = 0;
     }
-    while(true){
+    //while(true){
  
     cout << "top of image reader @ iter " << iter << endl;
     for(size_t i=0; i<images.size(); i++)
@@ -146,19 +146,19 @@ void image_reader::process()
         {   
             cout << "terminating image reader @ iter " << iter << endl;     
             this->os->task_terminate();
-            break; // exit the while loop
+            //break; // exit the while loop
         } else {
             this->os->time_wait(0);
         }
         //cout << "terminating" << endl; 
     }
     else{ // this should execute if there isn't an OS
-        break; 
+        //break; 
     }
 
 
-    iter++; 
-    } // while(true)
+    //iter++; 
+    //} // while(true)
  
     
 }
@@ -270,9 +270,9 @@ void conv_layer::process()
 
     if(this->waitTime > 0)
     { 
-        int iter = 0; 
+        //int iter = 0; 
     }
-    while(true){
+    //while(true){
  
     
     float* input;
@@ -360,19 +360,19 @@ void conv_layer::process()
         {        
             cout << "terminating conv layer " << layerIndex << " @ iter " << iter << endl;
             this->os->task_terminate();
-            break;// exit the while loop
+            //break;// exit the while loop
         } else {
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
     }
     else{
-        break; 
+        //break; 
     }
     
 
-    iter++; 
-    } // while(true)
+    //iter++; 
+    //} // while(true)
  
 }
 
@@ -415,9 +415,9 @@ void max_layer::process()
 
     if(this->waitTime > 0)
     {
-        int iter = 0; 
+        //int iter = 0; 
     }
-    while(true){
+    //while(true){
  
     
     float* data;
@@ -492,18 +492,18 @@ void max_layer::process()
         {       
             cout << "terminating max layer " << layerIndex << " @ iter " << iter << endl; 
             this->os->task_terminate();
-            break; // exit the while loop
+            //break; // exit the while loop
         } else {
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
     }
     else{
-        break; 
+        //break; 
     }
    
-    iter++;
-    } // while(true)
+    //iter++;
+    //} // while(true)
  
 }
 
@@ -570,9 +570,9 @@ void region_layer::process()
 
     if(this->waitTime > 0)
     {
-        int iter;   
+        //int iter;   
     }
-    while(true){
+    //while(true){
  
 
 	float* data;
@@ -671,14 +671,14 @@ void region_layer::process()
         {        
             cout << "terminating region layer @ iter "<< iter << endl; 
             this->os->task_terminate();
-            break; // exit the while loop
+            //break; // exit the while loop
         } else {
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
     }
     else{
-        break; 
+        //break; 
     }
     
     //free(alphabets);  Now part of the constructor and I don't free it here? 
@@ -686,7 +686,7 @@ void region_layer::process()
 
     //cout << "Incrementing iteration" << endl;
     iter ++;     
-    } // while(true)    
+    //} // while(true)    
  
 
 }
@@ -1077,9 +1077,9 @@ void conv_layer_to_bus::process()
 
     if(this->waitTime > 0)
     { 
-        int iter = 0;  
+        //int iter = 0;  
     }
-    while(true){
+    //while(true){
  
     
     float* input;
@@ -1171,19 +1171,19 @@ void conv_layer_to_bus::process()
         {       
             cout << "terminating conv layer " << layerIndex << " @ iter " << iter <<  endl; 
             this->os->task_terminate();
-            break; // exit the while loop
+            //break; // exit the while loop
         } else {
             this->os->time_wait(0);
         }
         //this->os->task_terminate(); 
     }
     else{
-        break; 
+        //break; 
     }
     
 
-    iter++; 
-    } // while(true)
+    //iter++; 
+    //} // while(true)
  
 }
 
@@ -1225,9 +1225,9 @@ void max_layer_to_bus::process()
 
     if(this->waitTime > 0){
        //reset iter to the scope of this function 
-       int iter = 0; 
+       //int iter = 0; 
     }
-    while(true){
+    //while(true){
  
     
     float* data;
@@ -1304,7 +1304,7 @@ void max_layer_to_bus::process()
         {        
             cout << "terminating max layer " <<  layerIndex << " @ iter " << iter << endl;
             this->os->task_terminate();
-            break;// exit the while loop
+            //break;// exit the while loop
         } else {
             this->os->time_wait(0);
         }
@@ -1312,11 +1312,11 @@ void max_layer_to_bus::process()
     }
     else{
         // get out of os while loop
-        break; 
+        //break; 
     }
 
-    iter++; 
-    } // while(true)
+    //iter++; 
+    //} // while(true)
  
     
 }

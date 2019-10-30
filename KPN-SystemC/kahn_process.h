@@ -27,10 +27,10 @@ class	kahn_process : public sc_module
 	void	main()
     {   
         init(); 
-//        while(iter < 20){
+           while(iter < 20){
             process(); 
-//            iter++;
-//        } 
+            iter++;
+        } 
 
 //        process();
     }
