@@ -168,7 +168,7 @@ kpn_neuralnet_os::kpn_neuralnet_os(sc_module_name name) : sc_module(name)
     region->os(*os);
 }
 
-
+//testing
 kpn_neuralnet_os_accel::kpn_neuralnet_os_accel(sc_module_name name, os_channel *os) : sc_module(name)
 {
     cout << "in kpn_neuralnet_os" << endl;
