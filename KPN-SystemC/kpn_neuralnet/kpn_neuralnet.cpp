@@ -24,6 +24,10 @@ using std::chrono::system_clock;
 using std::chrono::milliseconds; 
 typedef std::vector<std::string> strs;
 
+// this should match the number of iterations in the kahn process.h file
+const int ITER_MAX = 2;
+#define OS_ENABLE TRUE
+
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;
 const int IMAGE_HEIGHT = 416;
@@ -92,6 +96,14 @@ void image_reader::process()
 	//wait(LATENCY[latencyIndex],SC_MS);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++; 
+
+    if(this->waitTime > 0)
+    {
+        int iter = 0;
+    }
+    while(true){
+ 
+    cout << "top of image reader @ iter " << iter << endl;
     for(size_t i=0; i<images.size(); i++)
 	{
 		
@@ -110,7 +122,11 @@ void image_reader::process()
         //int layer_waitTime = LATENCY[latencyIndex];
         //latencyIndex++; latencyIndex %= 17;
         if(this->waitTime > 0){
-            this->os->time_wait(30); // hard-coded wait time for the region layer
+            this->os->time_wait(LATENCY[0]); // hard-coded wait time for the region layer
+        }
+        else{ // this should execute if there isn't an OS
+            cout << "image reader waiting but not yielding" << endl;
+            wait(LATENCY[0],SC_MS); 
         }
         writeImageData(&out, sized.data, IMAGE_WIDTH, IMAGE_HEIGHT, 3 );
 		writeImageData(&im_out, orig.data, orig.w, orig.h, 3 );
@@ -119,18 +135,33 @@ void image_reader::process()
 		char name[10];
         sprintf(name,"image%zu",i);
         string name_str(name);			
-        im_name_out->write(name_str);
-        
-        
+        im_name_out->write(name_str); 
+       
 	}
+
     cout << "finished reading" << endl; 
     if(this->waitTime > 0)
     {
         //yielding so other tasks can run
-    //    this->os->time_wait(0);
-        cout << "terminating" << endl; 
-        this->os->task_terminate();
+        if(iter >= ITER_MAX-1)
+        {   
+            cout << "terminating image reader @ iter " << iter << endl;     
+            this->os->task_terminate();
+            break; // exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //cout << "terminating" << endl; 
     }
+    else{ // this should execute if there isn't an OS
+        break; 
+    }
+
+
+    iter++; 
+    } // while(true)
+ 
+    
 }
 
 
@@ -236,8 +267,16 @@ void conv_layer::init(){
 
 void conv_layer::process()
 {
-    float* input;
+
+
+    if(this->waitTime > 0)
+    { 
+        int iter = 0; 
+    }
+    while(true){
+ 
     
+    float* input;
     // Read the output from the previos layer
     input = readImageData(&in, l.w, l.h, l.c);
 	
@@ -310,14 +349,32 @@ void conv_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
+    else{ // if there is isn't an OS
+        wait(LATENCY[layerIndex+1],SC_MS); 
+    }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
     if(this->waitTime > 0)
     {
         //yielding so other tasks can run
-        //this->os->time_wait(0);
-        this->os->task_terminate(); 
+        if(iter >= ITER_MAX-1)
+        {        
+            cout << "terminating conv layer " << layerIndex << " @ iter " << iter << endl;
+            this->os->task_terminate();
+            break;// exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+    
+
+    iter++; 
+    } // while(true)
+ 
 }
 
 
@@ -357,6 +414,13 @@ void max_layer::init(){
 void max_layer::process()
 {
 
+    if(this->waitTime > 0)
+    {
+        int iter = 0; 
+    }
+    while(true){
+ 
+    
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
 
@@ -373,7 +437,7 @@ void max_layer::process()
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
-    system_clock::time_point before = system_clock::now(); 
+    //system_clock::time_point before = system_clock::now(); 
      
     network dummyNetwork;
     dummyNetwork.input = data;
@@ -404,11 +468,11 @@ void max_layer::process()
     }
     
     
-    system_clock::time_point after = system_clock::now();
-    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
+    //system_clock::time_point after = system_clock::now();
+    //milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
 
-    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
-    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
+    //unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
+    //cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
 
     int layer_waitTime = LATENCY[layerIndex+1];
@@ -416,14 +480,32 @@ void max_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS); 
+    }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
 
     if(this->waitTime > 0)
     {
         //yielding so other tasks can run
-        //this->os->time_wait(0);
-        this->os->task_terminate(); 
+       
+        if(iter >= ITER_MAX-1)
+        {       
+            cout << "terminating max layer " << layerIndex << " @ iter " << iter << endl; 
+            this->os->task_terminate();
+            break; // exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+   
+    iter++;
+    } // while(true)
+ 
 }
 
 
@@ -486,6 +568,14 @@ void region_layer::init(){
 
 void region_layer::process()
 {
+
+    if(this->waitTime > 0)
+    {
+        int iter;   
+    }
+    while(true){
+ 
+
 	float* data;
 	string image_name; 
 	image im; 
@@ -571,13 +661,35 @@ void region_layer::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
+    else { 
+        wait(LATENCY[16],SC_MS);
+    }
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;	
     cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
     
     if(this->waitTime >0){
-        this->os->task_terminate(); 
+        if(iter >= ITER_MAX-1)
+        {        
+            cout << "terminating region layer @ iter "<< iter << endl; 
+            this->os->task_terminate();
+            break; // exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+    
     //free(alphabets);  Now part of the constructor and I don't free it here? 
+    
+
+    //cout << "Incrementing iteration" << endl;
+    iter ++;     
+    } // while(true)    
+ 
+
 }
 
 
@@ -767,8 +879,8 @@ class	kpn_neuralnet : public sc_module
     // Constructor of the overall network. Initialize all queues and layers
 	kpn_neuralnet(sc_module_name name) : sc_module(name)
 	{
-	  	strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
-		//strs images = {"../../darknet/data/dog.jpg"};
+	  	//strs images = {"../../darknet/data/dog.jpg", "../../darknet/data/horses.jpg"};
+		strs images = {"../../darknet/data/dog.jpg"};
 		//std::string cfgFile = "../../darknet/cfg/yolov2-tiny.cfg";
 		//std::string weightFile = "../../darknet/yolov2-tiny.weights";
 		//char *cfgFileC = new char[cfgFile.length() + 1];
@@ -963,6 +1075,14 @@ void conv_layer_to_bus::init(){
 
 void conv_layer_to_bus::process()
 {
+
+    if(this->waitTime > 0)
+    { 
+        int iter = 0;  
+    }
+    while(true){
+ 
+    
     float* input;
     input = new float[l.w*l.h*l.c];
     
@@ -1040,15 +1160,32 @@ void conv_layer_to_bus::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
-   
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS); 
+    } 
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
     if(this->waitTime > 0)
     {
         //yielding so other tasks can run
-        //this->os->time_wait(0);
-        this->os->task_terminate(); 
+        if(iter >= ITER_MAX-1)
+        {       
+            cout << "terminating conv layer " << layerIndex << " @ iter " << iter <<  endl; 
+            this->os->task_terminate();
+            break; // exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //this->os->task_terminate(); 
     }
+    else{
+        break; 
+    }
+    
+
+    iter++; 
+    } // while(true)
+ 
 }
 
 max_layer_to_bus::max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
@@ -1087,10 +1224,17 @@ void max_layer_to_bus::init(){
 void max_layer_to_bus::process()
 {
 
+    if(this->waitTime > 0){
+       //reset iter to the scope of this function 
+       int iter = 0; 
+    }
+    while(true){
+ 
+    
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
 
-    //wait(LATENCY[latencyIndex],SC_MS);
+    //wait(latency[latencyindex],sc_ms);
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++;
     cout << "forwarding max layer " << layerIndex << " @ iter " << iter << endl;
@@ -1103,7 +1247,7 @@ void max_layer_to_bus::process()
 
     // Call forward_maxpool_layer() here, read from layer.output and write to out
     // Create a dummy network object. The function only uses network.input
-    system_clock::time_point before = system_clock::now(); 
+    //system_clock::time_point before = system_clock::now(); 
      
     network dummyNetwork;
     dummyNetwork.input = data;
@@ -1134,11 +1278,11 @@ void max_layer_to_bus::process()
     }
     
     
-    system_clock::time_point after = system_clock::now();
-    milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
+    //system_clock::time_point after = system_clock::now();
+    //milliseconds duration = std::chrono::duration_cast<milliseconds> (after-before);
 
-    unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
-    cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
+    //unsigned long memoryFootprint = ((l.inputs+l.outputs)*sizeof(float))/1024;
+    //cout << "conv layer " << layerIndex << " data: Memory(kB): " << memoryFootprint << " time(ms): " << duration.count() << endl;   
     // Send off the layer's output to the next layer!
 
     int layer_waitTime = LATENCY[layerIndex+1];
@@ -1146,7 +1290,10 @@ void max_layer_to_bus::process()
     if(this->waitTime > 0){
         this->os->time_wait(layer_waitTime);
     }
-//    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
+    else{
+        wait(LATENCY[layerIndex+1],SC_MS);
+    }
+    //    writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
     cout << "Maxlayer finished. Attempting to write to the bus" << endl; 
     cout << "Output[0] " << outputImage[0] << endl;
     mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
@@ -1154,15 +1301,32 @@ void max_layer_to_bus::process()
     if(this->waitTime > 0)
     {
         //yielding so other tasks can run
-        //this->os->time_wait(0);
-        this->os->task_terminate(); 
+        if(iter >= ITER_MAX-1)
+        {        
+            cout << "terminating max layer " <<  layerIndex << " @ iter " << iter << endl;
+            this->os->task_terminate();
+            break;// exit the while loop
+        } else {
+            this->os->time_wait(0);
+        }
+        //this->os->task_terminate(); 
     }
+    else{
+        // get out of os while loop
+        break; 
+    }
+
+    iter++; 
+    } // while(true)
+ 
+    
 }
 
 
 //for some reason this main seg faults
 int sc_main(int argc, char * argv[])
 {
+       
     if(strcmp(argv[1], "part1") == 0){
         cout << "running part1" << endl;
         kpn_neuralnet knn0("kpn_neuralnet");
@@ -1194,7 +1358,7 @@ int sc_main(int argc, char * argv[])
 {
     //kpn_neuralnet knn0("kpn_neuralnet");
     //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    //kpn_neuralnet_os knn0("kpn_neuralnet_os");
+    kpn_neuralnet_os knn0("kpn_neuralnet_os");
     //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
     kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
     cout << "starting simulation" << endl;
