@@ -60,13 +60,13 @@ kpn_neuralnet_os::kpn_neuralnet_os(sc_module_name name) : sc_module(name)
     conv14_to_region   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
     conv14_to_region->os(*os);
 
-    reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3);
+    reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3 * 20);
     reader_to_writer->os(*os);
-    int_reader_to_writer	= new os_sc_fifo<int>(1); // needed to send im.w and im.h
+    int_reader_to_writer	= new os_sc_fifo<int>(20); // needed to send im.w and im.h
     int_reader_to_writer->os(*os);
-    int2_reader_to_writer 	= new os_sc_fifo<int>(1);
+    int2_reader_to_writer 	= new os_sc_fifo<int>(20);
     int2_reader_to_writer->os(*os); 
-    char_reader_to_writer  	= new os_sc_fifo<string>(1);
+    char_reader_to_writer  	= new os_sc_fifo<string>(20);
     char_reader_to_writer->os(*os);
     
     // Here is where we will indicate the parameters for each layer. These can
@@ -212,13 +212,13 @@ kpn_neuralnet_os_accel::kpn_neuralnet_os_accel(sc_module_name name, os_channel *
     conv14_to_region   	= new os_sc_fifo<float>(BIGGEST_FIFO_SIZE);
     conv14_to_region->os(*os);
 
-    reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3);
+    reader_to_writer 	= new os_sc_fifo<float>(800 * 600 * 3 * 20);
     reader_to_writer->os(*os);
-    int_reader_to_writer	= new os_sc_fifo<int>(2); // needed to send im.w and im.h
+    int_reader_to_writer	= new os_sc_fifo<int>(20); // needed to send im.w and im.h
     int_reader_to_writer->os(*os);
-    int2_reader_to_writer 	= new os_sc_fifo<int>(2);
+    int2_reader_to_writer 	= new os_sc_fifo<int>(20);
     int2_reader_to_writer->os(*os); 
-    char_reader_to_writer  	= new os_sc_fifo<string>(1);
+    char_reader_to_writer  	= new os_sc_fifo<string>(20);
     char_reader_to_writer->os(*os);
     
     // Here is where we will indicate the parameters for each layer. These can
