@@ -27,7 +27,7 @@ typedef std::vector<std::string> strs;
 
 // Number of iterations of each layer before we stop running the application
 // TODO: Change back to higher number like 20
-const int ITER_MAX = 1;
+const int ITER_MAX = 10;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;
@@ -1151,6 +1151,14 @@ void max_layer_to_bus::process()
 int sc_main(int argc, char * argv[])
 {
        
+    if(argc != 2){
+        cout << "Please add the part you would like to run as an argument. Potential supported parts: " << endl;
+        cout << "part1\npart2\npart3\npart5\npart6" << endl;
+        cout << "Ex: ./kpn_neuralnet.x part5 > console_output.txt " << endl;
+        return -1; 
+    }
+
+
     if(strcmp(argv[1], "part1") == 0){
         cout << "running part1" << endl;
         kpn_neuralnet knn0("kpn_neuralnet");
