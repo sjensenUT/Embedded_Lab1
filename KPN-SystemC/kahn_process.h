@@ -11,6 +11,9 @@
  */
 
 #include <systemc.h>
+#include <chrono> 
+using std::chrono::system_clock;
+using std::chrono::milliseconds;
 
 class	kahn_process : public sc_module
 {
@@ -33,24 +36,32 @@ class	kahn_process : public sc_module
 	}
 
 	void	main()
-  {   
+    {   
+       
+      system_clock::time_point before = system_clock::now(); 
+      
       init(); 
       while (iter < max_iter || max_iter == 0) {
           process(); 
           iter++;
       } 
       terminate();
-  }
+      
+      system_clock::time_point after = system_clock::now(); 
+      milliseconds duration = std::chrono::duration_cast<milliseconds> (after - before); 
+
+      cout << "SIMTIME: " << duration.count() << " ms." << endl;
+    }
     //void  main()  { process(); }
 	
 	protected:
 
 	int iter = 0;
-  int max_iter;
+    int max_iter;
 
 	virtual void process() = 0;
-  virtual void init() = 0;
-  virtual void terminate() { }
+    virtual void init() = 0;
+    virtual void terminate() { }
 
 };
 #endif

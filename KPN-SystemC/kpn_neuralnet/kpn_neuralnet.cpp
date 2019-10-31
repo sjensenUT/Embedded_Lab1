@@ -27,7 +27,7 @@ typedef std::vector<std::string> strs;
 
 // Number of iterations of each layer before we stop running the application
 // TODO: Change back to higher number like 20
-const int ITER_MAX = 3;
+const int ITER_MAX = 20;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;

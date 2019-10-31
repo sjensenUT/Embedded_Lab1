@@ -55,16 +55,19 @@ class bus_tlm: public sc_channel, public IMasterTLM, public ISlaveTLM
 
         void masterRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d){
             //cout << "in masterRead" << endl;
+            wait(39,SC_NS);
             accel_to_os.read(d);
         }
 
         void masterWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d){
             //cout << "in masterWrite" << endl;
             os_to_accel.write(d);
+            wait(34,SC_NS);
         }
 
         void slaveRead (const sc_bv<ADDR_WIDTH>& a, sc_bv<DATA_WIDTH>& d){
             //cout << "in slaveRead" << endl;
+            wait(34,SC_NS);            
             os_to_accel.read(d);
 
         }
@@ -72,6 +75,7 @@ class bus_tlm: public sc_channel, public IMasterTLM, public ISlaveTLM
         void slaveWrite(const sc_bv<ADDR_WIDTH>& a, const sc_bv<DATA_WIDTH>& d){
             //cout << "in slaveWrite" << endl;
             accel_to_os.write(d);
+            wait(39,SC_NS);
         }
 
 
