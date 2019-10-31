@@ -102,12 +102,6 @@ void image_reader::process()
     //cout << "waited for " << LATENCY[latencyIndex] << endl;
     //latencyIndex++; 
 
-    if(this->waitTime > 0)
-    {
-        //int iter = 0;
-    }
-    //while(true){
- 
     cout << "top of image reader @ iter " << iter << endl;
     for(size_t i=0; i<images.size(); i++) {
 
@@ -143,22 +137,6 @@ void image_reader::process()
     }
 
     cout << "finished reading" << endl; 
-    /*if(this->waitTime > 0)
-    {
-        //yielding so other tasks can run
-        if(iter >= ITER_MAX-1)
-        {   
-            cout << "terminating image reader @ iter " << iter << endl;     
-            this->os->task_terminate();
-            //break; // exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //cout << "terminating" << endl; 
-    }
-    else{ // this should execute if there isn't an OS
-        //break; 
-    }*/
     
 }
 
@@ -269,14 +247,6 @@ void conv_layer::terminate() {
 
 void conv_layer::process()
 {
-
-
-    /*if(this->waitTime > 0)
-    { 
-        //int iter = 0; 
-    }*/
-    //while(true){
- 
     
     float* input;
     // Read the output from the previos layer
@@ -356,23 +326,6 @@ void conv_layer::process()
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
-    /*if(this->waitTime > 0)
-    {
-        //yielding so other tasks can run
-        if(iter >= ITER_MAX-1)
-        {        
-            cout << "terminating conv layer " << layerIndex << " @ iter " << iter << endl;
-            this->os->task_terminate();
-            //break;// exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //this->os->task_terminate(); 
-    }
-    else{
-        //break; 
-    }*/
- 
 }
 
 
@@ -416,13 +369,6 @@ void max_layer::terminate() {
 void max_layer::process()
 {
 
-    /*if(this->waitTime > 0)
-    {
-        //int iter = 0; 
-    }*/
-    //while(true){
- 
-    
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
 
@@ -487,24 +433,6 @@ void max_layer::process()
     }
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans );	
 
-    /*if(this->waitTime > 0)
-    {
-        //yielding so other tasks can run
-       
-        if(iter >= ITER_MAX-1)
-        {       
-            cout << "terminating max layer " << layerIndex << " @ iter " << iter << endl; 
-            this->os->task_terminate();
-            //break; // exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //this->os->task_terminate(); 
-    }
-    else{
-        //break; 
-    }*/
- 
 }
 
 
@@ -571,13 +499,6 @@ void region_layer::terminate() {
 
 void region_layer::process()
 {
-
-    /*if(this->waitTime > 0)
-    {
-        //int iter;   
-    }*/
-    //while(true){
- 
 
 	float* data;
 	string image_name; 
@@ -670,52 +591,8 @@ void region_layer::process()
 	cout << "writing predictions to " << outFN << "  @ iter " << iter << endl;	
     cout << "TIMESTAMP: " << sc_time_stamp() << endl << endl; 
     
-    /*if(this->waitTime >0){
-        if(iter >= ITER_MAX-1)
-        {        
-            cout << "terminating region layer @ iter "<< iter << endl; 
-            this->os->task_terminate();
-            //break; // exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //this->os->task_terminate(); 
-    }
-    else{
-        //break; 
-    }*/
-    
     //free(alphabets);  Now part of the constructor and I don't free it here? 
 }
-
-
-idle_task::idle_task(sc_module_name name,int _waitTime)
-    : kahn_process(name), waitTime(_waitTime)
-{
-    cout << "instantiating idle task" << endl;
-}
-void idle_task::init()
-{
-    cout << "in idle_task::init()" << endl;
-    if(this->waitTime > 0){
-        char name[] = "idle task"; 
-        cout << "detected os, registering task" << endl;
-        this->os->reg_task(name);
-    }
-}
-
-void idle_task::process()
-{
-    while(1)
-    {
-        if(this->waitTime > 0)    
-        {
-            cout << "in idle task\n";  
-            this->os->time_wait(this->waitTime);
-        }
-    }
-}
-
 
 
 int coerce (int val, int min, int max) {
@@ -1076,13 +953,6 @@ void conv_layer_to_bus::terminate() {
 void conv_layer_to_bus::process()
 {
 
-    /*if(this->waitTime > 0)
-    { 
-        //int iter = 0;  
-    }*/
-    //while(true){
- 
-    
     float* input;
     input = new float[l.w*l.h*l.c];
     
@@ -1165,22 +1035,6 @@ void conv_layer_to_bus::process()
     } 
     writeImageData(&out, outputImage, outputWidth, outputHeight, outputChans);
     
-    /*if(this->waitTime > 0)
-    {
-        //yielding so other tasks can run
-        if(iter >= ITER_MAX-1)
-        {       
-            cout << "terminating conv layer " << layerIndex << " @ iter " << iter <<  endl; 
-            this->os->task_terminate();
-            //break; // exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //this->os->task_terminate(); 
-    }
-    else{
-        //break; 
-    }*/
 }
 
 
@@ -1224,13 +1078,6 @@ void max_layer_to_bus::terminate() {
 void max_layer_to_bus::process()
 {
 
-    if(this->waitTime > 0){
-       //reset iter to the scope of this function 
-       //int iter = 0; 
-    }
-    //while(true){
- 
-    
     float* data;
     data = readImageData(&in, l.w, l.h, l.c );
 
@@ -1298,28 +1145,9 @@ void max_layer_to_bus::process()
     cout << "Output[0] " << outputImage[0] << endl;
     mDriver->write(outputImage,outputWidth*outputHeight*outputChans*sizeof(float)); 
 
-    /*if(this->waitTime > 0)
-    {
-        //yielding so other tasks can run
-        if(iter >= ITER_MAX-1)
-        {        
-            cout << "terminating max layer " <<  layerIndex << " @ iter " << iter << endl;
-            this->os->task_terminate();
-            //break;// exit the while loop
-        } else {
-            this->os->time_wait(0);
-        }
-        //this->os->task_terminate(); 
-    }
-    else{
-        // get out of os while loop
-        //break; 
-    }*/
-    
 }
 
 
-//for some reason this main seg faults
 int sc_main(int argc, char * argv[])
 {
        
@@ -1347,17 +1175,3 @@ int sc_main(int argc, char * argv[])
     //kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
     return 0;
 }
-
-
-// This main works fine though even though the instantiation is identical
-/*int sc_main(int argc, char * argv[]) 
-{
-    //kpn_neuralnet knn0("kpn_neuralnet");
-    //kpn_neuralnet_fused knn0("kpn_neuralnet_fused");
-    kpn_neuralnet_os knn0("kpn_neuralnet_os");
-    //kpn_neuralnet_accelerated knn0("kpn_neuralnet_accelerated");
-    kpn_neuralnet_accelerated_bus knn0("kpn_neuralnet_accelerated_bus", false);
-    cout << "starting simulation" << endl;
-    sc_start();
-    return 0;
-}*/

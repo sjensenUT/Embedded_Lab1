@@ -172,14 +172,4 @@ void os_channel::reg_task(const char* taskName)
             current, getTaskName(current).c_str(), nowMs());
 }
 
-/*
-os_channel::idle_task()
-{
-    while(1)
-    {   printf("In idle task\n"); 
-        this->time_wait(10,SC_MS);
-    }
-}
-*/
-
 os_channel::~os_channel() {} // Destructor
