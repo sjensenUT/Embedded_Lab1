@@ -23,7 +23,6 @@
 #include "../../darknet/src/image.h"
 #include "kpn_neuralnet.h"
 #include "image_data.h"
-#include "os_channel.h"
 #include "os_sc_fifo.h"
 #include "os_sc_fifo.cpp"
 #include "HWBus.h" 
@@ -47,11 +46,12 @@ class   image_reader : public kahn_process
     sc_fifo_out<std::string> im_name_out;
     layer l;
     const int waitTime;
-    sc_port<os_channel> os;
+    sc_port<os_api> os;
 
     image_reader(sc_module_name name, std::vector<std::string> _images, int _waitTime);
     void    process() override;
     void    init() override;
+    void    terminate() override;
 };
 
 class   conv_layer : public kahn_process
@@ -73,7 +73,7 @@ class   conv_layer : public kahn_process
 
     sc_fifo_in<float> in;
     sc_fifo_out<float> out;
-    sc_port<os_channel> os;    
+    sc_port<os_api> os;    
 
     convolutional_layer l;
     
@@ -83,6 +83,7 @@ class   conv_layer : public kahn_process
              bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
+    void terminate() override;
 };
 
 
@@ -102,12 +103,13 @@ class   max_layer : public kahn_process
     const int waitTime;
     int* inputCoords;
     int* outputCoords;
-    sc_port<os_channel> os;
+    sc_port<os_api> os;
 
     max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
             int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
+    void terminate() override;
 };
 
 class   conv_layer_to_bus : public kahn_process
@@ -130,7 +132,7 @@ class   conv_layer_to_bus : public kahn_process
 //    sc_fifo_in<float> in;
     sc_port<kpn_BusMaster_ifc> mDriver;
     sc_fifo_out<float> out;
-    sc_port<os_channel> os;    
+    sc_port<os_api> os;    
 
     convolutional_layer l;
     
@@ -140,6 +142,7 @@ class   conv_layer_to_bus : public kahn_process
              bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
+    void terminate() override;
 };
 
 
@@ -160,13 +163,15 @@ class   max_layer_to_bus : public kahn_process
     const int waitTime;
     int* inputCoords;
     int* outputCoords;
-    sc_port<os_channel> os;
+    sc_port<os_api> os;
 
     max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
             int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime);
     void process() override;
     void init() override;
+    void terminate() override;
 };
+
 class   region_layer : public kahn_process
 {
     public:
@@ -195,7 +200,7 @@ class   region_layer : public kahn_process
     sc_fifo_in<int> im_w_in; // for width and height of image
     sc_fifo_in<int> im_h_in;
     sc_fifo_in<std::string> im_name_in;
-    sc_port<os_channel> os;
+    sc_port<os_api> os;
     
     image ** alphabets;
     layer l;
@@ -206,6 +211,7 @@ class   region_layer : public kahn_process
            bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, int _waitTime);
     void    process() override;
     void    init() override;
+    void    terminate() override;
 };
 
 
@@ -241,7 +247,7 @@ class idle_task : public kahn_process
 {
     public:
     const int waitTime;
-    sc_port<os_channel> os;
+    sc_port<os_api> os;
     
     idle_task(sc_module_name name, int _waitTime); 
     void    process() override;

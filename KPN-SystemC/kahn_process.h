@@ -21,27 +21,36 @@ class	kahn_process : public sc_module
 	kahn_process(sc_module_name name) : sc_module(name)
 	{
 		iter = 0;
+    max_iter = 0;
+		SC_THREAD(main);
+	}
+
+	kahn_process(sc_module_name name, int _maxIter) : sc_module(name)
+	{
+		iter = 0;
+    max_iter = _maxIter;
 		SC_THREAD(main);
 	}
 
 	void	main()
-    {   
-        init(); 
-        while (true) {
-            process(); 
-            iter++;
-        } 
-
-//        process();
-    }
+  {   
+      init(); 
+      while (iter < max_iter || max_iter == 0) {
+          process(); 
+          iter++;
+      } 
+      terminate();
+  }
     //void  main()  { process(); }
 	
 	protected:
 
 	int iter = 0;
+  int max_iter;
 
 	virtual void process() = 0;
   virtual void init() = 0;
+  virtual void terminate() { }
 
 };
 #endif

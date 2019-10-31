@@ -15,6 +15,7 @@
 #include "kpn_neuralnet_os_bus.h"
 #include "kpn_BusSlave.h"
 #include "kpn_BusMaster.h"
+#include "os_dummy.h"
  
 using	std::cout;
 using	std::endl;
@@ -24,8 +25,9 @@ using std::chrono::system_clock;
 using std::chrono::milliseconds; 
 typedef std::vector<std::string> strs;
 
-// this should match the number of iterations in the kahn process.h file
-const int ITER_MAX = 20;
+// Number of iterations of each layer before we stop running the application
+// TODO: Change back to higher number like 20
+const int ITER_MAX = 3;
 
 // These constants are fixed parameters of the YOLO-V2 Tiny network.
 const int IMAGE_WIDTH  = 416;
@@ -75,7 +77,7 @@ void	load(int lIdx, const char* attr, float* ptr, int size)
 
 
 image_reader::image_reader(sc_module_name name, strs _images, int _waitTime)
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
 	images(_images),
     waitTime(_waitTime)
 {
@@ -88,6 +90,10 @@ void image_reader::init(){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
+}
+
+void image_reader::terminate() {
+    this->os->task_terminate();
 }
 
 void image_reader::process()
@@ -198,7 +204,7 @@ int* getCropCoords (int* inputCoords, int* outputCoords) {
 conv_layer::conv_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
          int _stride, int _numFilters, int _pad, ACTIVATION _activation,
          bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
     stride(_stride),
     numFilters(_numFilters),
     layerIndex(_layerIndex),
@@ -255,6 +261,10 @@ void conv_layer::init(){
         this->os->reg_task(this->name());
     } 
     //cout << "asd wait time is:" << this->waitTime << endl; 
+}
+
+void conv_layer::terminate() {
+    this->os->task_terminate();
 }
 
 void conv_layer::process()
@@ -368,7 +378,7 @@ void conv_layer::process()
 
 max_layer::max_layer(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
     int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
     stride(_stride),
     layerIndex(_layerIndex),
     filterSize(_filterSize),
@@ -397,6 +407,10 @@ void max_layer::init(){
         cout << "detected os, registering task";
         this->os->reg_task(this->name());
     }
+}
+
+void max_layer::terminate() {
+    this->os->task_terminate();
 }
 
 void max_layer::process()
@@ -498,7 +512,7 @@ region_layer::region_layer(sc_module_name name, float _anchors[], bool _biasMatc
            int _coords, int _num, bool _softMax, float _jitter, bool _rescore, 
            int _objScale, bool _noObjectScale, int _classScale, int _coordScale,
            bool _absolute, float _thresh, bool _random, int _w, int _h, int _c, int _waitTime) 
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
     anchors(_anchors),
     biasMatch(_biasMatch),
     classes(_classes),
@@ -549,6 +563,10 @@ void region_layer::init(){
         cout << "detected os, registering task" << endl;
         this->os->reg_task(this->name());
     }
+}
+
+void region_layer::terminate() {
+    this->os->task_terminate();
 }
 
 void region_layer::process()
@@ -867,7 +885,7 @@ class	kpn_neuralnet : public sc_module
 		//strcpy(weightFileC, weightFile.c_str());
 		//network *net = load_network(cfgFileC, weightFileC, 0);
 		
-        os_channel *os = new os_channel("dummy_os", 100, false);
+        os_dummy *os = new os_dummy("dummy_os");
         
         reader_to_conv0 	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
 		conv0_to_max1   	= new sc_fifo<float>(BIGGEST_FIFO_SIZE);
@@ -993,7 +1011,7 @@ class	kpn_neuralnet : public sc_module
 conv_layer_to_bus::conv_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
          int _stride, int _numFilters, int _pad, ACTIVATION _activation,
          bool _batchNormalize, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
     stride(_stride),
     numFilters(_numFilters),
     layerIndex(_layerIndex),
@@ -1051,13 +1069,17 @@ void conv_layer_to_bus::init(){
     } 
 }
 
+void conv_layer_to_bus::terminate() {
+    this->os->task_terminate();
+}
+
 void conv_layer_to_bus::process()
 {
 
-    if(this->waitTime > 0)
+    /*if(this->waitTime > 0)
     { 
         //int iter = 0;  
-    }
+    }*/
     //while(true){
  
     
@@ -1164,7 +1186,7 @@ void conv_layer_to_bus::process()
 
 max_layer_to_bus::max_layer_to_bus(sc_module_name name, int _layerIndex, int _w, int _h, int _c,  int _filterSize,
     int _stride, bool _crop, int* _inputCoords, int* _outputCoords, int _waitTime)
-:	kahn_process(name),
+:	kahn_process(name, ITER_MAX),
     stride(_stride),
     layerIndex(_layerIndex),
     filterSize(_filterSize),
@@ -1193,6 +1215,10 @@ void max_layer_to_bus::init(){
         cout << "detected os, registering task";
         this->os->reg_task(this->name());
     }
+}
+
+void max_layer_to_bus::terminate() {
+    this->os->task_terminate();
 }
 
 void max_layer_to_bus::process()
