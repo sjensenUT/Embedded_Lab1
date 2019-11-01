@@ -1,4 +1,4 @@
-This is the code for Lab 1 in EE382N-23 submitted by Steffen Jensen, Jackson
+This is the code for Lab 2 in EE382N-23 submitted by Steffen Jensen, Jackson
 Farley, and Daniel Rauch.
 
 The code is broken up into two main directories:
@@ -8,23 +8,44 @@ KPN-SystemC/ - contains all of our code, including the provided kahn_process.h
 
 Most of our code can be found in KPN-SystemC/kpn_neuralnet/
 
-array_ops.cpp contains functions used by the fused and unfused tiling solutions,
-particularly the merge and scatter layers.
+acccelerator.cpp contains our implementation of the neural net accelerator. 
 
 image_data.cpp contains functions for reading and writing float arrays to/from
 FIFOs. This is what the layers use to communicate images to each other.
 
-kpn_neuralnet.cpp contains the bulk of our application's code. It defines the
-class methods for the image reader/writer, and three layer types that are 
-essentially SystemC wrappers around darknet's layer structs. It also implements
-the sc_main method that instantiates each layer with their necessary parameters
-and connects them together using sc_fifos.
+HWBus.h implements the bus protocol as well as the interrupts and the macs
+necessary for to create the PAM
 
-kpn_neuralnet_fused.cpp implements a fused layer path for a single tile used in
-the fused-tile partitioning part of the lab.
+kpn_BusMaster.h implements the bus master driver, as well as the high level 
+object which instantiates and connects all of the elements of the master side 
+of the PAM for part5, and the TLM for part 6.
 
-merge_scatter.cpp implements merge and scatter layers that are used between
-each layer in the unfused tiled approach and at the beginning and end of the 
-fused tile approach.
+kpn_BusSlave.h implements the bus slave driver, as well as the high level 
+object which instantiates and connects all of the elements of the slave side 
+of the PAM for part5, and the TLM for part 6.
+  
 
-To run our solution, run "make" and "make test" in KPN-SystemC/kpn_neuralnet.
+kpn_neuralnet.cpp defines the class methods for the image reader/writer, and three layer types that are essentially SystemC wrappers around darknet's layer 
+structs. It also implements the sc_main method that instantiates each layer 
+with their necessary parameter connects them together using sc_fifos, 
+and conects all of the layers to the os.
+
+kpn_neuralnet_os.cpp instantiates all of the layers as well as
+the accelerator and the fifo queues necessary for part 3 of the lab,
+and connects them all to the os. 
+
+kpn_neuralnet_os_bus.cpp instantiates all of the layers as well as the PAM and
+TLM necessary for parts 5 and 6 of the lab, and connects them together.
+
+os_channel.cpp implements the RTOS model
+
+os_sc_fifo.cpp implements 3 different versions of a class which inherits from 
+sc_fifo.h. First there is os_sc_fifo which refines both read and write to 
+yield to the os in the event that they block. There is also os_to_accel_fifo 
+which only refines the write method in this way, and accel_to_os_fifo which 
+only refines the read method in this way.
+
+To run our solution, run make first in the darknet directory, and then in KPN-SystemC/kpn_neuralnet
+after this you can run make part1, make part2, make part3, make part5, or make part6 to run
+parts 1, 2, 3, 5, or 6 of the lab respectively.
+Parts 4 and 7 of the lab are not implemented here.
